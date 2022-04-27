@@ -25,33 +25,31 @@ public sealed class Mesh : Asset
             
         _mesh = mesh;
         var gl = gameWindow.gl;
-
+        
         _vao = gl.GenVertexArray();
         gl.BindVertexArray(_vao);
-        
-        _ebo = gl.GenBuffer();
-        gl.BindBuffer(GLEnum.ElementArrayBuffer, _ebo);
-        fixed (void* ptr = _mesh.Faces) gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint) (sizeof(int) * 3 * _mesh.Faces.Length), ptr, BufferUsageARB.StaticDraw);
         
         _vbo = gl.GenBuffer();
         gl.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
         fixed (void* ptr = finalData)
             gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(sizeof(float) * 8 * finalData.Length), ptr, BufferUsageARB.StaticDraw);
-
-        gl.VertexAttribPointer(0, 3, GLEnum.Float, false, 32, (void*) 0);
-        gl.EnableVertexAttribArray(0);
-        gl.VertexAttribPointer(1, 3, GLEnum.Float, false, 32, (void*) 12);
-        gl.EnableVertexAttribArray(1);
-        gl.VertexAttribPointer(2, 2, GLEnum.Float, false, 32, (void*) 24);
-        gl.EnableVertexAttribArray(2);
         
-        gl.BindVertexArray(0);
+        _ebo = gl.GenBuffer();
+        gl.BindBuffer(GLEnum.ElementArrayBuffer, _ebo);
+        fixed (void* ptr = _mesh.Faces) gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint) (sizeof(int) * 3 * _mesh.Faces.Length), ptr, BufferUsageARB.StaticDraw);
+
+        gl.EnableVertexAttribArray(0);
+        gl.VertexAttribPointer(0, 3, GLEnum.Float, false, 32, (void*) 0);
+        gl.EnableVertexAttribArray(1);
+        gl.VertexAttribPointer(1, 3, GLEnum.Float, false, 32, (void*) 12);
+        gl.EnableVertexAttribArray(2);
+        gl.VertexAttribPointer(2, 2, GLEnum.Float, false, 32, (void*) 24);
     }
 
     public void Render()
     {
         GL gl = GameWindow.gl;
-            
+        
         gl.BindVertexArray(_vao);
         gl.DrawElements(PrimitiveType.Triangles, (uint) _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, 0);
     }

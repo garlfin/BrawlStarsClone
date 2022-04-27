@@ -38,3 +38,6 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\obj\Debug\net6.0\re
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\obj\Debug\net6.0\BrawlStarsClone.pdb
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\obj\Debug\net6.0\BrawlStarsClone.genruntimeconfig.cache
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\obj\Debug\net6.0\ref\BrawlStarsClone.dll
+C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Debug\net6.0\cube.scw
+C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Debug\net6.0\default.frag
+C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Debug\net6.0\default.vert
