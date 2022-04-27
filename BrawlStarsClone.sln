@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlStarsClone", "BrawlStarsClone\BrawlStarsClone.csproj", "{FA7213F3-5501-4F9D-A00A-C40028320284}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsModel", "bsModel\bsModel.csproj", "{23FC42BE-F6C2-4E8D-9C4B-9BC66A9BB28D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FA7213F3-5501-4F9D-A00A-C40028320284}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA7213F3-5501-4F9D-A00A-C40028320284}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA7213F3-5501-4F9D-A00A-C40028320284}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA7213F3-5501-4F9D-A00A-C40028320284}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23FC42BE-F6C2-4E8D-9C4B-9BC66A9BB28D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23FC42BE-F6C2-4E8D-9C4B-9BC66A9BB28D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23FC42BE-F6C2-4E8D-9C4B-9BC66A9BB28D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23FC42BE-F6C2-4E8D-9C4B-9BC66A9BB28D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
