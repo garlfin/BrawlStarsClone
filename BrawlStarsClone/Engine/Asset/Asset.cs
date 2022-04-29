@@ -1,25 +1,25 @@
-﻿using BrawlStarsClone.Engine.Windowing;
-
-namespace BrawlStarsClone.Engine.Asset;
+﻿namespace BrawlStarsClone.Engine.Asset;
 
 public class Asset
 {
-    protected readonly GameWindow GameWindow;
-
-    protected Asset(GameWindow gameWindow)
+    protected Asset()
     {
         AssetManager.Register(this);
-        GameWindow = gameWindow;
     }
 
     public virtual void Delete()
     {
     }
+
+    public virtual int Use(int slot)
+    {
+        return slot;
+    }
 }
 
 public static class AssetManager
 {
-    private static readonly List<Asset> Assets = new List<Asset>();
+    private static readonly List<Asset> Assets = new();
 
     public static void DeleteAllAssets()
     {

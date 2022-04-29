@@ -1,33 +1,32 @@
-﻿using BrawlStarsClone.Engine.Windowing;
-using Silk.NET.OpenGL;
+﻿using OpenTK.Graphics.OpenGL4;
 
 namespace BrawlStarsClone.Engine.Asset.Material
 {
     public class Shader : Asset
     {
-        private readonly uint _id;
+        private readonly int _id;
 
-        public Shader(GameWindow gameWindow, string path, ShaderType type) : base(gameWindow)
+        public Shader(string path, ShaderType type)
         {
-            _id = gameWindow.gl.CreateShader(type);
-            gameWindow.gl.ShaderSource(_id, File.ReadAllText(path));
-            gameWindow.gl.CompileShader(_id);
+            _id = GL.CreateShader(type);
+            GL.ShaderSource(_id, File.ReadAllText(path));
+            GL.CompileShader(_id);
 
-            string log = gameWindow.gl.GetShaderInfoLog(_id);
+            string log = GL.GetShaderInfoLog(_id);
             if (!string.IsNullOrEmpty(log)) Console.WriteLine(log);
         }
 
         public void Attach(ShaderProgram program)
         {
-            GameWindow.gl.AttachShader(program.Get(), _id);
+            GL.AttachShader(program.Get(), _id);
         }
 
         public override void Delete()
         {
-            GameWindow.gl.DeleteShader(_id);
+            GL.DeleteShader(_id);
         }
 
-        public uint Get()
+        public int Get()
         {
             return _id;
         }

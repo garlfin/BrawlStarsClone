@@ -1,26 +1,26 @@
-﻿using BrawlStarsClone.Engine.Windowing;
+﻿using BrawlStarsClone.Engine.Component;
+using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 
 namespace BrawlStarsClone.Engine.Asset.Material;
 
 public class ShaderProgram : Asset
 {
 
-    private uint _id;
+    private int _id;
         
-    public ShaderProgram(GameWindow gameWindow, string fragPath, string vertPath) : base(gameWindow)
+    public ShaderProgram(string fragPath, string vertPath, bool managed = true)
     {
-
-        _id = gameWindow.gl.CreateProgram();
+        if (managed) ShaderSystem.Register(this);
+        _id = GL.CreateProgram();
             
-        var fragment = new Shader(gameWindow, fragPath, ShaderType.FragmentShader);
-        var vertex = new Shader(gameWindow, vertPath, ShaderType.VertexShader);
+        var fragment = new Shader(fragPath, ShaderType.FragmentShader);
+        var vertex = new Shader(vertPath, ShaderType.VertexShader);
             
         fragment.Attach(this);
         vertex.Attach(this);
             
-        gameWindow.gl.LinkProgram(_id);
+        GL.LinkProgram(_id);
             
         fragment.Delete();
         vertex.Delete();
@@ -28,43 +28,74 @@ public class ShaderProgram : Asset
 
     public void Use()
     {
-        GameWindow.gl.UseProgram(_id);
+        GL.UseProgram(_id);
     }
         
 
     public void SetUniform(string uniform, int data)
     {
-        int realLocation = GameWindow.gl.GetUniformLocation(_id, uniform);
+        int realLocation = GL.GetUniformLocation(_id, uniform);
         if (realLocation == -1) return;
-        GameWindow.gl.ProgramUniform1(_id, realLocation, data);
+        GL.ProgramUniform1(_id, realLocation, data);
+    }
+    
+    public unsafe void SetUniform(string uniform, Vector3D<float> data)
+    {
+        int realLocation = GL.GetUniformLocation(_id, uniform);
+        if (realLocation == -1) return;
+        GL.ProgramUniform3(_id, realLocation, 1, (float*) &data);
     }
 
     public unsafe void SetUniform(string uniform, Matrix4X4<float>* data)
     {
-        int realLocation = GameWindow.gl.GetUniformLocation(_id, uniform);
+        int realLocation = GL.GetUniformLocation(_id, uniform);
         if (realLocation == -1) return;
-        GameWindow.gl.ProgramUniformMatrix4(_id, realLocation, 1, false, (float*) data);
+        GL.ProgramUniformMatrix4(_id, realLocation, 1, false, (float*) data);
     }
 
+    public unsafe void SetUniform(string uniform, Matrix4X4<float> data)
+    {
+        int realLocation = GL.GetUniformLocation(_id, uniform);
+        if (realLocation == -1) return;
+        GL.ProgramUniformMatrix4(_id, realLocation, 1, false, (float*) &data);
+    }
+    
     public void SetUniform(string uniform, float data)
     {
-        int realLocation = GameWindow.gl.GetUniformLocation(_id, uniform);
+        int realLocation = GL.GetUniformLocation(_id, uniform);
         if (realLocation == -1) return;
-        GameWindow.gl.ProgramUniform1(_id, realLocation, data);
+        GL.ProgramUniform1(_id, realLocation, data);
     }
         
     public override void Delete()
     {
-        GameWindow.gl.DeleteProgram(_id);
+        GL.DeleteProgram(_id);
     }
 
-    public uint Get()
+    public int Get()
     {
         return _id;
     }
         
     public void Set()
     {
-        GameWindow.gl.UseProgram(_id);
+       GL.UseProgram(_id);
     }
+}
+
+static class ShaderSystem
+{
+    private static List<ShaderProgram> _Programs = new();
+
+    public static void InitFrame()
+    {
+        foreach (var program in _Programs)
+        {
+            program.SetUniform("projection", CameraSystem.CurrentCamera.Projection);
+            program.SetUniform("view", CameraSystem.CurrentCamera.View);
+            program.SetUniform("viewPos", CameraSystem.CurrentCamera.Owner.GetComponent<Transform>().Location);
+        }
+    }
+
+    public static void Register(ShaderProgram program) => _Programs.Add(program);
 }

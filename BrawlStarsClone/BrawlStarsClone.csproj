@@ -9,19 +9,32 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Silk.NET" Version="2.15.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Update="default.vert">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="default.frag">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="cube.scw">
+      <None Update="cube.bnk">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="ash_tex.pvr">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="res\skin_diffuse.pvr">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="res\skin_spec.pvr">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="tutorial.bnk">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="OpenTK" Version="4.7.1" />
+      <PackageReference Include="Silk.NET.Maths" Version="2.15.0" />
     </ItemGroup>
 
 </Project>

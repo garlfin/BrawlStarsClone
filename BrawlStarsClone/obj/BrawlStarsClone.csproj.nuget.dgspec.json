@@ -44,7 +44,11 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
-            "Silk.NET": {
+            "OpenTK": {
+              "target": "Package",
+              "version": "[4.7.1, )"
+            },
+            "Silk.NET.Maths": {
               "target": "Package",
               "version": "[2.15.0, )"
             }

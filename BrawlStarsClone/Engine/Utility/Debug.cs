@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-using BrawlStarsClone.Engine.Windowing;
-using Silk.NET.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 
 namespace BrawlStarsClone.Engine.Utility
 {
@@ -8,16 +7,17 @@ namespace BrawlStarsClone.Engine.Utility
     {
         private static DebugProc _dp = Log;
 
-        public static unsafe void Init(GameWindow window)
+        private static void Log(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userparam)
         {
-            Console.Write("DEBUG: Debug initialize");
-            window.gl.Enable(EnableCap.DebugOutput);
-            window.gl.DebugMessageCallback(_dp, (void*) 0);
+            if (severity is not DebugSeverity.DebugSeverityNotification)
+                Console.WriteLine($"SEVERITY: {severity}; MESSAGE: {Marshal.PtrToStringAnsi(message, length)}");
         }
-        
-        private static void Log(GLEnum source, GLEnum type, int id, GLEnum severity, int length, nint message, nint userparam)
+
+        public static void Init()
         {
-            Console.WriteLine(Marshal.PtrToStringAnsi(message, length));
+            Console.WriteLine("DEBUG: Debug initialize");
+            GL.Enable(EnableCap.DebugOutput);
+            GL.DebugMessageCallback(_dp, (IntPtr) 0);
         }
     }
 }
