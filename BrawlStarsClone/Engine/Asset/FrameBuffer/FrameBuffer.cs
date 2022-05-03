@@ -19,7 +19,7 @@ public class FrameBuffer : Asset
         }
     }
 
-    protected FrameBuffer(int width, int height)
+    public FrameBuffer(int width, int height)
     {
         _width = width;
         _height = height;

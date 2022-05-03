@@ -28,6 +28,7 @@ public class ShaderProgram : Asset
 
     public void Use()
     {
+        ShaderSystem.CurrentProgram = this;
         GL.UseProgram(_id);
     }
         
@@ -81,20 +82,23 @@ public class ShaderProgram : Asset
     {
        GL.UseProgram(_id);
     }
+
+    public void UpdateMatrices()
+    {
+        SetUniform("projection", CameraSystem.CurrentCamera.Projection);
+        SetUniform("view", CameraSystem.CurrentCamera.View);
+    }
 }
 
 static class ShaderSystem
 {
     private static List<ShaderProgram> _Programs = new();
 
+    public static ShaderProgram CurrentProgram;
+
     public static void InitFrame()
     {
-        foreach (var program in _Programs)
-        {
-            program.SetUniform("projection", CameraSystem.CurrentCamera.Projection);
-            program.SetUniform("view", CameraSystem.CurrentCamera.View);
-            program.SetUniform("viewPos", CameraSystem.CurrentCamera.Owner.GetComponent<Transform>().Location);
-        }
+        foreach (var program in _Programs) program.UpdateMatrices();
     }
 
     public static void Register(ShaderProgram program) => _Programs.Add(program);

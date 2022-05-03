@@ -1,5 +1,4 @@
-﻿using BrawlStarsClone.Engine.Asset.FrameBuffer;
-using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Texture;
@@ -42,7 +41,7 @@ public abstract class Texture : Asset
         return new Vector2D<int>(width, height);
     }
     
-    public virtual void BindToBuffer(RenderBuffer buffer, FramebufferAttachment attachmentLevel,
+    public virtual void BindToBuffer(FrameBuffer.FrameBuffer buffer, FramebufferAttachment attachmentLevel,
         TextureTarget target = TextureTarget.Texture2D, int level = 0)
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
@@ -74,9 +73,7 @@ public static class TexSlotManager
         }
     }
 
-    public static void ResetUnit() => _unit = -1;
-    
-
+    public static void ResetUnit() => _unit = 0;
     public static bool IsSameSlot(int slot, int tex) => Slots[slot] == tex;
     public static void SetSlot(int slot, int tex) => Slots[slot] = tex;
     

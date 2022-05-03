@@ -9,15 +9,11 @@ static class Program
         var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open),
             PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes | PostProcessSteps.OptimizeGraph);
 
-        string finalPath = Path.GetFileNameWithoutExtension(args[0]) + ".bnk";
-        if (args.Length == 2)
-        {
-            finalPath = args[1] + finalPath;
-        }
+        string finalPath = $"{Path.GetDirectoryName(args[0])}\\{Path.GetFileNameWithoutExtension(args[0])}.bnk";
+        if (args.Length == 2) finalPath = $"{args[1]}{Path.GetFileNameWithoutExtension(args[0])}.bnk";
+        
         using var stream = File.Open(finalPath, FileMode.Create);
         using var writer = new BinaryWriter(stream, Encoding.UTF8, false);
-
-        
         
         writer.Write((ushort)scene.MeshCount);
         for (int i = 0; i < scene.MeshCount; i++)
@@ -42,7 +38,7 @@ static class Program
                 writer.Write((ushort) face.Indices[2]);
             }
 
-            writer.Write((byte) currentMesh.MaterialIndex);
+            writer.Write(scene.Materials[currentMesh.MaterialIndex].Name);
         }
         writer.Close();
     }

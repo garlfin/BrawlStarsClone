@@ -13,7 +13,7 @@ namespace BrawlStarsClone.Engine.Asset.Material
             GL.CompileShader(_id);
 
             string log = GL.GetShaderInfoLog(_id);
-            if (!string.IsNullOrEmpty(log)) Console.WriteLine(log);
+            if (!string.IsNullOrEmpty(log)) throw new Exception(log);
         }
 
         public void Attach(ShaderProgram program)

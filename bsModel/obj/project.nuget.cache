@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Dxf5ceEsYZ1CFGOrdt3g8QlZMGckr+kx+LsHiy1Z5TyJPGE+eH0R5X3CmHHYtA7+B7/0XhiW29UrAhwFmZRWhw==",
+  "dgSpecHash": "t+k8edPKGBJQXWD6KkWOI6SAP7YsVrtA58RgXG3pMl05sg2ztagSI0PoPC3CIlSVPGH8OASiH4ZVQgMnZGj0ag==",
   "success": true,
-  "projectFilePath": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\bsModel\\bsModel.csproj",
+  "projectFilePath": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\bsModel\\bsModel.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\scion\\.nuget\\packages\\assimpnet\\4.1.0\\assimpnet.4.1.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",

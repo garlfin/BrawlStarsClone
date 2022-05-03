@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 using BrawlStarsClone.Engine.Asset;
+using BrawlStarsClone.Engine.Asset.FrameBuffer;
 using BrawlStarsClone.Engine.Asset.Material;
-using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
+using BrawlStarsClone.Engine.Map;
 using BrawlStarsClone.Engine.Utility;
 using BrawlStarsClone.res.Scripts;
 using OpenTK.Graphics.OpenGL4;
@@ -19,17 +20,21 @@ namespace BrawlStarsClone.Engine.Windowing;
 
 public class GameWindow
 {
-    private int _width;
-    private int _height;
-    private Entity _mesh;
-    
-    private ShaderProgram _diffuseProgram;
+    private readonly int _width;
+    private readonly int _height;
+
     private readonly OpenTK.Windowing.Desktop.GameWindow _view;
     private bool _isClosed;
-    private ImageTexture _albedoTex, _specCap, _diffuseCap;
 
     public Vector2D<int> Size => new(_width, _height);
     public OpenTK.Windowing.Desktop.GameWindow View => _view;
+
+    private ShaderProgram _depthShader;
+    
+    public EmptyTexture ShadowMap;
+    private FrameBuffer _shadowBuffer;
+
+    public EngineState State { get; private set; }
 
     public GameWindow(int width, int height, string name)
     {
@@ -77,7 +82,7 @@ public class GameWindow
         GL.Enable(EnableCap.DebugOutput);
         
         Debug.Init();
-
+        MapLoader.Init();
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
 
@@ -92,82 +97,55 @@ public class GameWindow
         camera.GetComponent<Camera>().Set();
         camera.AddComponent(new Movement());
 
-        _albedoTex = new ImageTexture("ash_tex.pvr");
-        _diffuseCap = new ImageTexture("res/skin_diffuse.pvr", false);
-        _specCap = new ImageTexture("res/skin_spec.pvr", false);
+        MapLoader.LoadMap("../../../res/model/test.map",this);
 
-        _diffuseProgram = new ShaderProgram("default.frag", "default.vert");
-        _diffuseProgram.SetUniform("projection", CameraSystem.CurrentCamera!.Projection);
-        _diffuseProgram.SetUniform("model", Matrix4X4<float>.Identity);
+        _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
         
-        _diffuseProgram.SetUniform("albedoTex", 0);
-        _diffuseProgram.SetUniform("specCap", 2);
-        _diffuseProgram.SetUniform("diffCap", 1);
+        _shadowBuffer = new FrameBuffer(1024, 1024);
+        _shadowBuffer.SetShadow();
+        
+        ShadowMap = new EmptyTexture(1024, 1024, PixelInternalFormat.DepthComponent16, TextureWrapMode.ClampToEdge, TexFilterMode.Linear, PixelFormat.DepthComponent, false, true);
+        ShadowMap.BindToBuffer(_shadowBuffer, FramebufferAttachment.DepthAttachment);
 
-        BinaryReader reader = new BinaryReader(File.Open("cube.bnk", FileMode.Open));
-
-        ushort meshCount = reader.ReadUInt16();
-        var mesh = new Mesh
+        Entity sun = new Entity(this);
+        sun.AddComponent(new Transform(sun, new Transformation()
         {
-            Meshes = new MeshData[meshCount],
-            MeshVaos = new MeshVao[meshCount]
-        };
+            Location = new Vector3D<float>(-20, 40, 20) * 2
+        }));
+        sun.AddComponent(new Sun(sun, 60));
+
+        State = EngineState.Shadow;
         
-        for (int u = 0; u < meshCount; u++)
-        {
-            MeshData data = new MeshData();
-            data.Vertices = new Vector3D<float>[reader.ReadUInt32()];
-            for (int i = 0; i < data.Vertices.Length; i++) data.Vertices[i] = ReadVector3D(reader);
-            data.UVs = new Vector2D<float>[reader.ReadUInt32()];
-            for (int i = 0; i < data.UVs.Length; i++) data.UVs[i] = ReadVector2D(reader);
-            data.Normals = new Vector3D<float>[reader.ReadUInt32()];
-            for (int i = 0; i < data.Normals.Length; i++) data.Normals[i] = ReadVector3D(reader);
-            data.Faces = new Vector3D<int>[reader.ReadUInt32()];
-            for (int i = 0; i < data.Faces.Length; i++) data.Faces[i] = ReadVector3Di(reader);
-            reader.ReadByte();
-            
-            mesh.Meshes[u] = data;
-            mesh.MeshVaos[u] = new MeshVao(data);
-        }
-        reader.Close();
+        _shadowBuffer.Bind(ClearBufferMask.DepthBufferBit);
+        sun.GetComponent<Sun>().Set();
         
-        _mesh = new Entity(this);
-        _mesh.AddComponent(new MeshRenderer(_mesh, mesh));
-        _mesh.AddComponent(new Transform(_mesh));
+        TransformSystem.Update(0f);
+        CameraSystem.Update(0f);
+        ShaderSystem.InitFrame();
+        
+        _depthShader.Use();
+        
+        MeshRendererSystem.Render(0f);
+        
+        GL.Viewport(0, 0, _width, _height);
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        
+        camera.GetComponent<Camera>().Set();
     }
 
     private void OnRender(FrameEventArgs frameEventArgs)
     {
         if (_isClosed) return;  
         // Main Render Pass
+        State = EngineState.Render;
         CameraSystem.Update(0f);
         ShaderSystem.InitFrame();
         
-        
         GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
         
-        _albedoTex.Use(0);
-        _diffuseCap.Use(1);
-        _specCap.Use(2);
-        
-        _diffuseProgram.Use();
         MeshRendererSystem.Render(0f);
-        
-        _view.SwapBuffers();
-    }
 
-    public static Vector3D<float> ReadVector3D(BinaryReader reader)
-    {
-        return new Vector3D<float>(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-    }
-        
-    public static Vector3D<int> ReadVector3Di(BinaryReader reader)
-    {
-        return new Vector3D<int>(reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadUInt16());
-    }
-        
-    public static Vector2D<float> ReadVector2D(BinaryReader reader)
-    {
-        return new Vector2D<float>(reader.ReadSingle(), reader.ReadSingle());
+        State = EngineState.PostProcess;
+        _view.SwapBuffers();
     }
 }

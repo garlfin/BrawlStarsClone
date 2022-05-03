@@ -17,7 +17,7 @@ public class ImageTexture : Texture
         InternalFormat internalFormat = (Format)reader.ReadUInt64() switch
         {
             Format.BC1 => InternalFormat.CompressedRgbaS3tcDxt1Ext,
-            Format.BC3 => InternalFormat.CompressedRgbaS3tcDxt3Ext,
+            Format.BC3 => InternalFormat.CompressedSrgbAlphaS3tcDxt3Ext,
             Format.BC5 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
             _ => throw new ArgumentOutOfRangeException()
         };

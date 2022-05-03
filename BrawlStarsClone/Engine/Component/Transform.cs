@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using BrawlStarsClone.Engine.Utility;
 using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component;
@@ -18,6 +19,7 @@ public sealed class Transform : Component
     public Transform(Entity owner) : base(owner)
     {
         Model = Matrix4X4<float>.Identity;
+        TransformSystem.Register(this);
     }
     
     public Transform(Entity owner, Transformation transform) : base(owner)
@@ -26,14 +28,20 @@ public sealed class Transform : Component
         Rotation = transform.Rotation;
         Scale = transform.Scale;
         OnUpdate(0f);
+        TransformSystem.Register(this);
     }
 
     public override void OnUpdate(float deltaTime)
     {
-        Model = Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateRotationX(Rotation.X) *
-                Matrix4X4.CreateRotationY(Rotation.Y) * Matrix4X4.CreateRotationZ(Rotation.Z) *
+        Model = Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
+                Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) * Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
                 Matrix4X4.CreateTranslation(Location);
     }
+}
+
+class TransformSystem : ComponentSystem<Transform>
+{
+    
 }
 
 public struct Transformation
