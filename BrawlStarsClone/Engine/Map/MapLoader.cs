@@ -116,7 +116,7 @@ public static class MapLoader
             entity.AddComponent(new Transform(entity, new Transformation
             {
                 Location = tilePos,
-                Rotation = new Vector3D<float>(-90, 180, 0),
+                Rotation = Vector3D<float>.Zero,
                 Scale = Vector3D<float>.One
             }));
             Material material = null;

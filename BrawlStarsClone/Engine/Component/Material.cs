@@ -18,6 +18,5 @@ public class Material : Component
     public Asset.Material.Material this[int index]
     {
         get => _materials[index];
-        set => _materials[index] = value;
     }
 }
