@@ -13,8 +13,6 @@ uniform vec3 influence;
 
 out vec4 FragColor;
 
-
-
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -22,11 +20,11 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     float currentDepth = projCoords.z;
     float visibility = 0;
 
-    float texelSize = 1.0/1024.0;
-    int pcfCount = 2;
+    float texelSize = 1.0/2048.0;
+    int pcfCount = 1;
     for (int x = -pcfCount; x<= pcfCount; x++){
         for (int y =-pcfCount; y<=pcfCount; y++){
-            visibility += texture(shadowMap, vec3(projCoords.xy+vec2(x, y)*texelSize, currentDepth - 0.001));   
+            visibility += texture(shadowMap, vec3(projCoords.xy+vec2(x, y)*texelSize, currentDepth - 0.0001));   
         }
     }
     visibility /= (pcfCount * 2 + 1) * (pcfCount * 2 + 1);

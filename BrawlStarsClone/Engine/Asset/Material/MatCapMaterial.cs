@@ -26,6 +26,6 @@ public class MatCapMaterial : Material
         Program.SetUniform("diffCap", _matCap.UseDiffuse ? _matCap.Diffuse.Use(TexSlotManager.Unit) : 0);
         Program.SetUniform("specCap", _matCap.UseSpecular ? _matCap.Specular.Use(TexSlotManager.Unit) : 0);
         Program.SetUniform("shadowMap",Window.ShadowMap.Use(TexSlotManager.Unit));
-        Program.SetUniform("influence", new Vector3D<float>(_matCap.UseDiffuse.AsInt(), _matCap.UseSpecular.AsInt(), _matCap.UseSpecular.AsInt()));
+        Program.SetUniform("influence", new Vector3D<float>(_matCap.UseDiffuse.AsInt(), _matCap.UseSpecular.AsInt(), _matCap.UseShadow.AsInt()));
     }
 }

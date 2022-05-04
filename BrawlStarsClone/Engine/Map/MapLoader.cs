@@ -3,6 +3,7 @@ using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Windowing;
+using Silk.NET.Maths;
 using Material = BrawlStarsClone.Engine.Asset.Material.Material;
 
 namespace BrawlStarsClone.Engine.Map;
@@ -15,28 +16,29 @@ public static class MapLoader
     private static MatCap _unlit;
     private static MatCap _unlitShadow;
     private static ShaderProgram _diffuseProgram;
+    private static Mesh[] _tiles;
 
     public static void Init()
     {
         var diffuse = new ImageTexture("../../../res/diff.pvr");
         var spec = new ImageTexture("../../../res/spec.pvr");
-        _default = new MatCap()
+        _default = new MatCap
         {
             Diffuse = diffuse
         };
-        _metal = new MatCap()
+        _metal = new MatCap
         {
             Diffuse = new ImageTexture("../../../res/metal_spec.pvr"),
             Specular = new ImageTexture("../../../res/metal_diff.pvr"),
             UseSpecular = true
         };
-        _specular = new MatCap()
+        _specular = new MatCap
         {
             Diffuse = diffuse,
             Specular = spec,
             UseSpecular = true
         };
-        _unlit = new MatCap()
+        _unlit = new MatCap
         {
             Specular = spec,
             Diffuse = diffuse,
@@ -45,10 +47,12 @@ public static class MapLoader
             UseShadow = false
         };
         _diffuseProgram = new ShaderProgram("default.frag", "default.vert");
+        _tiles = new Mesh[1];
+        _tiles[0] = MeshLoader.LoadMesh("../../../res/model/block.bnk");
 
     }
     
-    public static void LoadMap(string path, GameWindow window)
+    public static void LoadMap(string path, GameWindow window, string mapData)
     {
         Stream fileStream = File.Open(path, FileMode.Open);
         BinaryReader reader = new BinaryReader(fileStream);
@@ -101,7 +105,29 @@ public static class MapLoader
             entity.AddComponent(new Component.Material(materials));
             entity.AddComponent(new MeshRenderer(entity, mesh));
         }
-        
+
+        Vector3D<float> tilePos = new Vector3D<float>(0.5f, 0f, 1f);
+        for (var i = 0; i < mapData.Length; i++, tilePos += Vector3D<float>.UnitX)
+        {
+            var tile = mapData[i];
+            if (tile == '.') continue;
+
+            Entity entity = new Entity(window);
+            entity.AddComponent(new Transform(entity, new Transformation
+            {
+                Location = tilePos,
+                Rotation = new Vector3D<float>(-90, 180, 0),
+                Scale = Vector3D<float>.One
+            }));
+            Material material = null;
+            foreach (var matCapMaterial in matCapMaterials)
+            {
+                if (matCapMaterial.Item2 == _tiles[0].Meshes[0].MatName) material = matCapMaterial.Item1;
+            }
+            entity.AddComponent(new Component.Material(new []{material}!));
+            entity.AddComponent(new MeshRenderer(entity, _tiles[0]));
+            if ((i+1) % 17 == 0) tilePos += new Vector3D<float>(-17, 0, 1);
+        }
     }
 }
 

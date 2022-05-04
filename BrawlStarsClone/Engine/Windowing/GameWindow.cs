@@ -85,6 +85,7 @@ public class GameWindow
         MapLoader.Init();
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
+        GL.Enable(EnableCap.CullFace);
 
         GL.Viewport(new Size(_width, _height));
 
@@ -97,14 +98,14 @@ public class GameWindow
         camera.GetComponent<Camera>().Set();
         camera.AddComponent(new Movement());
 
-        MapLoader.LoadMap("../../../res/model/test.map",this);
+        MapLoader.LoadMap("../../../res/model/test.map",this, File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""));
 
         _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
         
-        _shadowBuffer = new FrameBuffer(1024, 1024);
+        _shadowBuffer = new FrameBuffer(2048, 2048);
         _shadowBuffer.SetShadow();
         
-        ShadowMap = new EmptyTexture(1024, 1024, PixelInternalFormat.DepthComponent16, TextureWrapMode.ClampToEdge, TexFilterMode.Linear, PixelFormat.DepthComponent, false, true);
+        ShadowMap = new EmptyTexture(2048, 2048, PixelInternalFormat.DepthComponent16, TextureWrapMode.ClampToEdge, TexFilterMode.Linear, PixelFormat.DepthComponent, false, true);
         ShadowMap.BindToBuffer(_shadowBuffer, FramebufferAttachment.DepthAttachment);
 
         Entity sun = new Entity(this);
@@ -113,6 +114,7 @@ public class GameWindow
             Location = new Vector3D<float>(-20, 40, 20) * 2
         }));
         sun.AddComponent(new Sun(sun, 60));
+        sun.GetComponent<Sun>().Offset = new Vector3D<float>(0, 0, 10);
 
         State = EngineState.Shadow;
         

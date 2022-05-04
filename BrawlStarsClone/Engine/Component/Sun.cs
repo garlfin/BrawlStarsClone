@@ -5,7 +5,9 @@ namespace BrawlStarsClone.Engine.Component;
 public class Sun : BaseCamera
 {
     private int _size;
-    
+
+    public Vector3D<float> Offset = Vector3D<float>.Zero;
+
     public Sun(Entity owner, int size) : base(owner)
     {
         _size = size;
@@ -20,7 +22,7 @@ public class Sun : BaseCamera
 
     public override void OnUpdate(float deltaTime)
     {
-        _view = Matrix4X4.CreateLookAt(Owner.GetComponent<Transform>().Location, Vector3D<float>.Zero, Vector3D<float>.UnitY);
+        _view = Matrix4X4.CreateLookAt(Owner.GetComponent<Transform>().Location + Offset, Vector3D<float>.Zero + Offset, Vector3D<float>.UnitY);
     }
 
     protected sealed override void UpdateProjection()
