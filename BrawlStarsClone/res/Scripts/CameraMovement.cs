@@ -5,12 +5,12 @@ using Silk.NET.Maths;
 
 namespace BrawlStarsClone.res.Scripts;
 
-public class Movement : Behavior
+public class CameraMovement : Behavior
 {
     
     public float CameraSpeed = 4f;
 
-    public Movement()
+    public CameraMovement()
     {
     }
 
@@ -25,17 +25,8 @@ public class Movement : Behavior
     {
         var entityTransform = Owner.GetComponent<Transform>();
 
-        var input = Owner.Window.View.KeyboardState.GetSnapshot();
+        var input = Owner.Window.Input;
         if (input.IsKeyDown(Keys.W)) entityTransform.Location -= Vector3D<float>.UnitZ * CameraSpeed * gameTime; // Forward
         if (input.IsKeyDown(Keys.S)) entityTransform.Location += Vector3D<float>.UnitZ * CameraSpeed * gameTime; // Backwards
     }
-
-    /*
-    public override void OnMouseMove(MouseMoveEventArgs args)
-    {
-        var entityTransform = Owner.GetComponent<Transform>();
-        entityTransform.Rotation.Y += args.DeltaX * Sensitivity;
-        entityTransform.Rotation.X = Math.Clamp(entityTransform.Rotation.X - args.DeltaY * Sensitivity, -89, 89);
-    }
-    */
 }

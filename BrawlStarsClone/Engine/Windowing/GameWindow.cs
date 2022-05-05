@@ -15,6 +15,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Silk.NET.Maths;
 using Color = System.Drawing.Color;
+using Material = BrawlStarsClone.Engine.Asset.Material.Material;
 
 namespace BrawlStarsClone.Engine.Windowing;
 
@@ -22,6 +23,8 @@ public class GameWindow
 {
     private readonly int _width;
     private readonly int _height;
+
+    public KeyboardState Input { get; private set; }
 
     private readonly OpenTK.Windowing.Desktop.GameWindow _view;
     private bool _isClosed;
@@ -62,7 +65,8 @@ public class GameWindow
 
     private void ViewOnUpdateFrame(FrameEventArgs obj)
     {
-         if (_view.IsKeyDown(Keys.Escape)) _view.Close();
+        Input = View.KeyboardState.GetSnapshot();
+        if (_view.IsKeyDown(Keys.Escape)) _view.Close();
         BehaviorSystem.Update((float)obj.Time);
     }
 
@@ -89,16 +93,18 @@ public class GameWindow
 
         GL.Viewport(new Size(_width, _height));
 
-        Entity camera = new Entity(this);
-        Transform transform = new Transform(camera);
-        transform.Location = new Vector3D<float>(0, 0, 10);
-        transform.Rotation = new Vector3D<float>(0, -90, 0);
+        var camera = new Entity(this);
+        var transform = new Transform(camera)
+        {
+            Location = new Vector3D<float>(0, 0, 10),
+            Rotation = new Vector3D<float>(0, -90, 0)
+        };
         camera.AddComponent(transform);
         camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f));
         camera.GetComponent<Camera>().Set();
-        camera.AddComponent(new Movement());
+        camera.AddComponent(new CameraMovement());
 
-        MapLoader.LoadMap("../../../res/model/test.map",this, File.ReadAllText("../../../testmap.txt").Replace("\n", ""));
+        MapLoader.LoadMap("../../../res/model/test.map",this, File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""));
 
         _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
         
@@ -111,10 +117,10 @@ public class GameWindow
         Entity sun = new Entity(this);
         sun.AddComponent(new Transform(sun, new Transformation()
         {
-            Location = new Vector3D<float>(-20, 40, 20) * 2
+            Location = new Vector3D<float>(20, 40, -20) * 2
         }));
         sun.AddComponent(new Sun(sun, 60));
-        sun.GetComponent<Sun>().Offset = new Vector3D<float>(0, 0, 10);
+        sun.GetComponent<Sun>().Offset = new Vector3D<float>(0, 0, 15);
 
         State = EngineState.Shadow;
         
@@ -133,6 +139,15 @@ public class GameWindow
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         
         camera.GetComponent<Camera>().Set();
+        
+        Entity player = new Entity(this);
+        player.AddComponent(new Transform(player)
+        {
+            Location = new Vector3D<float>(8.5f, 0, 0)
+        });
+        player.AddComponent(new Component.Material(new Material[]{new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Metal, new ImageTexture("../../../res/grass2.pvr"))}));
+        player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../res/model/capsule.bnk")));
+        player.AddComponent(new PlayerMovement());
         
         BehaviorSystem.Load();
     }

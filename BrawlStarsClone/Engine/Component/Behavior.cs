@@ -6,6 +6,7 @@ public class Behavior : Component
 
     private Behavior(Entity owner) : base(owner)
     {
+        BehaviorSystem.Register(this);
     }
     
 }

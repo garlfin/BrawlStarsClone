@@ -3,6 +3,7 @@ using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Windowing;
+using BrawlStarsClone.res.Scripts;
 using Silk.NET.Maths;
 using Material = BrawlStarsClone.Engine.Asset.Material.Material;
 
@@ -11,11 +12,11 @@ namespace BrawlStarsClone.Engine.Map;
 public static class MapLoader
 {
     private static MatCap _default;
-    private static MatCap _metal;
+    public static MatCap Metal;
     private static MatCap _specular;
     private static MatCap _unlit;
     private static MatCap _unlitShadow;
-    private static ShaderProgram _diffuseProgram;
+    public static ShaderProgram DiffuseProgram;
     private static Mesh[] _tiles;
 
     public static void Init()
@@ -26,7 +27,7 @@ public static class MapLoader
         {
             Diffuse = diffuse
         };
-        _metal = new MatCap
+        Metal = new MatCap
         {
             Diffuse = new ImageTexture("../../../res/metal_spec.pvr"),
             Specular = new ImageTexture("../../../res/metal_diff.pvr"),
@@ -47,7 +48,7 @@ public static class MapLoader
             UseSpecular = true,
             UseShadow = false
         };
-        _diffuseProgram = new ShaderProgram("default.frag", "default.vert");
+        DiffuseProgram = new ShaderProgram("default.frag", "default.vert");
         _tiles = new Mesh[2];
         _tiles[0] = MeshLoader.LoadMesh("../../../res/model/block.bnk");
         _tiles[1] = MeshLoader.LoadMesh("../../../res/model/grass.bnk");
@@ -69,13 +70,13 @@ public static class MapLoader
             {
                 MatCapType.Diffuse => _default,
                 MatCapType.Specular => _specular,
-                MatCapType.Metal => _metal,
+                MatCapType.Metal => Metal,
                 MatCapType.Unlit => _unlit,
                 MatCapType.UnlitShadow => _unlit,
                 _ => throw new ArgumentOutOfRangeException()
             };
             
-            matCapMaterials[i] = new Tuple<MatCapMaterial, string>(new MatCapMaterial(window, _diffuseProgram, currentCap, textures[reader.ReadUInt32()]), name);
+            matCapMaterials[i] = new Tuple<MatCapMaterial, string>(new MatCapMaterial(window, DiffuseProgram, currentCap, textures[reader.ReadUInt32()]), name);
         }
 
         Mesh[] meshes = new Mesh[reader.ReadUInt32()];
