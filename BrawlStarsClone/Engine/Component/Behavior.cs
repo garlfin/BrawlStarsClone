@@ -7,6 +7,7 @@ public class Behavior : Component
     private Behavior(Entity owner) : base(owner)
     {
     }
+    
 }
 
 class BehaviorSystem : ComponentSystem<Behavior> { }

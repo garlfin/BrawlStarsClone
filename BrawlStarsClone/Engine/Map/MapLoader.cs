@@ -30,7 +30,8 @@ public static class MapLoader
         {
             Diffuse = new ImageTexture("../../../res/metal_spec.pvr"),
             Specular = new ImageTexture("../../../res/metal_diff.pvr"),
-            UseSpecular = true
+            UseSpecular = true,
+            SpecColor = new Vector3D<float>(0.56078f, 0.54902f, 0.54902f)
         };
         _specular = new MatCap
         {
@@ -47,9 +48,9 @@ public static class MapLoader
             UseShadow = false
         };
         _diffuseProgram = new ShaderProgram("default.frag", "default.vert");
-        _tiles = new Mesh[1];
+        _tiles = new Mesh[2];
         _tiles[0] = MeshLoader.LoadMesh("../../../res/model/block.bnk");
-
+        _tiles[1] = MeshLoader.LoadMesh("../../../res/model/grass.bnk");
     }
     
     public static void LoadMap(string path, GameWindow window, string mapData)
@@ -110,22 +111,34 @@ public static class MapLoader
         for (var i = 0; i < mapData.Length; i++, tilePos += Vector3D<float>.UnitX)
         {
             var tile = mapData[i];
-            if (tile == '.') continue;
 
-            Entity entity = new Entity(window);
-            entity.AddComponent(new Transform(entity, new Transformation
+            if (tile != '.')
             {
-                Location = tilePos,
-                Rotation = Vector3D<float>.Zero,
-                Scale = Vector3D<float>.One
-            }));
-            Material material = null;
-            foreach (var matCapMaterial in matCapMaterials)
-            {
-                if (matCapMaterial.Item2 == _tiles[0].Meshes[0].MatName) material = matCapMaterial.Item1;
+
+                var tileMesh = tile switch
+                {
+                    's' => _tiles[0],
+                    'g' => _tiles[1],
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                Entity entity = new Entity(window);
+                entity.AddComponent(new Transform(entity, new Transformation
+                {
+                    Location = tilePos,
+                    Rotation = Vector3D<float>.Zero,
+                    Scale = Vector3D<float>.One
+                }));
+                Material material = null;
+                foreach (var matCapMaterial in matCapMaterials)
+                {
+                    if (matCapMaterial.Item2 == tileMesh.Meshes[0].MatName) material = matCapMaterial.Item1;
+                }
+
+                entity.AddComponent(new Component.Material(new[] { material }!));
+                entity.AddComponent(new MeshRenderer(entity, tileMesh));
             }
-            entity.AddComponent(new Component.Material(new []{material}!));
-            entity.AddComponent(new MeshRenderer(entity, _tiles[0]));
+
             if ((i+1) % 17 == 0) tilePos += new Vector3D<float>(-17, 0, 1);
         }
     }

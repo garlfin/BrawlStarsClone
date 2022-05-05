@@ -10,6 +10,7 @@ uniform sampler2D specCap;
 uniform sampler2DShadow shadowMap;
 
 uniform vec3 influence;
+uniform vec3 specularColor;
 
 out vec4 FragColor;
 
@@ -24,7 +25,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     int pcfCount = 1;
     for (int x = -pcfCount; x<= pcfCount; x++){
         for (int y =-pcfCount; y<=pcfCount; y++){
-            visibility += texture(shadowMap, vec3(projCoords.xy+vec2(x, y)*texelSize, currentDepth - 0.0001));   
+            visibility += texture(shadowMap, vec3(projCoords.xy+vec2(x, y)*texelSize, currentDepth - 0.0005));   
         }
     }
     visibility /= (pcfCount * 2 + 1) * (pcfCount * 2 + 1);
@@ -38,6 +39,6 @@ void main(){
     FragColor = vec4(color, 1.0);
     FragColor *= vec4(mix(vec3(1.0), texture(diffCap, normal).rgb, influence.x), 1.0);
     FragColor *= mix(0.75, 1.0, ShadowCalculation(FragPosLightSpace));
-    FragColor += vec4(texture(specCap, normal).rgb, 0.0) * vec4(color, 1.0) * influence.y;
+    FragColor += vec4(texture(specCap, normal).rgb * specularColor * influence.y, 0.0);
     FragColor = pow(FragColor, vec4(0.4545));
 }

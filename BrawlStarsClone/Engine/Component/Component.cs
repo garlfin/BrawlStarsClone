@@ -23,7 +23,7 @@ public abstract class Component
     public virtual void OnMouseMove(MouseMoveEventArgs args) { }
 }
 
-class ComponentSystem<T> where T : Component
+abstract class ComponentSystem<T> where T : Component
 {
     private static List<T> _components = new();
 

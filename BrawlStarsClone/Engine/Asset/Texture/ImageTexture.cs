@@ -17,12 +17,11 @@ public class ImageTexture : Texture
         InternalFormat internalFormat = (Format)reader.ReadUInt64() switch
         {
             Format.BC1 => InternalFormat.CompressedRgbaS3tcDxt1Ext,
-            Format.BC3 => InternalFormat.CompressedSrgbAlphaS3tcDxt3Ext,
+            Format.BC3 => InternalFormat.CompressedRgbaS3tcDxt3Ext,
             Format.BC5 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
             _ => throw new ArgumentOutOfRangeException()
         };
-
-        reader.ReadUInt32();
+        if (reader.ReadUInt32() == 1) internalFormat += 2140;
         reader.ReadUInt32();
         _width = reader.ReadInt32();
         _height = reader.ReadInt32();

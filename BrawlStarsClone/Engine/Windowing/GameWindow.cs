@@ -94,11 +94,11 @@ public class GameWindow
         transform.Location = new Vector3D<float>(0, 0, 10);
         transform.Rotation = new Vector3D<float>(0, -90, 0);
         camera.AddComponent(transform);
-        camera.AddComponent(new Camera(camera, 60f, 0.1f, 1000f));
+        camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f));
         camera.GetComponent<Camera>().Set();
         camera.AddComponent(new Movement());
 
-        MapLoader.LoadMap("../../../res/model/test.map",this, File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""));
+        MapLoader.LoadMap("../../../res/model/test.map",this, File.ReadAllText("../../../testmap.txt").Replace("\n", ""));
 
         _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
         
@@ -133,6 +133,8 @@ public class GameWindow
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         
         camera.GetComponent<Camera>().Set();
+        
+        BehaviorSystem.Load();
     }
 
     private void OnRender(FrameEventArgs frameEventArgs)

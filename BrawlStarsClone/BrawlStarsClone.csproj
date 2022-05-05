@@ -30,6 +30,7 @@
       <None Update="tutorial.bnk">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Remove="res\model\block.bnk" />
     </ItemGroup>
 
     <ItemGroup>
