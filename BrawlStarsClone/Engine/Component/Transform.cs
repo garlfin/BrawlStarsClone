@@ -19,6 +19,7 @@ public sealed class Transform : Component
     public Transform(Entity owner) : base(owner)
     {
         Model = Matrix4X4<float>.Identity;
+        OnUpdate(0f);
         TransformSystem.Register(this);
     }
     

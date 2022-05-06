@@ -31,6 +31,7 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Remove="res\model\block.bnk" />
+      <None Remove="res\old_town.png" />
     </ItemGroup>
 
     <ItemGroup>

@@ -55,22 +55,22 @@ public class GameWindow
 
         _view.Load += OnLoad;
         _view.RenderFrame += OnRender;
-        _view.UpdateFrame += ViewOnUpdateFrame;
+        _view.UpdateFrame += OnUpdate;
         _view.Closing += OnClose;
-        _view.MouseMove += ViewOnMouseMove;
-        _view.CursorGrabbed = true;
+        _view.MouseMove += OnMouseMove;
+        //_view.CursorGrabbed = true;
         
         _view.Run();
     }
 
-    private void ViewOnUpdateFrame(FrameEventArgs obj)
+    private void OnUpdate(FrameEventArgs obj)
     {
         Input = View.KeyboardState.GetSnapshot();
-        if (_view.IsKeyDown(Keys.Escape)) _view.Close();
+        if (Input.IsKeyDown(Keys.Escape)) _view.Close();
         BehaviorSystem.Update((float)obj.Time);
     }
 
-    private void ViewOnMouseMove(MouseMoveEventArgs obj)
+    private void OnMouseMove(MouseMoveEventArgs obj)
     {
         BehaviorSystem.MouseMove(obj);
     }
@@ -110,7 +110,7 @@ public class GameWindow
         
         _shadowBuffer = new FrameBuffer(2048, 2048);
         _shadowBuffer.SetShadow();
-        
+
         ShadowMap = new EmptyTexture(2048, 2048, PixelInternalFormat.DepthComponent16, TextureWrapMode.ClampToEdge, TexFilterMode.Linear, PixelFormat.DepthComponent, false, true);
         ShadowMap.BindToBuffer(_shadowBuffer, FramebufferAttachment.DepthAttachment);
 
@@ -139,11 +139,13 @@ public class GameWindow
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         
         camera.GetComponent<Camera>().Set();
-        
-        Entity player = new Entity(this);
+
+        var player = new Entity(this);
         player.AddComponent(new Transform(player)
         {
-            Location = new Vector3D<float>(8.5f, 0, 0)
+            Location = new Vector3D<float>(8.5f, 0.5f, -15),
+            Rotation = new Vector3D<float>(90, 0, 0),
+            Scale = new Vector3D<float>(0.25f)
         });
         player.AddComponent(new Component.Material(new Material[]{new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Metal, new ImageTexture("../../../res/grass2.pvr"))}));
         player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../res/model/capsule.bnk")));
@@ -157,6 +159,7 @@ public class GameWindow
         if (_isClosed) return;  
         // Main Render Pass
         State = EngineState.Render;
+        TransformSystem.Update(0f);
         CameraSystem.Update(0f);
         ShaderSystem.InitFrame();
         
