@@ -11,11 +11,11 @@ namespace BrawlStarsClone.Engine.Map;
 
 public static class MapLoader
 {
-    private static MatCap _default;
+    public static MatCap Default;
     public static MatCap Metal;
-    private static MatCap _specular;
-    private static MatCap _unlit;
-    private static MatCap _unlitShadow;
+    public static MatCap Specular;
+    public static MatCap Unlit;
+    public static MatCap UnlitShadow;
     public static ShaderProgram DiffuseProgram;
     private static Mesh[] _tiles;
 
@@ -23,7 +23,7 @@ public static class MapLoader
     {
         var diffuse = new ImageTexture("../../../res/diff.pvr");
         var spec = new ImageTexture("../../../res/spec.pvr");
-        _default = new MatCap
+        Default = new MatCap
         {
             Diffuse = diffuse
         };
@@ -34,13 +34,13 @@ public static class MapLoader
             UseSpecular = true,
             SpecColor = new Vector3D<float>(0.56078f, 0.54902f, 0.54902f)
         };
-        _specular = new MatCap
+        Specular = new MatCap
         {
             Diffuse = diffuse,
             Specular = spec,
             UseSpecular = true
         };
-        _unlit = new MatCap
+        Unlit = new MatCap
         {
             Specular = spec,
             Diffuse = diffuse,
@@ -68,11 +68,11 @@ public static class MapLoader
             var name = reader.ReadPythonString();
             var currentCap = (MatCapType) reader.ReadUInt32() switch
             {
-                MatCapType.Diffuse => _default,
-                MatCapType.Specular => _specular,
+                MatCapType.Diffuse => Default,
+                MatCapType.Specular => Specular,
                 MatCapType.Metal => Metal,
-                MatCapType.Unlit => _unlit,
-                MatCapType.UnlitShadow => _unlit,
+                MatCapType.Unlit => Unlit,
+                MatCapType.UnlitShadow => Unlit,
                 _ => throw new ArgumentOutOfRangeException()
             };
             

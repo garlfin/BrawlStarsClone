@@ -87,6 +87,7 @@ public class ShaderProgram : Asset
     {
         SetUniform("projection", CameraSystem.CurrentCamera.Projection);
         SetUniform("view", CameraSystem.CurrentCamera.View);
+        SetUniform("light", CameraSystem.Sun.View * CameraSystem.Sun.Projection);
     }
 }
 

@@ -19,9 +19,18 @@ public class MatCapMaterial : Material
 
     public override void Use(Matrix4X4<float> model)
     {
-        Program.Use();
-        Program.SetUniform("model", model);
-        Program.SetUniform("light", CameraSystem.Sun.View * CameraSystem.Sun.Projection);
+        base.Use(model);
+        DefaultUniforms();
+    }
+
+    public override void Use(Mesh.Mesh mesh)
+    {
+        base.Use(mesh);
+        DefaultUniforms();
+    }
+
+    private void DefaultUniforms()
+    {
         Program.SetUniform("albedoTex", _albedo.Use(TexSlotManager.Unit));
         Program.SetUniform("diffCap", _matCap.UseDiffuse ? _matCap.Diffuse.Use(TexSlotManager.Unit) : 0);
         Program.SetUniform("specCap", _matCap.UseSpecular ? _matCap.Specular.Use(TexSlotManager.Unit) : 0);

@@ -4,13 +4,15 @@ in vec2 TexCoord;
 in vec4 FragPosLightSpace;
 in vec2 normal;
 
-uniform sampler2D albedoTex;
-uniform sampler2D diffCap;
-uniform sampler2D specCap;
-uniform sampler2DShadow shadowMap;
+layout (std130, binding = 1) uniform MatCapData {
+    vec4 influence;
+    vec4 specularColor;
+};
 
-uniform vec3 influence;
-uniform vec3 specularColor;
+layout (binding = 2) uniform sampler2D albedoTex;
+layout (binding = 3) uniform sampler2D diffCap;
+layout (binding = 4) uniform sampler2D specCap;
+layout (binding = 5) uniform sampler2DShadow shadowMap;
 
 out vec4 FragColor;
 
@@ -38,7 +40,7 @@ void main(){
     vec3 color = texture(albedoTex, TexCoord).rgb;
     FragColor = vec4(color, 1.0);
     FragColor *= vec4(mix(vec3(1.0), texture(diffCap, normal).rgb, influence.x), 1.0);
-    FragColor *= mix(0.75, 1.0, ShadowCalculation(FragPosLightSpace));
-    FragColor += vec4(texture(specCap, normal).rgb * specularColor * influence.y, 0.0);
+    FragColor *= mix(1, mix(0.75, 1.0, ShadowCalculation(FragPosLightSpace)), influence.z);
+    FragColor += vec4(texture(specCap, normal).rgb * specularColor.rgb * influence.y, 0.0);
     FragColor = pow(FragColor, vec4(0.4545));
 }

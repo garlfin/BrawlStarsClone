@@ -3,6 +3,7 @@ using System.Drawing;
 using BrawlStarsClone.Engine.Asset;
 using BrawlStarsClone.Engine.Asset.FrameBuffer;
 using BrawlStarsClone.Engine.Asset.Material;
+using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Map;
@@ -134,6 +135,7 @@ public class GameWindow
         _depthShader.Use();
         
         MeshRendererSystem.Render(0f);
+        ManagedMeshes.Render(this);
         
         GL.Viewport(0, 0, _width, _height);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -147,7 +149,7 @@ public class GameWindow
             Rotation = new Vector3D<float>(90, 0, 0),
             Scale = new Vector3D<float>(0.25f)
         });
-        player.AddComponent(new Component.Material(new Material[]{new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Metal, new ImageTexture("../../../res/grass2.pvr"))}));
+        player.AddComponent(new Component.Material(new Material[]{new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Specular, new ImageTexture("../../../res/grass2.pvr"))}));
         player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../res/model/capsule.bnk")));
         player.AddComponent(new PlayerMovement());
         
@@ -166,6 +168,7 @@ public class GameWindow
         GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
         
         MeshRendererSystem.Render(0f);
+        ManagedMeshes.Render(this);
 
         State = EngineState.PostProcess;
         _view.SwapBuffers();
