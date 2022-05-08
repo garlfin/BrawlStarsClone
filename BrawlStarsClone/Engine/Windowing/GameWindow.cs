@@ -88,6 +88,8 @@ public class GameWindow
         
         Debug.Init();
         MapLoader.Init();
+        ProgramManager.Init();
+        
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.CullFace);
@@ -130,7 +132,7 @@ public class GameWindow
         
         TransformSystem.Update(0f);
         CameraSystem.Update(0f);
-        ShaderSystem.InitFrame();
+        ProgramManager.InitFrame();
         
         _depthShader.Use();
         
@@ -152,7 +154,7 @@ public class GameWindow
         player.AddComponent(new Component.Material(new Material[]{new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Specular, new ImageTexture("../../../res/grass2.pvr"))}));
         player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../res/model/capsule.bnk")));
         player.AddComponent(new PlayerMovement());
-        
+
         BehaviorSystem.Load();
     }
 
@@ -163,7 +165,7 @@ public class GameWindow
         State = EngineState.Render;
         TransformSystem.Update(0f);
         CameraSystem.Update(0f);
-        ShaderSystem.InitFrame();
+        ProgramManager.InitFrame();
         
         GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
         

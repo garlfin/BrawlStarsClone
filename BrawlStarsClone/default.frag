@@ -1,18 +1,18 @@
-﻿#version 330 core
+﻿#version 420 core
 
 in vec2 TexCoord;
 in vec4 FragPosLightSpace;
 in vec2 normal;
 
-layout (std130, binding = 1) uniform MatCapData {
+layout (std140, binding = 3) uniform MatCapData {
     vec4 influence;
     vec4 specularColor;
 };
 
-layout (binding = 2) uniform sampler2D albedoTex;
-layout (binding = 3) uniform sampler2D diffCap;
-layout (binding = 4) uniform sampler2D specCap;
-layout (binding = 5) uniform sampler2DShadow shadowMap;
+uniform sampler2D albedoTex;
+uniform sampler2D diffCap;
+uniform sampler2D specCap;
+uniform sampler2DShadow shadowMap;
 
 out vec4 FragColor;
 

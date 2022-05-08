@@ -3,7 +3,6 @@ using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Windowing;
-using BrawlStarsClone.res.Scripts;
 using Silk.NET.Maths;
 using Material = BrawlStarsClone.Engine.Asset.Material.Material;
 
@@ -46,7 +45,7 @@ public static class MapLoader
             Diffuse = diffuse,
             UseDiffuse = false,
             UseSpecular = true,
-            UseShadow = false
+            UseShadow = true
         };
         DiffuseProgram = new ShaderProgram("default.frag", "default.vert");
         _tiles = new Mesh[2];

@@ -1,22 +1,37 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using System.Runtime.InteropServices;
+using BrawlStarsClone.Engine.Asset.Material;
+using OpenTK.Graphics.OpenGL4;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset;
 
-public class UniformBuffer<T> : Asset where T : unmanaged
+public class UniformBuffer: Asset
 {
     private int _id;
+    private int _location;
+
+    public int ID => _id;
+    public int Location => _location;
     
-    public unsafe UniformBuffer(T? data, BufferUsageHint usageHint)
+    public UniformBuffer(int size, BufferUsageHint usageHint)
     {
         _id = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.UniformBuffer, _id);
-        if (data is null) GL.BufferData(BufferTarget.UniformBuffer, sizeof(T), data is null ? IntPtr.Zero : (IntPtr) (&data), usageHint);
+        GL.BufferData(BufferTarget.UniformBuffer, size, IntPtr.Zero, usageHint);
     }
 
-    public unsafe void ReplaceData(T data)
+    public unsafe void ReplaceData(void* data, int size, int offset = 0)
     {
         GL.BindBuffer(BufferTarget.UniformBuffer, _id);
-        GL.BufferSubData(BufferTarget.UniformBuffer, IntPtr.Zero, sizeof(T), (IntPtr) (&data));
+        GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr) offset, size, (IntPtr) data);
+    }
+
+
+    public void Bind(int slot)
+    {
+        _location = slot;
+        GL.BindBuffer(BufferTarget.UniformBuffer, _id);
+        GL.BindBufferBase(BufferRangeTarget.UniformBuffer, slot, ID);
     }
 
     public override void Delete()

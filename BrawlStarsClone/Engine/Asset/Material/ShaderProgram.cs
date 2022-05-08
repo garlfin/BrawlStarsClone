@@ -1,106 +1,145 @@
-﻿using BrawlStarsClone.Engine.Component;
+﻿using System.Runtime.InteropServices;
+using BrawlStarsClone.Engine.Component;
 using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Material;
-
 public class ShaderProgram : Asset
 {
+    public int ID { get; }
 
-    private int _id;
-        
     public ShaderProgram(string fragPath, string vertPath, bool managed = true)
     {
-        if (managed) ShaderSystem.Register(this);
-        _id = GL.CreateProgram();
-            
+        if (managed) ProgramManager.Register(this);
+        ID = GL.CreateProgram();
+
         var fragment = new Shader(fragPath, ShaderType.FragmentShader);
         var vertex = new Shader(vertPath, ShaderType.VertexShader);
-            
+
         fragment.Attach(this);
         vertex.Attach(this);
-            
-        GL.LinkProgram(_id);
-            
+
+        GL.LinkProgram(ID);
+
         fragment.Delete();
         vertex.Delete();
     }
 
     public void Use()
     {
-        ShaderSystem.CurrentProgram = this;
-        GL.UseProgram(_id);
+        if (ProgramManager.CurrentProgram == this) return;
+        ProgramManager.CurrentProgram = this;
+        GL.UseProgram(ID);
     }
-        
+
 
     public void SetUniform(string uniform, int data)
     {
-        int realLocation = GL.GetUniformLocation(_id, uniform);
+        int realLocation = GL.GetUniformLocation(ID, uniform);
         if (realLocation == -1) return;
-        GL.ProgramUniform1(_id, realLocation, data);
+        GL.ProgramUniform1(ID, realLocation, data);
     }
-    
+
     public unsafe void SetUniform(string uniform, Vector3D<float> data)
     {
-        int realLocation = GL.GetUniformLocation(_id, uniform);
+        int realLocation = GL.GetUniformLocation(ID, uniform);
         if (realLocation == -1) return;
-        GL.ProgramUniform3(_id, realLocation, 1, (float*) &data);
+        GL.ProgramUniform3(ID, realLocation, 1, (float*)&data);
     }
 
     public unsafe void SetUniform(string uniform, Matrix4X4<float>* data)
     {
-        int realLocation = GL.GetUniformLocation(_id, uniform);
+        int realLocation = GL.GetUniformLocation(ID, uniform);
         if (realLocation == -1) return;
-        GL.ProgramUniformMatrix4(_id, realLocation, 1, false, (float*) data);
+        GL.ProgramUniformMatrix4(ID, realLocation, 1, false, (float*)data);
     }
 
     public unsafe void SetUniform(string uniform, Matrix4X4<float> data)
     {
-        int realLocation = GL.GetUniformLocation(_id, uniform);
+        int realLocation = GL.GetUniformLocation(ID, uniform);
         if (realLocation == -1) return;
-        GL.ProgramUniformMatrix4(_id, realLocation, 1, false, (float*) &data);
+        GL.ProgramUniformMatrix4(ID, realLocation, 1, false, (float*)&data);
     }
-    
+
     public void SetUniform(string uniform, float data)
     {
-        int realLocation = GL.GetUniformLocation(_id, uniform);
+        int realLocation = GL.GetUniformLocation(ID, uniform);
         if (realLocation == -1) return;
-        GL.ProgramUniform1(_id, realLocation, data);
+        GL.ProgramUniform1(ID, realLocation, data);
     }
-        
+
     public override void Delete()
     {
-        GL.DeleteProgram(_id);
+        GL.DeleteProgram(ID);
     }
 
-    public int Get()
+    public void BindToBuffer(UniformBuffer buffer, string uniformName)
     {
-        return _id;
-    }
-        
-    public void Set()
-    {
-       GL.UseProgram(_id);
+        int uniform = GL.GetUniformBlockIndex(ID, uniformName);
+        GL.UniformBlockBinding(ID, uniform, buffer.Location);
     }
 
-    public void UpdateMatrices()
+    public void BindToBuffer(int location, string uniformName)
     {
-        SetUniform("projection", CameraSystem.CurrentCamera.Projection);
-        SetUniform("view", CameraSystem.CurrentCamera.View);
-        SetUniform("light", CameraSystem.Sun.View * CameraSystem.Sun.Projection);
+        int uniform = GL.GetUniformBlockIndex(ID, uniformName);
+        GL.UniformBlockBinding(ID, uniform, location);
     }
 }
 
-static class ShaderSystem
+static class ProgramManager
 {
     private static List<ShaderProgram> _Programs = new();
 
     public static ShaderProgram CurrentProgram;
 
-    public static void InitFrame()
+    private static UniformBuffer _capData;
+    private static UniformBuffer _matricesData;
+
+    private static Matrices Matrices;
+    public static MatCapUniformBuffer MatCap = new();
+
+    public static unsafe void Init()
     {
-        foreach (var program in _Programs) program.UpdateMatrices();
+        _matricesData = new UniformBuffer(sizeof(float) * 16 * 53, BufferUsageHint.DynamicDraw);
+        _matricesData.Bind(2);
+        _capData = new UniformBuffer(sizeof(MatCapUniformBuffer), BufferUsageHint.DynamicDraw);
+        _capData.Bind(3);
+    }
+
+    public static unsafe void InitFrame()
+    {
+        Matrices.Projection = CameraSystem.CurrentCamera.Projection;
+        Matrices.View = CameraSystem.CurrentCamera.View;
+        Matrices.LightProjection = CameraSystem.Sun.View * CameraSystem.Sun.Projection ;
+
+        var ptr = Marshal.AllocHGlobal(3392);
+        Marshal.StructureToPtr(Matrices, ptr, true);
+        _matricesData.ReplaceData((void*)ptr, 16 * 4 * 53); // 16 floats * 4 bytes * 53 elements
+        Marshal.FreeHGlobal(ptr);
     }
 
     public static void Register(ShaderProgram program) => _Programs.Add(program);
+
+    public static unsafe void PushModelMatrix(void* ptr, int size)
+    {
+        _matricesData.ReplaceData(ptr, size);
+    }
+
+    public static unsafe void PushMatCap()
+    {
+        fixed (void* ptr = &MatCap) _capData.ReplaceData(ptr, sizeof(MatCapUniformBuffer));
+    }
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 3392)]
+public struct Matrices
+{
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50)]
+    public Matrix4X4<float>[] Model; // 3200
+    [MarshalAs(UnmanagedType.Struct)]
+    public Matrix4X4<float> View; // 64
+    [MarshalAs(UnmanagedType.Struct)]
+    public Matrix4X4<float> Projection; // 64
+    [MarshalAs(UnmanagedType.Struct)]
+    public Matrix4X4<float> LightProjection; // 64
 }

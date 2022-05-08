@@ -1,13 +1,15 @@
-﻿#version 330 core
+﻿#version 420 core
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 
-uniform mat4 model[50];
-uniform mat4 view;
-uniform mat4 projection;
-uniform mat4 light;
+layout (std140, binding = 2) uniform Matrices {
+    mat4 model[50];
+    mat4 view;
+    mat4 projection;
+    mat4 light;
+};
 
 out vec2 TexCoord;
 out vec2 normal;

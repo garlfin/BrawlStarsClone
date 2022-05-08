@@ -1,4 +1,5 @@
-﻿using BrawlStarsClone.Engine.Asset.Material;
+﻿using System.Runtime.InteropServices;
+using BrawlStarsClone.Engine.Asset.Material;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Windowing;
@@ -35,15 +36,14 @@ public class Mesh
         foreach (var mesh in MeshVaos) mesh.Render();
     }
 
-    public void ManagedRender(GameWindow window)
+    public unsafe void ManagedRender(GameWindow window)
     {
         for (var i = 0; i < MeshVaos.Length; i++)
         {
-            if (window.State is EngineState.Render)
-                _users[0].GetComponent<Component.Material>()[i].Use(this);
-            else
-                for (var j = 0; j < _users.Count; j++)
-                    ShaderSystem.CurrentProgram.SetUniform($"model[{j}]", _users[j].GetComponent<Transform>().Model);
+            if (window.State is EngineState.Render) _users[0].GetComponent<Component.Material>()[i].Use();
+            Matrix4X4<float>[] model = new Matrix4X4<float>[_users.Count];
+            for (var j = 0; j < _users.Count; j++) model[j] = _users[j].GetComponent<Transform>().Model;
+            fixed(void* ptr = model) ProgramManager.PushModelMatrix(ptr, sizeof(Matrix4X4<float>) * model.Length);
             MeshVaos[i].RenderInstanced(_users.Count);
             TexSlotManager.ResetUnit();
         }

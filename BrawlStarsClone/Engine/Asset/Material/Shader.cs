@@ -18,7 +18,7 @@ namespace BrawlStarsClone.Engine.Asset.Material
 
         public void Attach(ShaderProgram program)
         {
-            GL.AttachShader(program.Get(), _id);
+            GL.AttachShader(program.ID, _id);
         }
 
         public override void Delete()

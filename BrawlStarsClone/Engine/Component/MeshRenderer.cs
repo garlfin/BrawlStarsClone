@@ -2,6 +2,7 @@
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Windowing;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component;
 
@@ -18,17 +19,15 @@ public sealed class MeshRenderer : Component
         if (!overrideInstance) mesh.Register(Owner);
     }
 
-    public override void OnRender(float deltaTime)
+    public override unsafe void OnRender(float deltaTime)
     {
         if (_mesh.Instanced && !_overrideInstance) return;
+        var matrix = Owner.GetComponent<Transform>().Model;
+        ProgramManager.PushModelMatrix(&matrix, sizeof(float) * 16);
         for (var i = 0; i < _mesh.MeshVaos.Length; i++)
         {
-            var mesh = _mesh.MeshVaos[i];
-            if (Owner.Window.State is EngineState.Render)
-                Owner.GetComponent<Material>()[i].Use(Owner.GetComponent<Transform>().Model);
-            else
-                ShaderSystem.CurrentProgram.SetUniform("model", Owner.GetComponent<Transform>().Model);
-            mesh.Render();
+            if (Owner.Window.State is EngineState.Render) Owner.GetComponent<Material>()[i].Use();
+            _mesh.MeshVaos[i].Render();
         }
 
         TexSlotManager.ResetUnit();

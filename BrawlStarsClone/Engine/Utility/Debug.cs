@@ -9,8 +9,10 @@ namespace BrawlStarsClone.Engine.Utility
 
         private static void Log(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userparam)
         {
-            if (severity is not DebugSeverity.DebugSeverityNotification)
-                Console.WriteLine($"SEVERITY: {severity}; MESSAGE: {Marshal.PtrToStringAnsi(message, length)}");
+            if (severity is DebugSeverity.DebugSeverityNotification) return;
+            if (severity is DebugSeverity.DebugSeverityHigh) throw new Exception(Marshal.PtrToStringAnsi(message, length));
+            Console.WriteLine($"SEVERITY: {severity}; MESSAGE: {Marshal.PtrToStringAnsi(message, length)}");
+            
         }
 
         public static void Init()
