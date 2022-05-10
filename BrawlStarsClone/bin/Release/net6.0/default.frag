@@ -27,7 +27,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     int pcfCount = 1;
     for (int x = -pcfCount; x<= pcfCount; x++){
         for (int y =-pcfCount; y<=pcfCount; y++){
-            visibility += texture(shadowMap, vec3(projCoords.xy+vec2(x, y)*texelSize, currentDepth - 0.0005));   
+            visibility += texture(shadowMap, vec3(projCoords.xy+vec2(x, y)*texelSize, currentDepth - 0.0005));
         }
     }
     visibility /= (pcfCount * 2 + 1) * (pcfCount * 2 + 1);
@@ -40,7 +40,7 @@ void main(){
     vec3 color = texture(albedoTex, TexCoord).rgb;
     FragColor = vec4(color, 1.0);
     FragColor *= vec4(mix(vec3(1.0), texture(diffCap, normal).rgb, influence.x), 1.0);
-    FragColor *= mix(1, mix(0.75, 1.0, ShadowCalculation(FragPosLightSpace)), influence.z);
+    FragColor *= mix(1.0, mix(0.75, 1.0, ShadowCalculation(FragPosLightSpace)), influence.z);
     FragColor += vec4(texture(specCap, normal).rgb * specularColor.rgb * influence.y, 0.0);
     FragColor = pow(FragColor, vec4(0.4545));
 }

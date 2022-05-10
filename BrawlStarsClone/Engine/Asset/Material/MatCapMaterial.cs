@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
 using BrawlStarsClone.Engine.Asset.Texture;
-using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Map;
 using BrawlStarsClone.Engine.Windowing;
 using Silk.NET.Maths;
@@ -20,8 +19,8 @@ public struct MatCapUniformBuffer
 
 public class MatCapMaterial : Material
 {
-    private readonly MatCap _matCap;
     private readonly Texture.Texture _albedo;
+    private readonly MatCap _matCap;
 
     public MatCapMaterial(GameWindow window, ShaderProgram program, MatCap matCap, Texture.Texture albedo) : base(
         window, program)

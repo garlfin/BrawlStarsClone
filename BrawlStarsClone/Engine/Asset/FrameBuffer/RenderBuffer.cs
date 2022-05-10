@@ -4,25 +4,23 @@ namespace BrawlStarsClone.Engine.Asset.FrameBuffer;
 
 public class RenderBuffer : Asset
 {
-    private int _id;
-
-    public int ID => _id;
-    
     protected RenderBuffer()
     {
-        _id = GL.GenRenderbuffer();
+        ID = GL.GenRenderbuffer();
     }
+
+    public int ID { get; }
 
     public void BindToFrameBuffer(FrameBuffer buffer, RenderbufferStorage storage, FramebufferAttachment attachment)
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
-        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, _id);
+        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, ID);
         GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, storage, buffer.Size.X, buffer.Size.Y);
-        GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, attachment, RenderbufferTarget.Renderbuffer, _id);
+        GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, attachment, RenderbufferTarget.Renderbuffer, ID);
     }
 
     public override void Delete()
     {
-        GL.DeleteRenderbuffer(_id);
+        GL.DeleteRenderbuffer(ID);
     }
 }

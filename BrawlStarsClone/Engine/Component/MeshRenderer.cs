@@ -2,14 +2,13 @@
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Windowing;
-using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component;
 
 public sealed class MeshRenderer : Component
 {
     private readonly Mesh _mesh;
-    private bool _overrideInstance;
+    private readonly bool _overrideInstance;
 
     public MeshRenderer(Entity owner, Mesh mesh, bool overrideInstance = false) : base(owner)
     {
@@ -34,7 +33,6 @@ public sealed class MeshRenderer : Component
     }
 }
 
-class MeshRendererSystem : ComponentSystem<MeshRenderer>
+internal class MeshRendererSystem : ComponentSystem<MeshRenderer>
 {
-    
 }

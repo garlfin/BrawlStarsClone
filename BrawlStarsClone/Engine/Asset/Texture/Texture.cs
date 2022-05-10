@@ -5,10 +5,11 @@ namespace BrawlStarsClone.Engine.Asset.Texture;
 
 public abstract class Texture : Asset
 {
+    protected int _height;
+
     // Properties
     protected int _id;
     protected int _width;
-    protected int _height;
 
     // Exposers
     public Vector2D<int> Size => new(_width, _height);
@@ -22,17 +23,17 @@ public abstract class Texture : Asset
         GL.BindTexture(TextureTarget.Texture2D, _id);
         return slot;
     }
-    
+
     public int GetMipsCount()
     {
-        return (int)Math.Floor(Math.Log2(Math.Min(_width, _height)));
+        return (int) Math.Floor(Math.Log2(Math.Min(_width, _height)));
     }
-    
+
     public Vector2D<int> GetMipSize(int level)
     {
         var width = _width;
         var height = _height;
-        for (int i = level; i > 0; i--)
+        for (var i = level; i > 0; i--)
         {
             width /= 2;
             height /= 2;
@@ -40,7 +41,7 @@ public abstract class Texture : Asset
 
         return new Vector2D<int>(width, height);
     }
-    
+
     public virtual void BindToBuffer(FrameBuffer.FrameBuffer buffer, FramebufferAttachment attachmentLevel,
         TextureTarget target = TextureTarget.Texture2D, int level = 0)
     {
@@ -57,7 +58,7 @@ public abstract class Texture : Asset
 public static class TexSlotManager
 {
     private static readonly int[] Slots = new int[30];
-    private static int _unit = 0;
+    private static int _unit;
 
     static TexSlotManager()
     {
@@ -73,10 +74,20 @@ public static class TexSlotManager
         }
     }
 
-    public static void ResetUnit() => _unit = 0;
-    public static bool IsSameSlot(int slot, int tex) => Slots[slot] == tex;
-    public static void SetSlot(int slot, int tex) => Slots[slot] = tex;
-    
+    public static void ResetUnit()
+    {
+        _unit = 0;
+    }
+
+    public static bool IsSameSlot(int slot, int tex)
+    {
+        return Slots[slot] == tex;
+    }
+
+    public static void SetSlot(int slot, int tex)
+    {
+        Slots[slot] = tex;
+    }
 }
 
 public enum TexFilterMode

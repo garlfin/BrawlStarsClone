@@ -9,34 +9,34 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Update="default.vert">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="default.frag">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="cube.bnk">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="ash_tex.pvr">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="res\skin_diffuse.pvr">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="res\skin_spec.pvr">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="tutorial.bnk">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Remove="res\model\block.bnk" />
-      <None Remove="res\old_town.png" />
+        <None Update="default.vert">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="default.frag">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="cube.bnk">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="ash_tex.pvr">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="res\skin_diffuse.pvr">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="res\skin_spec.pvr">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="tutorial.bnk">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Remove="res\model\block.bnk"/>
+        <None Remove="res\old_town.png"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="OpenTK" Version="4.7.1" />
-      <PackageReference Include="Silk.NET.Maths" Version="2.15.0" />
+        <PackageReference Include="OpenTK" Version="4.7.1"/>
+        <PackageReference Include="Silk.NET.Maths" Version="2.15.0"/>
     </ItemGroup>
 
 </Project>

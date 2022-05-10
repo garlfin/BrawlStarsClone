@@ -1,44 +1,48 @@
-﻿using System.Runtime.InteropServices;
-using BrawlStarsClone.Engine.Component;
-using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public sealed class MeshVao : Asset
 {
-    private readonly MeshData _mesh;
-    private readonly int _vbo;
     private readonly int _ebo;
+    private readonly MeshData _mesh;
     private readonly int _vao;
+    private readonly int _vbo;
     private int _modelBo;
 
     public unsafe MeshVao(MeshData mesh)
     {
+        var finalData = new Vertex[mesh.Vertices.Length];
 
-        Vertex[] finalData = new Vertex[mesh.Vertices.Length];
-
-        for (int i = 0; i < mesh.Vertices.Length; i++)
-            finalData[i] = new Vertex()
+        for (var i = 0; i < mesh.Vertices.Length; i++)
+            finalData[i] = new Vertex
             {
                 Vert = mesh.Vertices[i],
                 UV = mesh.UVs[i],
                 Normal = mesh.Normals[i]
             };
-            
+
         _mesh = mesh;
 
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
-        
+
         _vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
         fixed (void* ptr = finalData)
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(Vertex) * finalData.Length, (IntPtr) ptr, BufferUsageHint.StaticDraw);
-        
+        {
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(Vertex) * finalData.Length, (IntPtr) ptr,
+                BufferUsageHint.StaticDraw);
+        }
+
         _ebo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-        fixed (void* ptr = _mesh.Faces) GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr) ptr, BufferUsageHint.StaticDraw);
+        fixed (void* ptr = _mesh.Faces)
+        {
+            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr) ptr,
+                BufferUsageHint.StaticDraw);
+        }
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 32, 0);
@@ -57,7 +61,8 @@ public sealed class MeshVao : Asset
     public void RenderInstanced(int count)
     {
         GL.BindVertexArray(_vao);
-        GL.DrawElementsInstanced(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, IntPtr.Zero, count);
+        GL.DrawElementsInstanced(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
+            IntPtr.Zero, count);
     }
 
     public override void Delete()
@@ -66,7 +71,7 @@ public sealed class MeshVao : Asset
         GL.DeleteBuffer(_vbo);
         GL.DeleteBuffer(_ebo);
     }
-    
+
     private struct Vertex
     {
         public Vector3D<float> Vert;

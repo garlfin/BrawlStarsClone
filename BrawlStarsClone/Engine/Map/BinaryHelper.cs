@@ -8,12 +8,12 @@ public static class BinaryHelper
     {
         return new Vector3D<float>(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
     }
-        
+
     public static Vector3D<int> ReadVector3Di(this BinaryReader reader)
     {
         return new Vector3D<int>(reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadUInt16());
     }
-        
+
     public static Vector2D<float> ReadVector2D(this BinaryReader reader)
     {
         return new Vector2D<float>(reader.ReadSingle(), reader.ReadSingle());

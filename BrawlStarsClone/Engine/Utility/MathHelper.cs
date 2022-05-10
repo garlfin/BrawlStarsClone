@@ -6,5 +6,4 @@ public static class MathHelper
     {
         return degrees * MathF.PI / 180f;
     }
-    
 }

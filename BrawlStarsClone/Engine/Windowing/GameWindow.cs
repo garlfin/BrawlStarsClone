@@ -15,30 +15,21 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Silk.NET.Maths;
-using Color = System.Drawing.Color;
 using Material = BrawlStarsClone.Engine.Asset.Material.Material;
 
 namespace BrawlStarsClone.Engine.Windowing;
 
 public class GameWindow
 {
-    private readonly int _width;
     private readonly int _height;
 
-    public KeyboardState Input { get; private set; }
-
-    private readonly OpenTK.Windowing.Desktop.GameWindow _view;
-    private bool _isClosed;
-
-    public Vector2D<int> Size => new(_width, _height);
-    public OpenTK.Windowing.Desktop.GameWindow View => _view;
+    private readonly int _width;
 
     private ShaderProgram _depthShader;
-    
-    public EmptyTexture ShadowMap;
+    private bool _isClosed;
     private FrameBuffer _shadowBuffer;
 
-    public EngineState State { get; private set; }
+    public EmptyTexture ShadowMap;
 
     public GameWindow(int width, int height, string name)
     {
@@ -46,29 +37,36 @@ public class GameWindow
         nativeWindowSettings.Size = new Vector2i(width, height);
         nativeWindowSettings.Title = name;
         nativeWindowSettings.Flags = ContextFlags.Debug;
-        
+
         var gameWindowSettings = GameWindowSettings.Default;
-        
-        _view = new OpenTK.Windowing.Desktop.GameWindow(gameWindowSettings, nativeWindowSettings);
+
+        View = new OpenTK.Windowing.Desktop.GameWindow(gameWindowSettings, nativeWindowSettings);
 
         _width = width;
         _height = height;
 
-        _view.Load += OnLoad;
-        _view.RenderFrame += OnRender;
-        _view.UpdateFrame += OnUpdate;
-        _view.Closing += OnClose;
-        _view.MouseMove += OnMouseMove;
+        View.Load += OnLoad;
+        View.RenderFrame += OnRender;
+        View.UpdateFrame += OnUpdate;
+        View.Closing += OnClose;
+        View.MouseMove += OnMouseMove;
         //_view.CursorGrabbed = true;
-        
-        _view.Run();
+
+        View.Run();
     }
+
+    public KeyboardState Input { get; private set; }
+
+    public Vector2D<int> Size => new(_width, _height);
+    public OpenTK.Windowing.Desktop.GameWindow View { get; }
+
+    public EngineState State { get; private set; }
 
     private void OnUpdate(FrameEventArgs obj)
     {
         Input = View.KeyboardState.GetSnapshot();
-        if (Input.IsKeyDown(Keys.Escape)) _view.Close();
-        BehaviorSystem.Update((float)obj.Time);
+        if (Input.IsKeyDown(Keys.Escape)) View.Close();
+        BehaviorSystem.Update((float) obj.Time);
     }
 
     private void OnMouseMove(MouseMoveEventArgs obj)
@@ -85,11 +83,11 @@ public class GameWindow
     private void OnLoad()
     {
         GL.Enable(EnableCap.DebugOutput);
-        
+
         Debug.Init();
         MapLoader.Init();
         ProgramManager.Init();
-        
+
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.CullFace);
@@ -105,20 +103,21 @@ public class GameWindow
         camera.AddComponent(transform);
         camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f));
         camera.GetComponent<Camera>().Set();
-        camera.AddComponent(new CameraMovement());
 
-        MapLoader.LoadMap("../../../res/model/test.map",this, File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""));
+        MapLoader.LoadMap("../../../res/model/test.map", this,
+            File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""));
 
         _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
-        
+
         _shadowBuffer = new FrameBuffer(2048, 2048);
         _shadowBuffer.SetShadow();
 
-        ShadowMap = new EmptyTexture(2048, 2048, PixelInternalFormat.DepthComponent16, TextureWrapMode.ClampToEdge, TexFilterMode.Linear, PixelFormat.DepthComponent, false, true);
+        ShadowMap = new EmptyTexture(2048, 2048, PixelInternalFormat.DepthComponent16, TextureWrapMode.ClampToEdge,
+            TexFilterMode.Linear, PixelFormat.DepthComponent, false, true);
         ShadowMap.BindToBuffer(_shadowBuffer, FramebufferAttachment.DepthAttachment);
 
-        Entity sun = new Entity(this);
-        sun.AddComponent(new Transform(sun, new Transformation()
+        var sun = new Entity(this);
+        sun.AddComponent(new Transform(sun, new Transformation
         {
             Location = new Vector3D<float>(20, 40, -20) * 2
         }));
@@ -126,53 +125,57 @@ public class GameWindow
         sun.GetComponent<Sun>().Offset = new Vector3D<float>(0, 0, 15);
 
         State = EngineState.Shadow;
-        
+
         _shadowBuffer.Bind(ClearBufferMask.DepthBufferBit);
         sun.GetComponent<Sun>().Set();
-        
+
         TransformSystem.Update(0f);
         CameraSystem.Update(0f);
         ProgramManager.InitFrame();
-        
+
         _depthShader.Use();
-        
+
         MeshRendererSystem.Render(0f);
         ManagedMeshes.Render(this);
-        
+
         GL.Viewport(0, 0, _width, _height);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-        
+
         camera.GetComponent<Camera>().Set();
 
         var player = new Entity(this);
         player.AddComponent(new Transform(player)
         {
-            Location = new Vector3D<float>(8.5f, 0.5f, -15),
+            Location = new Vector3D<float>(8.5f, 0.5f, 0),
             Rotation = new Vector3D<float>(90, 0, 0),
             Scale = new Vector3D<float>(0.25f)
         });
-        player.AddComponent(new Component.Material(new Material[]{new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Specular, new ImageTexture("../../../res/grass2.pvr"))}));
+        player.AddComponent(new Component.Material(new Material[]
+        {
+            new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
+                new ImageTexture("../../../res/white.pvr"))
+        }));
         player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../res/model/capsule.bnk")));
         player.AddComponent(new PlayerMovement());
-
+        camera.AddComponent(new CameraMovement(player));
         BehaviorSystem.Load();
     }
 
     private void OnRender(FrameEventArgs frameEventArgs)
     {
-        if (_isClosed) return;  
+        if (_isClosed) return;
         // Main Render Pass
         State = EngineState.Render;
         TransformSystem.Update(0f);
         CameraSystem.Update(0f);
         ProgramManager.InitFrame();
-        
+
         GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
-        
+
         MeshRendererSystem.Render(0f);
         ManagedMeshes.Render(this);
 
         State = EngineState.PostProcess;
-        _view.SwapBuffers();
+        View.SwapBuffers();
     }
 }
