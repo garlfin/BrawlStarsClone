@@ -6,9 +6,8 @@ namespace BrawlStarsClone.res.Scripts;
 
 public class CameraMovement : Behavior
 {
-    public float CameraSpeed = 4f;
     private readonly Transform _player;
-    private Transform _entityTransform;
+    private Transform _entityTransform = null!;
 
     private readonly Tuple<Vector3D<float>, Vector3D<float>> _bounds =
         new(new Vector3D<float>(8.5f, 25f, 20f),

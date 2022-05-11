@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics.CodeAnalysis;
 using BrawlStarsClone.Engine.Component;
 using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
@@ -69,18 +69,15 @@ public class ShaderProgram : Asset
         GL.ProgramUniform1(ID, realLocation, data);
     }
 
-    public override void Delete()
-    {
-        GL.DeleteProgram(ID);
-    }
+    public override void Delete() => GL.DeleteProgram(ID);
 
-    public void BindToBuffer(UniformBuffer buffer, string uniformName)
+    public void BindToUBO(UniformBuffer buffer, string uniformName)
     {
         var uniform = GL.GetUniformBlockIndex(ID, uniformName);
         GL.UniformBlockBinding(ID, uniform, buffer.Location);
     }
 
-    public void BindToBuffer(int location, string uniformName)
+    public void BindToUBO(int location, string uniformName)
     {
         var uniform = GL.GetUniformBlockIndex(ID, uniformName);
         GL.UniformBlockBinding(ID, uniform, location);
@@ -113,29 +110,20 @@ internal static class ProgramManager
         Matrices.View = CameraSystem.CurrentCamera.View;
         Matrices.LightProjection = CameraSystem.Sun.View * CameraSystem.Sun.Projection;
 
-        fixed (float* ptr = Matrices.Model) _matricesData.ReplaceData(ptr, 3392);
+        fixed (float* ptr = Matrices.Model) _matricesData.ReplaceData(ptr, sizeof(Matrices));
     }
 
-    public static void Register(ShaderProgram program)
-    {
-        _Programs.Add(program);
-    }
+    public static void Register(ShaderProgram program) => _Programs.Add(program);
 
-    public static unsafe void PushModelMatrix(void* ptr, int size)
-    {
-        _matricesData.ReplaceData(ptr, size);
-    }
+    public static unsafe void PushModelMatrix(void* ptr, int size) => _matricesData.ReplaceData(ptr, size);
 
     public static unsafe void PushMatCap()
     {
-        fixed (void* ptr = &MatCap)
-        {
-            _capData.ReplaceData(ptr, sizeof(MatCapUniformBuffer));
-        }
+        fixed (void* ptr = &MatCap) _capData.ReplaceData(ptr, sizeof(MatCapUniformBuffer));
     }
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 3392)]
+[SuppressMessage("ReSharper", "NotAccessedField.Global")]
 public struct Matrices
 {
     public unsafe fixed float Model[800];

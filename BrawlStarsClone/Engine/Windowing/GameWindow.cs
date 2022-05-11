@@ -36,9 +36,11 @@ public class GameWindow
         var nativeWindowSettings = NativeWindowSettings.Default;
         nativeWindowSettings.Size = new Vector2i(width, height);
         nativeWindowSettings.Title = name;
-        nativeWindowSettings.Flags = ContextFlags.Debug;
+        //nativeWindowSettings.Flags = ContextFlags.Debug;
 
         var gameWindowSettings = GameWindowSettings.Default;
+        gameWindowSettings.RenderFrequency = 144;
+        gameWindowSettings.UpdateFrequency = 0;
 
         View = new OpenTK.Windowing.Desktop.GameWindow(gameWindowSettings, nativeWindowSettings);
 
