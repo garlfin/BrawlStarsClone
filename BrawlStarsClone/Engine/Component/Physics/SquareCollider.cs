@@ -5,6 +5,7 @@ namespace BrawlStarsClone.Engine.Component.Physics;
 public class SquareCollider : Collider
 {
     private Transform _transform;
+    private const float Offset = 0.025f;
 
     protected override bool Intersect(Collider other)
     {
@@ -18,31 +19,31 @@ public class SquareCollider : Collider
 
         if (!result || Static) return false;
 
-        if ((transform.X + Max.X) - (otherTransform.X - Max.X) < (transform.Z + Max.Y) - (otherTransform.Z - Max.Y) && (transform.X - Max.X) - (otherTransform.X + Max.X) < (transform.Z - Max.Y) - (otherTransform.Z + Max.Y))
-            PushX(transform, otherTransform);
-        else
-            PushY(transform, otherTransform);
+        // This is positively awful
+        var x = MathF.Min(MathF.Abs(transform.X + Max.X - (otherTransform.X - Max.X)), MathF.Abs((transform.X - Max.X) - (otherTransform.X + Max.X)));
+        var y = MathF.Min(MathF.Abs(transform.Z + Max.Y - (otherTransform.Z - Max.Y)), MathF.Abs((transform.Z - Max.Y) - (otherTransform.Z + Max.Y)));
+        if (x < y) PushX(transform, otherTransform);
+        else PushY(transform, otherTransform);
 
         return true;
-        
     }
 
     private void PushX(Vector3D<float> transform, Vector3D<float> otherTransform)
     {
         if (transform.X + Max.X > otherTransform.X - Max.X && transform.X + Max.X < otherTransform.X + Max.X)
-            _transform.Location.X -= (transform.X + Max.X) - (otherTransform.X - Max.X);
+            _transform.Location.X -= (transform.X + Max.X) - (otherTransform.X - Max.X) + Offset;
 
-        else if (transform.X - Max.X < otherTransform.X + Max.X && transform.X - Max.X > otherTransform.X - Max.X)
-            _transform.Location.X -= (transform.X - Max.X) - (otherTransform.X + Max.X);
+        else// if (transform.X - Max.X < otherTransform.X + Max.X && transform.X - Max.X > otherTransform.X - Max.X)
+            _transform.Location.X -= (transform.X - Max.X) - (otherTransform.X + Max.X) - Offset;
     }
 
     private void PushY(Vector3D<float> transform, Vector3D<float> otherTransform)
     {
         if (transform.Z + Max.Y > otherTransform.Z - Max.Y && transform.Z + Max.Y < otherTransform.Z + Max.Y)
-            _transform.Location.Z -= (transform.Z + Max.Y) - (otherTransform.Z - Max.Y);
+            _transform.Location.Z -= (transform.Z + Max.Y) - (otherTransform.Z - Max.Y) + Offset;
 
-        else if (transform.Z - Max.Y < otherTransform.Z + Max.Y && transform.Z - Max.Y > otherTransform.Z - Max.Y)
-            _transform.Location.Z -= (transform.Z - Max.Y) - (otherTransform.Z + Max.Y);
+        else// if (transform.Z - Max.Y < otherTransform.Z + Max.Y && transform.Z - Max.Y > otherTransform.Z - Max.Y)
+            _transform.Location.Z -= (transform.Z - Max.Y) - (otherTransform.Z + Max.Y) - Offset;
     }
 
     public Vector2D<float> Min { get; }

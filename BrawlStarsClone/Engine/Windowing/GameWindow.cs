@@ -162,7 +162,7 @@ public class GameWindow
         }));
         player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../res/model/capsule.bnk")));
         player.AddComponent(new PlayerMovement()); 
-        player.AddComponent(new SquareCollider(player,false, new Vector2D<float>(0.9f)));
+        player.AddComponent(new SquareCollider(player,false));
         camera.AddComponent(new CameraMovement(player));
 
         PhysicsSystem.Load();
@@ -174,6 +174,7 @@ public class GameWindow
         if (_isClosed) return;
         // Main Render Pass
         State = EngineState.Render;
+        BehaviorSystem.Render((float) frameEventArgs.Time);
         TransformSystem.Update(0f);
         CameraSystem.Update(0f);
         ProgramManager.InitFrame();

@@ -22,10 +22,13 @@ public class CameraMovement : Behavior
     {
         _entityTransform = Owner.GetComponent<Transform>();
         _entityTransform.Rotation = new Vector3D<float>(-59, -90, 0);
+        _entityTransform.Location = Vector3D.Clamp(new Vector3D<float>(8.5f, 25, _player.Location.Z + 15), _bounds.Item1, _bounds.Item2);
     }
 
-    public override void OnUpdate(float gameTime)
+    public override void OnRender(float deltaTime)
     {
-        _entityTransform.Location = Vector3D.Clamp(new Vector3D<float>(8.5f, 25, _player.Location.Z + 15), _bounds.Item1, _bounds.Item2);
+        // Smooth Follow
+        var newPos = Vector3D.Clamp(new Vector3D<float>(8.5f, 25, _player.Location.Z + 15), _bounds.Item1, _bounds.Item2);
+        _entityTransform.Location = Vector3D.Lerp<float>(_entityTransform.Location, newPos, deltaTime * 3);
     }
 }
