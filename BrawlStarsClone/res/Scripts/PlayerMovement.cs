@@ -7,6 +7,8 @@ namespace BrawlStarsClone.res.Scripts;
 public class PlayerMovement : Behavior
 {
     private Transform _entityTransform;
+
+    public Tuple<Vector3D<float>, Vector3D<float>> Bounds = new(new Vector3D<float>(0), new Vector3D<float>(17, 100, 33));
     public override void OnLoad()
     {
         _entityTransform = Owner.GetComponent<Transform>();
@@ -19,5 +21,6 @@ public class PlayerMovement : Behavior
         if (input.IsKeyDown(Keys.S)) _entityTransform.Location += Vector3D<float>.UnitZ * 4 * gameTime; // Backwards
         if (input.IsKeyDown(Keys.A)) _entityTransform.Location -= Vector3D<float>.UnitX * 4 * gameTime; // Forward
         if (input.IsKeyDown(Keys.D)) _entityTransform.Location += Vector3D<float>.UnitX * 4 * gameTime; // Backwards
+        _entityTransform.Location = Vector3D.Clamp(_entityTransform.Location, Bounds.Item1, Bounds.Item2);
     }
 }

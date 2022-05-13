@@ -36,35 +36,35 @@ public abstract class Component
 
 internal abstract class ComponentSystem<T> where T : Component
 {
-    private static readonly List<T> _components = new();
+    public static readonly List<T> Components = new();
 
     public static void Register(T component)
     {
-        _components.Add(component);
+        Components.Add(component);
     }
 
     public static void Remove(T component)
     {
-        _components.Remove(component);
+        Components.Remove(component);
     }
 
     public static void Update(float deltaTime)
     {
-        foreach (var component in _components) component.OnUpdate(deltaTime);
+        foreach (var component in Components) component.OnUpdate(deltaTime);
     }
 
     public static void Load()
     {
-        foreach (var component in _components) component.OnLoad();
+        foreach (var component in Components) component.OnLoad();
     }
 
     public static void Render(float deltaTime)
     {
-        foreach (var component in _components) component.OnRender(deltaTime);
+        foreach (var component in Components) component.OnRender(deltaTime);
     }
 
     public static void MouseMove(MouseMoveEventArgs args)
     {
-        foreach (var component in _components) component.OnMouseMove(args);
+        foreach (var component in Components) component.OnMouseMove(args);
     }
 }

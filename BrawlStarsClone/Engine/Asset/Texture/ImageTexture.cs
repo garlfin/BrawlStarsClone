@@ -8,7 +8,6 @@ public class ImageTexture : Texture
     {
         if (!File.Exists(path)) throw new FileNotFoundException();
         var file = File.Open(path, FileMode.Open);
-        var length = file.Length;
         var reader = new BinaryReader(file);
 
         reader.ReadUInt32();
@@ -21,7 +20,7 @@ public class ImageTexture : Texture
             Format.BC5 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
             _ => throw new ArgumentOutOfRangeException()
         };
-        if (reader.ReadUInt32() == 1) internalFormat += 2140;
+        if (reader.ReadUInt32() == 1) internalFormat += 2140; // I hate looking at this but it works...
         reader.ReadUInt32();
         _width = reader.ReadInt32();
         _height = reader.ReadInt32();
@@ -29,9 +28,10 @@ public class ImageTexture : Texture
         reader.ReadUInt32();
         reader.ReadUInt32();
         reader.ReadUInt32();
+        
         var mipCount = reader.ReadUInt32();
         var metaDataSize = reader.ReadUInt32();
-        var isPo2 = Math.Sqrt((double) _width * _height) % 1 == 0;
+        var isPo2 = Math.Sqrt((double) _width * _height) % 1 == 0; // This works and I kinda forgot why
         if (mipCount > 1 && !isPo2) throw new Exception("Non-Power of 2 texture & mips not supported.");
         reader.ReadBytes((int) metaDataSize);
         var singleMipImgLen = (int) (file.Length - file.Position);

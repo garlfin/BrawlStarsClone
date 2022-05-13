@@ -6,6 +6,7 @@ using BrawlStarsClone.Engine.Asset.Material;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
+using BrawlStarsClone.Engine.Component.Physics;
 using BrawlStarsClone.Engine.Map;
 using BrawlStarsClone.Engine.Utility;
 using BrawlStarsClone.res.Scripts;
@@ -68,7 +69,9 @@ public class GameWindow
     {
         Input = View.KeyboardState.GetSnapshot();
         if (Input.IsKeyDown(Keys.Escape)) View.Close();
+        PhysicsSystem.ResetCollisions();
         BehaviorSystem.Update((float) obj.Time);
+        PhysicsSystem.Update((float) obj.Time);
     }
 
     private void OnMouseMove(MouseMoveEventArgs obj)
@@ -150,7 +153,7 @@ public class GameWindow
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
             Rotation = new Vector3D<float>(90, 0, 0),
-            Scale = new Vector3D<float>(0.25f)
+            Scale = new Vector3D<float>(0.5f, 0.5f, 0.5f)
         });
         player.AddComponent(new Component.Material(new Material[]
         {
@@ -158,8 +161,11 @@ public class GameWindow
                 new ImageTexture("../../../res/white.pvr"))
         }));
         player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../res/model/capsule.bnk")));
-        player.AddComponent(new PlayerMovement());
+        player.AddComponent(new PlayerMovement()); 
+        player.AddComponent(new SquareCollider(player,false, new Vector2D<float>(0.9f)));
         camera.AddComponent(new CameraMovement(player));
+
+        PhysicsSystem.Load();
         BehaviorSystem.Load();
     }
 

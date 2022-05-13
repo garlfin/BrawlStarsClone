@@ -2,6 +2,7 @@
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
+using BrawlStarsClone.Engine.Component.Physics;
 using BrawlStarsClone.Engine.Windowing;
 using Silk.NET.Maths;
 using Material = BrawlStarsClone.Engine.Asset.Material.Material;
@@ -138,6 +139,7 @@ public static class MapLoader
 
                 entity.AddComponent(new Component.Material(new[] {material}!));
                 entity.AddComponent(new MeshRenderer(entity, tileMesh));
+                if (tile != 'g') entity.AddComponent(new SquareCollider(entity, true));
             }
 
             if ((i + 1) % 17 == 0) tilePos += new Vector3D<float>(-17, 0, 1);

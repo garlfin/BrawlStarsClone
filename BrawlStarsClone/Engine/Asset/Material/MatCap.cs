@@ -16,7 +16,3 @@ public struct MatCap
     {
     }
 }
-
-public static class MatCaps
-{
-}
