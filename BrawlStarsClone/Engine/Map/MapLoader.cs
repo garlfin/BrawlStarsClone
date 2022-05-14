@@ -17,7 +17,7 @@ public static class MapLoader
     public static MatCap Unlit;
     public static MatCap UnlitShadow;
     public static ShaderProgram DiffuseProgram;
-    private static Mesh[] _tiles;
+    private static Mesh[][] _tiles;
 
     public static void Init()
     {
@@ -52,9 +52,14 @@ public static class MapLoader
             UseShadow = true
         };
         DiffuseProgram = new ShaderProgram("default.frag", "default.vert");
-        _tiles = new Mesh[2];
-        _tiles[0] = MeshLoader.LoadMesh("../../../res/model/block.bnk");
-        _tiles[1] = MeshLoader.LoadMesh("../../../res/model/grass.bnk");
+        
+        _tiles = new Mesh[2][];
+        _tiles[0] = new[] { MeshLoader.LoadMesh("../../../res/model/block.bnk") };
+        _tiles[1] = new[] // Tile Variations
+        {
+            MeshLoader.LoadMesh("../../../res/model/grass.bnk"),
+            MeshLoader.LoadMesh("../../../res/model/grass2.bnk")
+        };
     }
 
     public static void LoadMap(string path, GameWindow window, string mapData)
@@ -110,7 +115,8 @@ public static class MapLoader
             entity.AddComponent(new Component.Material(materials));
             entity.AddComponent(new MeshRenderer(entity, mesh));
         }
-
+        
+        Random rng = new Random();
         var tilePos = new Vector3D<float>(0.5f, 0f, 1f);
         for (var i = 0; i < mapData.Length; i++, tilePos += Vector3D<float>.UnitX)
         {
@@ -118,12 +124,13 @@ public static class MapLoader
 
             if (tile != '.')
             {
-                var tileMesh = tile switch
+                var tileArr = tile switch
                 {
                     's' => _tiles[0],
                     'g' => _tiles[1],
                     _ => throw new ArgumentOutOfRangeException()
                 };
+                var finalTile = tileArr[rng.Next(0, tileArr.Length)];
 
                 var entity = new Entity(window);
                 entity.AddComponent(new Transform(entity, new Transformation
@@ -134,11 +141,11 @@ public static class MapLoader
                 }));
                 Material material = null;
                 foreach (var matCapMaterial in matCapMaterials)
-                    if (matCapMaterial.Item2 == tileMesh.Meshes[0].MatName)
+                    if (matCapMaterial.Item2 == finalTile.Meshes[0].MatName)
                         material = matCapMaterial.Item1;
 
                 entity.AddComponent(new Component.Material(new[] {material}!));
-                entity.AddComponent(new MeshRenderer(entity, tileMesh));
+                entity.AddComponent(new MeshRenderer(entity, finalTile));
                 if (tile != 'g') entity.AddComponent(new SquareCollider(entity, true));
             }
 

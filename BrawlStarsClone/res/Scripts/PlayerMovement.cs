@@ -1,4 +1,5 @@
 ﻿using BrawlStarsClone.Engine.Component;
+using BrawlStarsClone.Engine.Utility;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Silk.NET.Maths;
 
@@ -30,26 +31,33 @@ public class PlayerMovement : Behavior
         if (key[0] || key[1] || key[2] || key[3]) rotation = 0;
 
         if (key[0]) {
-            _entityTransform.Location -= Vector3D<float>.UnitZ * 4 * gameTime; // Forward
             pressCount++;
+            _entityTransform.Location -= Vector3D<float>.UnitZ * 4 * gameTime; // Forward
+
         }
         if (key[1]){
-            _entityTransform.Location += Vector3D<float>.UnitZ * 4 * gameTime; // Backwards
             pressCount++;
+            _entityTransform.Location += Vector3D<float>.UnitZ * 4 * gameTime; // Backwards
             rotation += 180;
         }
         if (key[2]) {
-            _entityTransform.Location -= Vector3D<float>.UnitX * 4 * gameTime; // Forward
-            pressCount++;
-            rotation += 270;
+            if (pressCount != 2)
+            {
+                pressCount++;
+                _entityTransform.Location -= Vector3D<float>.UnitX * 4 * gameTime; // Forward
+                rotation += 270;
+            }
         }
         if (key[3]){
-            _entityTransform.Location += Vector3D<float>.UnitX * 4 * gameTime; // Backwards
-            pressCount++;
-            rotation += 90;
+            if (pressCount != 2)
+            {
+                pressCount++;
+                _entityTransform.Location += Vector3D<float>.UnitX * 4 * gameTime; // Backwards
+                rotation += 90;
+            }
         }
         _entityTransform.Location = Vector3D.Clamp(_entityTransform.Location, Bounds.Item1, Bounds.Item2);
-        
-        _entityTransform.Rotation.Y =  (1 - gameTime * 10) * _entityTransform.Rotation.Y + gameTime * 10 * (key[0] && key[2] ? -45 : rotation / Math.Max(pressCount, 1));
+        rotation = key[0] && key[2] ? 315 : rotation / Math.Max(pressCount, 1);
+        _entityTransform.Rotation.Y = Mathf.LerpAngle(_entityTransform.Rotation.Y, rotation, gameTime * 10);
     }
 }
