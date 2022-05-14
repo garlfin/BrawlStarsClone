@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using System.Collections;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component.Physics;
 
@@ -24,9 +25,23 @@ public abstract class Collider : Component
 
     public override void OnUpdate(float deltaTime)
     {
-        for (var i = 0; i < PhysicsSystem.Components.Count; i++)
+        if (Static) return;
+
+        Tuple<Collider, float>[] collidersSorted = new Tuple<Collider, float>[PhysicsSystem.Components.Count];
+        for (int i = 0; i < collidersSorted.Length; i++)
         {
-            var collider = PhysicsSystem.Components[i];
+            var component = PhysicsSystem.Components[i];
+            if (component == this) continue;
+            float distance = Vector3D.Distance(Owner.GetComponent<Transform>().Location, component.Owner.GetComponent<Transform>().Location);
+            if (distance > 5) continue;
+            collidersSorted[i] = new Tuple<Collider, float>(component, distance);
+        }
+        Array.Sort(collidersSorted, new TupleCompare());
+
+        for (var i = 0; i < collidersSorted.Length; i++)
+        {
+            if (collidersSorted[i] is null) continue;
+            var collider = collidersSorted[i].Item1;
             if (collider == this) continue;
             if (Static && collider.Static) continue;
             if (Collisions.Contains(collider)) continue;
@@ -36,10 +51,18 @@ public abstract class Collider : Component
             collider.Collisions.Add(this);
         }
     }
-
-    public abstract void TickPhysics();
-
     protected abstract bool Intersect(Collider other);
+}
+
+public class TupleCompare : IComparer<Tuple<Collider, float>>
+{
+    public int Compare(Tuple<Collider, float> x, Tuple<Collider, float> y)
+    {
+        if (ReferenceEquals(x, y)) return 0;
+        if (ReferenceEquals(null, y)) return 1;
+        if (ReferenceEquals(null, x)) return -1;
+        return Comparer<float>.Default.Compare(x.Item2, y.Item2);
+    }
 }
 
 class PhysicsSystem : ComponentSystem<Collider>
@@ -47,13 +70,5 @@ class PhysicsSystem : ComponentSystem<Collider>
     public static void ResetCollisions()
     {
         foreach (var component in Components) component.ResetCollisions();
-    }
-
-    public static void TickPhysics()
-    {
-        foreach (var component in Components)
-        {
-            component.TickPhysics();
-        }
     }
 }

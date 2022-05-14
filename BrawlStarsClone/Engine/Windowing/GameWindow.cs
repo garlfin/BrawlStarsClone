@@ -152,16 +152,17 @@ public class GameWindow
         player.AddComponent(new Transform(player)
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
-            Rotation = new Vector3D<float>(90, 0, 0),
-            Scale = new Vector3D<float>(0.5f, 0.5f, 0.5f)
+            Rotation = new Vector3D<float>(90, 0, 180),
+            Scale = new Vector3D<float>(0.15f, 0.15f, 0.15f)
         });
+        var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
+            new ImageTexture("../../../res/squeak.pvr"));
         player.AddComponent(new Component.Material(new Material[]
         {
-            new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
-                new ImageTexture("../../../res/white.pvr"))
+           whiteBase, whiteBase, whiteBase, whiteBase, whiteBase
         }));
-        player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../res/model/capsule.bnk")));
-        player.AddComponent(new PlayerMovement()); 
+        player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../squeak.bnk")));
+        player.AddComponent(new PlayerMovement());
         player.AddComponent(new SquareCollider(player,false));
         camera.AddComponent(new CameraMovement(player));
 

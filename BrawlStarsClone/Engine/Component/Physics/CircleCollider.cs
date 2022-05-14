@@ -19,44 +19,15 @@ public class CircleCollider : Collider
 
             var pos2D = new Vector2D<float>(_entityTransform.Location.X, _entityTransform.Location.Z);
 
-            var x = MathF.Max(box.Min.X, Math.Min(pos2D.X, box.Max.X));
-            var z = MathF.Max(box.Min.Y, Math.Min(pos2D.Y, box.Max.Y));
+            var x = MathF.Max(-box.Max.X, Math.Min(pos2D.X, box.Max.X));
+            var z = MathF.Max(-box.Max.Y, Math.Min(pos2D.Y, box.Max.Y));
             var closest = new Vector2D<float>(x, z);
 
             var distance = Vector2D.Distance(closest, pos2D);
 
-            var result = distance < Radius;
-
-            if (!result) return result;
-
-            var difference = pos2D - closest;
-            
-
-            return result;
+            return distance < Radius;
         }
         return false;
-    }
-    
-    
-    public override void TickPhysics()
-    {
-        if (Static) return;
-        for (var i = 0; i < Collisions.Count; i++)
-        {
-            var collider = (SquareCollider) Collisions[i];
-            var x = MathF.Max(collider.Min.X, Math.Min(_entityTransform.Location.X, collider.Max.X));
-            var z = MathF.Max(collider.Min.Y, Math.Min(_entityTransform.Location.Z, collider.Max.Y));
-            var closest = new Vector2D<float>(x, z);
-
-            var distance = Vector2D.Distance(closest, new Vector2D<float>(_entityTransform.Location.X, closest.Y));
-
-            _entityTransform.Location.X += distance;
-            
-            distance = Vector2D.Distance(closest, new Vector2D<float>(closest.X, _entityTransform.Location.Z));
-
-            _entityTransform.Location.Z += distance;
-
-        }
     }
 
     public CircleCollider(bool isStatic, Vector2D<float>? scale = null, bool usePhysics = false) : base(isStatic, scale, usePhysics)

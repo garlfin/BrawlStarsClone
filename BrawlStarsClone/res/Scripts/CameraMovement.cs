@@ -29,6 +29,6 @@ public class CameraMovement : Behavior
     {
         // Smooth Follow
         var newPos = Vector3D.Clamp(new Vector3D<float>(8.5f, 25, _player.Location.Z + 15), _bounds.Item1, _bounds.Item2);
-        _entityTransform.Location = Vector3D.Lerp<float>(_entityTransform.Location, newPos, deltaTime * 3);
+        _entityTransform.Location = Vector3D.Lerp(_entityTransform.Location, newPos, deltaTime * 3);
     }
 }
