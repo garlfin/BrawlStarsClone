@@ -6,7 +6,7 @@ namespace BrawlStarsClone.Engine.Component.Physics;
 public abstract class Collider : Component
 {
     protected Vector2D<float> Scale = Vector2D<float>.One;
-    public readonly List<Collider> Collisions = new List<Collider>();
+    public readonly List<Collider> Collisions = new();
     public readonly bool Static;
     public bool UsePhysics { get; }
     
@@ -27,22 +27,23 @@ public abstract class Collider : Component
     {
         if (Static) return;
 
-        Tuple<Collider, float>[] collidersSorted = new Tuple<Collider, float>[PhysicsSystem.Components.Count];
+        ColliderDistance[] collidersSorted = new ColliderDistance[PhysicsSystem.Components.Count];
+        
         for (int i = 0; i < collidersSorted.Length; i++)
         {
             var component = PhysicsSystem.Components[i];
             if (component == this) continue;
             float distance = Vector3D.Distance(Owner.GetComponent<Transform>().Location, component.Owner.GetComponent<Transform>().Location);
             if (distance > 5) continue;
-            collidersSorted[i] = new Tuple<Collider, float>(component, distance);
+            collidersSorted[i] = new(component, distance);
         }
-        Array.Sort(collidersSorted, new TupleCompare());
+        
+        Array.Sort(collidersSorted, new ColliderCompare());
 
         for (var i = 0; i < collidersSorted.Length; i++)
         {
-            if (collidersSorted[i] is null) continue;
-            var collider = collidersSorted[i].Item1;
-            if (collider == this) continue;
+            var collider = collidersSorted[i].Collider;
+            if (collider == this || collider == null) continue;
             if (Static && collider.Static) continue;
             if (Collisions.Contains(collider)) continue;
             if (!Intersect(collider)) continue;
@@ -54,14 +55,11 @@ public abstract class Collider : Component
     protected abstract bool Intersect(Collider other);
 }
 
-public class TupleCompare : IComparer<Tuple<Collider, float>>
+public class ColliderCompare : IComparer<ColliderDistance>
 {
-    public int Compare(Tuple<Collider, float> x, Tuple<Collider, float> y)
+    public int Compare(ColliderDistance x, ColliderDistance y)
     {
-        if (ReferenceEquals(x, y)) return 0;
-        if (ReferenceEquals(null, y)) return 1;
-        if (ReferenceEquals(null, x)) return -1;
-        return Comparer<float>.Default.Compare(x.Item2, y.Item2);
+        return Comparer<float>.Default.Compare(x.Distance, y.Distance);
     }
 }
 
@@ -70,5 +68,17 @@ class PhysicsSystem : ComponentSystem<Collider>
     public static void ResetCollisions()
     {
         foreach (var component in Components) component.ResetCollisions();
+    }
+}
+
+public struct ColliderDistance
+{
+    public Collider Collider;
+    public float Distance;
+
+    public ColliderDistance(Collider collider, float distance)
+    {
+        Collider = collider;
+        Distance = distance;
     }
 }

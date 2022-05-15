@@ -2,6 +2,7 @@
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Windowing;
+using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
@@ -34,11 +35,16 @@ public class Mesh
 
     public unsafe void ManagedRender(GameWindow window)
     {
+        GL.Enable(EnableCap.Blend);
         for (var i = 0; i < MeshVaos.Length; i++)
         {
-            if (window.State is EngineState.Render) Users[0].GetComponent<Component.Material>()[i].Use();
             var model = new Matrix4X4<float>[Users.Count];
-            for (var j = 0; j < Users.Count; j++) model[j] = Users[j].GetComponent<Transform>().Model;
+            for (var j = 0; j < Math.Min(Users.Count, 100); j++)
+            {
+                model[j] = Users[j].GetComponent<Transform>().Model;
+                ProgramManager.MatCap.OtherData[j * 4] = Users[j].GetComponent<MeshRenderer>().Alpha;
+            }
+            if (window.State is EngineState.Render) Users[0].GetComponent<Component.Material>()[i].Use();
             fixed (void* ptr = model)
             {
                 ProgramManager.PushModelMatrix(ptr, sizeof(Matrix4X4<float>) * model.Length);
@@ -47,6 +53,8 @@ public class Mesh
             MeshVaos[i].RenderInstanced(Users.Count);
             TexSlotManager.ResetUnit();
         }
+
+        GL.Disable(EnableCap.Blend);
     }
 }
 

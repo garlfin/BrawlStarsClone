@@ -98,7 +98,7 @@ internal static class ProgramManager
 
     public static unsafe void Init()
     {
-        _matricesData = new UniformBuffer(sizeof(float) * 16 * 53, BufferUsageHint.DynamicDraw);
+        _matricesData = new UniformBuffer(sizeof(Matrices), BufferUsageHint.DynamicDraw);
         _matricesData.Bind(2);
         _capData = new UniformBuffer(sizeof(MatCapUniformBuffer), BufferUsageHint.DynamicDraw);
         _capData.Bind(3);
@@ -126,7 +126,7 @@ internal static class ProgramManager
 [SuppressMessage("ReSharper", "NotAccessedField.Global")]
 public struct Matrices
 {
-    public unsafe fixed float Model[800];
+    public unsafe fixed float Model[1600];
     public Matrix4X4<float> View; // 64
     public Matrix4X4<float> Projection; // 64
     public Matrix4X4<float> LightProjection; // 64

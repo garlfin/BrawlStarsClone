@@ -8,6 +8,8 @@ public sealed class Transform : Component
     public Vector3D<float> Location = Vector3D<float>.Zero;
     public Vector3D<float> Rotation = Vector3D<float>.Zero;
     public Vector3D<float> Scale = Vector3D<float>.One;
+    
+    public Vector3D<float> RenderLocation { get; private set; } = Vector3D<float>.One;
 
     public Transform(Entity owner) : base(owner)
     {
@@ -32,6 +34,7 @@ public sealed class Transform : Component
         Model = Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
                 Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) * Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
                 Matrix4X4.CreateTranslation(Location);
+        RenderLocation = Location;
     }
 }
 

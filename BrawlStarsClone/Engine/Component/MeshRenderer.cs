@@ -2,6 +2,8 @@
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Windowing;
+using OpenTK.Graphics.OpenGL4;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component;
 
@@ -9,6 +11,7 @@ public sealed class MeshRenderer : Component
 {
     private readonly Mesh _mesh;
     private readonly bool _overrideInstance;
+    public float Alpha = 1f;
 
     public MeshRenderer(Entity owner, Mesh mesh, bool overrideInstance = false) : base(owner)
     {
@@ -23,12 +26,15 @@ public sealed class MeshRenderer : Component
         if (_mesh.Instanced && !_overrideInstance) return;
         var matrix = Owner.GetComponent<Transform>().Model;
         ProgramManager.PushModelMatrix(&matrix, sizeof(float) * 16);
+        ProgramManager.MatCap.OtherData[0] = Alpha;
+         
+        if (Alpha < 1) GL.Enable(EnableCap.Blend);
         for (var i = 0; i < _mesh.MeshVaos.Length; i++)
         {
             if (Owner.Window.State is EngineState.Render) Owner.GetComponent<Material>()[i].Use();
             _mesh.MeshVaos[i].Render();
         }
-
+        GL.Disable(EnableCap.Blend);
         TexSlotManager.ResetUnit();
     }
 }

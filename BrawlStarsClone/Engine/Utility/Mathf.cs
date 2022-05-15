@@ -13,7 +13,7 @@ public static class Mathf
             delta -= 360;
         return a + delta * t;
     }
-    public static float Lerp(float value, float value2, float t) => (1 - t) * value + t * value2;
+    public static float Lerp(float value, float value2, float t) => (1 - Math.Clamp(t, 0, 1)) * value + Math.Clamp(t, 0, 1) * value2;
     
     public static float DegToRad(this float degrees)
     {

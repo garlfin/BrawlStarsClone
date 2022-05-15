@@ -1,9 +1,11 @@
-﻿using BrawlStarsClone.Engine.Asset.Material;
+﻿using System.Data;
+using BrawlStarsClone.Engine.Asset.Material;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Component.Physics;
 using BrawlStarsClone.Engine.Windowing;
+using BrawlStarsClone.res.Scripts;
 using Silk.NET.Maths;
 using Material = BrawlStarsClone.Engine.Asset.Material.Material;
 
@@ -15,7 +17,6 @@ public static class MapLoader
     public static MatCap Metal;
     public static MatCap Specular;
     public static MatCap Unlit;
-    public static MatCap UnlitShadow;
     public static ShaderProgram DiffuseProgram;
     private static Mesh[][] _tiles;
 
@@ -54,7 +55,10 @@ public static class MapLoader
         DiffuseProgram = new ShaderProgram("default.frag", "default.vert");
         
         _tiles = new Mesh[2][];
-        _tiles[0] = new[] { MeshLoader.LoadMesh("../../../res/model/block.bnk") };
+        _tiles[0] = new[]
+        {
+            MeshLoader.LoadMesh("../../../res/model/block.bnk")
+        };
         _tiles[1] = new[] // Tile Variations
         {
             MeshLoader.LoadMesh("../../../res/model/grass.bnk"),
@@ -62,7 +66,7 @@ public static class MapLoader
         };
     }
 
-    public static void LoadMap(string path, GameWindow window, string mapData)
+    public static void LoadMap(string path, GameWindow window, string mapData, Entity player)
     {
         Stream fileStream = File.Open(path, FileMode.Open);
         var reader = new BinaryReader(fileStream);
@@ -108,7 +112,7 @@ public static class MapLoader
                 foreach (var matCapMaterial in matCapMaterials)
                     if (matCapMaterial.Item2 == mesh.Meshes[j].MatName)
                         materials[j] = matCapMaterial.Item1;
-                if (materials[j] == null) throw new InvalidOperationException();
+                if (materials[j] == null) throw new NoNullAllowedException($"Null material {mesh.Meshes[j].MatName}");
                 // Positively Awful Code
             }
 
@@ -146,7 +150,12 @@ public static class MapLoader
 
                 entity.AddComponent(new Component.Material(new[] {material}!));
                 entity.AddComponent(new MeshRenderer(entity, finalTile));
-                if (tile != 'g') entity.AddComponent(new SquareCollider(entity, true));
+                if (tile != 'g')
+                {
+                    entity.AddComponent(new SquareCollider(entity, true));
+                    entity.GetComponent<Transform>().Rotation.Y = rng.Next(0, 5) * 90;
+                }
+                else if (tile == 'g') entity.AddComponent(new GrassScript(player));
             }
 
             if ((i + 1) % 17 == 0) tilePos += new Vector3D<float>(-17, 0, 1);

@@ -96,6 +96,7 @@ public class GameWindow
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.CullFace);
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
         GL.Viewport(new Size(_width, _height));
 
@@ -108,9 +109,9 @@ public class GameWindow
         camera.AddComponent(transform);
         camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f));
         camera.GetComponent<Camera>().Set();
-
+        var player = new Entity(this);
         MapLoader.LoadMap("../../../res/model/test.map", this,
-            File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""));
+            File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""), player);
 
         _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
 
@@ -147,8 +148,7 @@ public class GameWindow
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
         camera.GetComponent<Camera>().Set();
-
-        var player = new Entity(this);
+        
         player.AddComponent(new Transform(player)
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
