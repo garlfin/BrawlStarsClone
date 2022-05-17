@@ -26,6 +26,6 @@ public class GrassScript : Behavior
     {
         float dist = Vector3D.Distance(_transform.Location, _player.GetComponent<Transform>().Location) * 0.25f;
         _transform.Scale.Y = Mathf.Lerp(0.1f, 1, dist);
-        _mesh.Alpha = Mathf.Lerp(0.5f, 1, dist);
+        _mesh.Alpha = Mathf.Lerp(0.25f, 1, dist);
     }
 }
