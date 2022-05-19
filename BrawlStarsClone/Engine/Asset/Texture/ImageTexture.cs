@@ -31,10 +31,7 @@ public class ImageTexture : Texture
         
         var mipCount = reader.ReadUInt32();
         var metaDataSize = reader.ReadUInt32();
-        var isPo2 = Math.Sqrt((double) _width * _height) % 1 == 0; // This works and I kinda forgot why
-        if (mipCount > 1 && !isPo2) throw new Exception("Non-Power of 2 texture & mips not supported.");
         reader.ReadBytes((int) metaDataSize);
-        var singleMipImgLen = (int) (file.Length - file.Position);
         var calcMip = !(mipCount > 1);
 
         _id = GL.GenTexture();
@@ -44,7 +41,7 @@ public class ImageTexture : Texture
         {
             var currentMipSize = GetMipSize(mip);
             var imageData =
-                reader.ReadBytes(calcMip ? singleMipImgLen : Math.Max(currentMipSize.X * currentMipSize.Y, 16));
+                reader.ReadBytes((int) MathF.Ceiling(currentMipSize.X * currentMipSize.Y / 16f) * 16);
             fixed (void* ptr = imageData)
             {
                 GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, internalFormat, currentMipSize.X,

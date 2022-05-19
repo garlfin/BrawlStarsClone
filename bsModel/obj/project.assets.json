@@ -4527,31 +4527,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\scion\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\scion\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\bsModel\\bsModel.csproj",
+      "projectUniqueName": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\bsModel\\bsModel.csproj",
       "projectName": "bsModel",
-      "projectPath": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\bsModel\\bsModel.csproj",
+      "projectPath": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\bsModel\\bsModel.csproj",
       "packagesPath": "C:\\Users\\scion\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\bsModel\\obj\\",
+      "outputPath": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\bsModel\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\scion\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\scion\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -4590,7 +4583,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.300\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Users\\scion\\.dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
       }
     }
   }
