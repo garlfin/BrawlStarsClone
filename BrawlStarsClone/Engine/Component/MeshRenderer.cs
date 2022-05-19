@@ -28,10 +28,11 @@ public sealed class MeshRenderer : Component
         ProgramManager.PushModelMatrix(&matrix, sizeof(float) * 16);
         ProgramManager.MatCap.OtherData[0] = Alpha;
          
-        if (Alpha < 1) GL.Enable(EnableCap.Blend);
+        if (Alpha < 1 && _mesh.Transparent) GL.Enable(EnableCap.Blend);
+
         for (var i = 0; i < _mesh.MeshVaos.Length; i++)
         {
-            if (Owner.Window.State is EngineState.Render) Owner.GetComponent<Material>()[i].Use();
+            if (Owner.Window.State is EngineState.Render or EngineState.RenderTransparent) Owner.GetComponent<Material>()[i].Use();
             _mesh.MeshVaos[i].Render();
         }
         GL.Disable(EnableCap.Blend);

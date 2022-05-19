@@ -5,7 +5,7 @@ namespace BrawlStarsClone.Engine.Map;
 
 public static class MeshLoader
 {
-    public static Mesh LoadMesh(string path)
+    public static Mesh LoadMesh(string path, bool transparent = false)
     {
         var reader = new BinaryReader(File.Open(path, FileMode.Open));
 
@@ -34,6 +34,7 @@ public static class MeshLoader
         }
 
         reader.Close();
+        mesh.Transparent = transparent;
         return mesh;
     }
 }

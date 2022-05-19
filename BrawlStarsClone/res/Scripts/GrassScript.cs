@@ -24,8 +24,12 @@ public class GrassScript : Behavior
 
     public override void OnRender(float deltaTime)
     {
-        float dist = Vector3D.Distance(_transform.Location, _player.GetComponent<Transform>().Location) * 0.25f;
-        _transform.Scale.Y = Mathf.Lerp(0.1f, 1, dist);
-        _mesh.Alpha = Mathf.Lerp(0.25f, 1, dist);
+        var location = _player.GetComponent<Transform>().Location;
+        location.X = MathF.Round(location.X - 0.5f) + 0.5f;
+        location.Z = MathF.Round(location.Z);
+        
+        float dist = Vector3D.Distance(_transform.Location, location);
+        var newAlpha = dist < 2.5 ? 0.3f : 1;
+        _mesh.Alpha = Mathf.Lerp(_mesh.Alpha, newAlpha, deltaTime * 5);
     }
 }

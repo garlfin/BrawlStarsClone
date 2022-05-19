@@ -17,6 +17,8 @@ public class Mesh
 
     public List<Entity> Users { get; } = new();
 
+    public bool Transparent { get; set; }
+
     public void Register(Entity entity)
     {
         if (Users.Count > 1 && !Instanced)
@@ -35,7 +37,14 @@ public class Mesh
 
     public unsafe void ManagedRender(GameWindow window)
     {
-        GL.Enable(EnableCap.Blend);
+        if (Transparent)
+        {
+            if (window.State is EngineState.RenderTransparent) GL.Enable(EnableCap.Blend);
+            else if (window.State is EngineState.Shadow) {}
+            else if (window.State is EngineState.Render or EngineState.PostProcess) return;
+        }
+        else if (window.State is EngineState.RenderTransparent) return;
+
         for (var i = 0; i < MeshVaos.Length; i++)
         {
             var model = new Matrix4X4<float>[Users.Count];
@@ -44,7 +53,7 @@ public class Mesh
                 model[j] = Users[j].GetComponent<Transform>().Model;
                 ProgramManager.MatCap.OtherData[j * 4] = Users[j].GetComponent<MeshRenderer>().Alpha;
             }
-            if (window.State is EngineState.Render) Users[0].GetComponent<Component.Material>()[i].Use();
+            if (window.State is EngineState.Render or EngineState.RenderTransparent) Users[0].GetComponent<Component.Material>()[i].Use();
             fixed (void* ptr = model)
             {
                 ProgramManager.PushModelMatrix(ptr, sizeof(Matrix4X4<float>) * model.Length);
@@ -54,7 +63,7 @@ public class Mesh
             TexSlotManager.ResetUnit();
         }
 
-        GL.Disable(EnableCap.Blend);
+        if (Transparent) GL.Disable(EnableCap.Blend);
     }
 }
 

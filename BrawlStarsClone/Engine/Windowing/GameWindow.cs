@@ -96,6 +96,7 @@ public class GameWindow
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.CullFace);
+        
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
         GL.Viewport(new Size(_width, _height));
@@ -184,8 +185,8 @@ public class GameWindow
 
         MeshRendererSystem.Render(0f);
         ManagedMeshes.Render(this);
-
-        State = EngineState.PostProcess;
+        State = EngineState.RenderTransparent;
+        ManagedMeshes.Render(this);
         View.SwapBuffers();
     }
 }

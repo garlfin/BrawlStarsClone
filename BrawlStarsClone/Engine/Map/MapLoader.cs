@@ -61,8 +61,8 @@ public static class MapLoader
         };
         _tiles[1] = new[] // Tile Variations
         {
-            MeshLoader.LoadMesh("../../../res/model/grass.bnk"),
-            MeshLoader.LoadMesh("../../../res/model/grass2.bnk")
+            MeshLoader.LoadMesh("../../../res/model/grass.bnk", true),
+            MeshLoader.LoadMesh("../../../res/model/grass2.bnk", true)
         };
     }
 
