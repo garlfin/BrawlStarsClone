@@ -24,6 +24,19 @@ public class ShaderProgram : Asset
         vertex.Delete();
     }
 
+    public ShaderProgram(string computePath)
+    {
+        ID = GL.CreateProgram();
+
+        var compute = new Shader(computePath, ShaderType.ComputeShader);
+
+        compute.Attach(this);
+
+        GL.LinkProgram(ID);
+
+        compute.Delete();
+    }
+
     public int ID { get; }
 
     public void Use()

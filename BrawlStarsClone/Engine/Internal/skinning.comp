@@ -1,1 +1,37 @@
-﻿
+﻿#version 430
+
+struct Vertex {
+    vec3 pos;
+    vec3 normal;
+    vec2 uv;
+    ivec4 BoneID;
+    vec4 Weight;
+};
+
+layout (std430, binding = 4) buffer BoneMatrices {
+  mat4 BoneMatrix[100];  // Max Bones
+};
+
+layout (std430, binding = 5) buffer Vertices {
+    Vertex vertices[];
+};
+
+layout (std430, binding = 6) buffer VerticesOut {
+    Vertex verticesOut[];
+};
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+void main() {
+
+    Vertex vertex = vertices[gl_GlobalInvocationID.x];
+    
+    mat4 BoneTransform = BoneMatrix[vertex.BoneID[0]] * vertex.Weight[0];
+    BoneTransform += BoneMatrix[vertex.BoneID[1]] * vertex.Weight[1];
+    BoneTransform += BoneMatrix[vertex.BoneID[2]] * vertex.Weight[2];
+    BoneTransform += BoneMatrix[vertex.BoneID[3]] * vertex.Weight[3];
+
+    verticesOut[gl_GlobalInvocationID.x].pos = vec3(BoneTransform * vec4(vertices[gl_GlobalInvocationID.x].pos, 1.0));
+    verticesOut[gl_GlobalInvocationID.x].normal = vec3(BoneTransform * vec4(vertices[gl_GlobalInvocationID.x].normal, 0.0));
+    verticesOut[gl_GlobalInvocationID.x].uv = vertices[gl_GlobalInvocationID.x].uv;
+}

@@ -3,14 +3,9 @@ using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
 
-public sealed class MeshVao : Asset
+public sealed class MeshVao : VAO
 {
-    private readonly int _ebo;
     private readonly MeshData _mesh;
-    private readonly int _vao;
-    private readonly int _vbo;
-    private int _modelBo;
-
     public unsafe MeshVao(MeshData mesh)
     {
         var finalData = new Vertex[mesh.Vertices.Length];
@@ -31,34 +26,30 @@ public sealed class MeshVao : Asset
         _vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
         fixed (void* ptr = finalData)
-        {
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(Vertex) * finalData.Length, (IntPtr) ptr,
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(Vertex) * finalData.Length, (IntPtr)ptr,
                 BufferUsageHint.StaticDraw);
-        }
 
         _ebo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
         fixed (void* ptr = _mesh.Faces)
-        {
-            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr) ptr,
+            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr)ptr,
                 BufferUsageHint.StaticDraw);
-        }
 
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 32, 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, sizeof(Vertex), 0);
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 32, 12);
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, sizeof(Vertex), 12);
         GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 32, 24);
+        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, sizeof(Vertex), 24);
     }
 
-    public void Render()
+    public override void Render()
     {
         GL.BindVertexArray(_vao);
         GL.DrawElements(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, 0);
     }
 
-    public void RenderInstanced(int count)
+    public override void RenderInstanced(int count)
     {
         GL.BindVertexArray(_vao);
         GL.DrawElementsInstanced(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
@@ -70,12 +61,5 @@ public sealed class MeshVao : Asset
         GL.DeleteVertexArray(_vao);
         GL.DeleteBuffer(_vbo);
         GL.DeleteBuffer(_ebo);
-    }
-
-    private struct Vertex
-    {
-        public Vector3D<float> Vert;
-        public Vector3D<float> Normal;
-        public Vector2D<float> UV;
     }
 }

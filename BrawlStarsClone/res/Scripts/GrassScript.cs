@@ -30,6 +30,6 @@ public class GrassScript : Behavior
         
         float dist = Vector3D.Distance(_transform.Location, location);
         var newAlpha = dist < 2.5 ? 0.3f : 1;
-        _mesh.Alpha = Mathf.Lerp(_mesh.Alpha, newAlpha, deltaTime * 5);
+        _mesh.Alpha = Mathf.Lerp(_mesh.Alpha, newAlpha, deltaTime * 10);
     }
 }

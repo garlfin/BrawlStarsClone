@@ -31,6 +31,7 @@ public class GameWindow
     private FrameBuffer _shadowBuffer;
 
     public EmptyTexture ShadowMap;
+    private ShaderProgram _skinningShader;
 
     public GameWindow(int width, int height, string name)
     {
@@ -116,6 +117,8 @@ public class GameWindow
 
         _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
 
+        _skinningShader = new ShaderProgram("../../../Engine/Internal/skinning.comp");
+
         _shadowBuffer = new FrameBuffer(2048, 2048);
         _shadowBuffer.SetShadow();
 
@@ -162,10 +165,15 @@ public class GameWindow
         {
            whiteBase, whiteBase, whiteBase, whiteBase, whiteBase
         }));
-        player.AddComponent(new MeshRenderer(player, MeshLoader.LoadMesh("../../../squeak.bnk")));
+        Mesh playerMesh = MeshLoader.LoadMesh("../../../squeak.bnk");
+        player.AddComponent(new MeshRenderer(player, playerMesh));
         player.AddComponent(new PlayerMovement());
         player.AddComponent(new SquareCollider(player,false));
         camera.AddComponent(new CameraMovement(player));
+
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, playerMesh.MeshVaos[0].VBO);
+        
+        
 
         PhysicsSystem.Load();
         BehaviorSystem.Load();
