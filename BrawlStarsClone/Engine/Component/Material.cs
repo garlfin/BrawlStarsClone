@@ -8,7 +8,7 @@ public class Material : Component
 
     public Material(Mesh mesh)
     {
-        _materials = new Asset.Material.Material[mesh.MeshVaos.Length];
+        _materials = new Asset.Material.Material[mesh.MeshVAO.Length];
     }
 
     public Material(Asset.Material.Material[] materials)

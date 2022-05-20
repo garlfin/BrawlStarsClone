@@ -5,7 +5,7 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public sealed class MeshVao : VAO
 {
-    private readonly MeshData _mesh;
+    public readonly MeshData Mesh;
     public unsafe MeshVao(MeshData mesh)
     {
         var finalData = new Vertex[mesh.Vertices.Length];
@@ -18,7 +18,7 @@ public sealed class MeshVao : VAO
                 Normal = mesh.Normals[i]
             };
 
-        _mesh = mesh;
+        Mesh = mesh;
 
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
@@ -31,8 +31,8 @@ public sealed class MeshVao : VAO
 
         _ebo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-        fixed (void* ptr = _mesh.Faces)
-            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr)ptr,
+        fixed (void* ptr = Mesh.Faces)
+            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * Mesh.Faces.Length, (IntPtr)ptr,
                 BufferUsageHint.StaticDraw);
 
         GL.EnableVertexAttribArray(0);
@@ -46,13 +46,13 @@ public sealed class MeshVao : VAO
     public override void Render()
     {
         GL.BindVertexArray(_vao);
-        GL.DrawElements(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, 0);
+        GL.DrawElements(PrimitiveType.Triangles, Mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, 0);
     }
 
     public override void RenderInstanced(int count)
     {
         GL.BindVertexArray(_vao);
-        GL.DrawElementsInstanced(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
+        GL.DrawElementsInstanced(PrimitiveType.Triangles, Mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
             IntPtr.Zero, count);
     }
 

@@ -171,9 +171,9 @@ public class GameWindow
         player.AddComponent(new SquareCollider(player,false));
         camera.AddComponent(new CameraMovement(player));
 
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, playerMesh.MeshVaos[0].VBO);
+        Mesh testSkeleton = MeshLoader.LoadMesh("../../../animated.bnk");
         
-        
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, playerMesh.MeshVAO[0].VBO);
 
         PhysicsSystem.Load();
         BehaviorSystem.Load();

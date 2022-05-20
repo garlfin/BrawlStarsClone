@@ -106,13 +106,13 @@ public static class MapLoader
                 Scale = reader.ReadVector3D()
             }));
             var mesh = meshes[reader.ReadUInt32()];
-            var materials = new Material[mesh.MeshVaos.Length];
+            var materials = new Material[mesh.MeshVAO.Length];
             for (var j = 0; j < materials.Length; j++)
             {
                 foreach (var matCapMaterial in matCapMaterials)
-                    if (matCapMaterial.Item2 == mesh.Meshes[j].MatName)
+                    if (matCapMaterial.Item2 == mesh.Materials[j])
                         materials[j] = matCapMaterial.Item1;
-                if (materials[j] == null) throw new NoNullAllowedException($"Null material {mesh.Meshes[j].MatName}");
+                if (materials[j] == null) throw new NoNullAllowedException($"Null material {mesh.Materials[j]}");
                 // Positively Awful Code
             }
 
@@ -145,7 +145,7 @@ public static class MapLoader
                 }));
                 Material material = null;
                 foreach (var matCapMaterial in matCapMaterials)
-                    if (matCapMaterial.Item2 == finalTile.Meshes[0].MatName)
+                    if (matCapMaterial.Item2 == finalTile.Materials[0])
                         material = matCapMaterial.Item1;
 
                 entity.AddComponent(new Component.Material(new[] {material}!));

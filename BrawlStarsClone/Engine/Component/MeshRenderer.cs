@@ -30,10 +30,10 @@ public sealed class MeshRenderer : Component
          
         if (Alpha < 1 && _mesh.Transparent) GL.Enable(EnableCap.Blend);
 
-        for (var i = 0; i < _mesh.MeshVaos.Length; i++)
+        for (var i = 0; i < _mesh.MeshVAO.Length; i++)
         {
             if (Owner.Window.State is EngineState.Render or EngineState.RenderTransparent) Owner.GetComponent<Material>()[i].Use();
-            _mesh.MeshVaos[i].Render();
+            _mesh[i].Render();
         }
         GL.Disable(EnableCap.Blend);
         TexSlotManager.ResetUnit();
