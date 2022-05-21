@@ -17,6 +17,6 @@ public struct Vertex
     public Vector3D<float> Vert;
     public Vector3D<float> Normal;
     public Vector2D<float> UV;
-    public Vector4D<int> BoneID;
-    public Vector3D<float> Weight;
+    public Vector4D<uint> BoneID;
+    public Vector4D<float> Weight;
 }

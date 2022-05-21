@@ -2,18 +2,18 @@
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
 
-public class EmptyVAO : VAO
+public class SkinnedVAO : VAO
 {
     private int _faceCount; 
     
-    public unsafe EmptyVAO(int length, int ebo, int faces)
+    public unsafe SkinnedVAO(int length, int ebo, int faces)
     {
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
 
         _vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, length, IntPtr.Zero, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, length * sizeof(Vertex), IntPtr.Zero, BufferUsageHint.StaticDraw);
         
         _ebo = ebo;
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);

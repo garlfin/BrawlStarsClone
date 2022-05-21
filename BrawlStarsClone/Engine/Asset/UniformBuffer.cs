@@ -25,7 +25,6 @@ public class UniformBuffer : Asset
     public void Bind(int slot)
     {
         Location = slot;
-        GL.BindBuffer(BufferTarget.UniformBuffer, ID);
         GL.BindBufferBase(BufferRangeTarget.UniformBuffer, slot, ID);
     }
 

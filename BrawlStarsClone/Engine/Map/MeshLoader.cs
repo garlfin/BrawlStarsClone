@@ -6,7 +6,7 @@ namespace BrawlStarsClone.Engine.Map;
 
 public static class MeshLoader
 {
-    public static unsafe Mesh LoadMesh(string path, bool transparent = false)
+    public static Mesh LoadMesh(string path, bool transparent = false, bool v2 = false)
     {
         var reader = new BinaryReader(File.Open(path, FileMode.Open));
 
@@ -16,7 +16,7 @@ public static class MeshLoader
             Materials = new string[meshCount],
             MeshVAO = new MeshVao[meshCount]
         };
-
+        
         for (var u = 0; u < meshCount; u++)
         {
             var data = new MeshData();
@@ -30,31 +30,22 @@ public static class MeshLoader
             for (var i = 0; i < data.Faces.Length; i++) data.Faces[i] = reader.ReadVector3Di();
             
             mesh.Materials[u] = reader.ReadString();
-            mesh.MeshVAO[u] = new MeshVao(data);
+
             int boneCount = 0;
-            try
+            if (v2) boneCount = reader.ReadUInt16();
+
+            if (boneCount != 0)
             {
-                boneCount = reader.ReadUInt16();
-            }
-            catch (Exception e)
-            {
+                mesh.SetSkinned();
+                for (int i = 0; i < boneCount; i++) mesh.Bones.Add(reader.ReadMat4());
                 
+                data.Weights = new VertexWeight[data.Vertices.Length];
+                for (int i = 0; i < data.Vertices.Length; i++) data.Weights[i] = reader.ReadVertexWeight();
             }
+            
+            mesh.MeshVAO[u] = new MeshVao(data, boneCount != 0);
 
-            if (boneCount == 0) continue;
-            mesh.SetSkinned();
-            for (int i = 0; i < boneCount; i++)
-            {
-                byte[] matDat = reader.ReadBytes(64);
-                fixed (byte* ptr = matDat) mesh.Bones.Add((Matrix4X4<float>) (Marshal.PtrToStructure((IntPtr) ptr, typeof(Matrix4X4<float>)) ?? throw new InvalidOperationException()));
-            }
-
-            data.Weights = new VertexWeight[data.Vertices.Length];
-            for (int i = 0; i < data.Vertices.Length; i++)
-            {
-                byte[] weightDat = reader.ReadBytes(32);
-                fixed (byte* ptr = weightDat) data.Weights[i] = (VertexWeight) (Marshal.PtrToStructure((IntPtr) ptr, typeof(VertexWeight)) ?? throw new InvalidOperationException());
-            }
+            if (boneCount != 0) mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, mesh.MeshVAO[u].EBO, data.Faces.Length);
         }
 
         reader.Close();

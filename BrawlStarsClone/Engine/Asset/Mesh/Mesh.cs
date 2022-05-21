@@ -22,7 +22,6 @@ public class Mesh // Id rather this be a struct...
     public List<Entity> Users { get; } = new();
 
     public List<Matrix4X4<float>> Bones;
-    public VertexWeight[][] Weights;
 
     public bool Transparent { get; set; }
 
@@ -35,11 +34,6 @@ public class Mesh // Id rather this be a struct...
         }
 
         Users.Add(entity);
-    }
-
-    public void Render()
-    {
-        foreach (var mesh in MeshVAO) mesh.Render();
     }
 
     public unsafe void ManagedRender(GameWindow window)
@@ -77,8 +71,7 @@ public class Mesh // Id rather this be a struct...
         if (IsSkinned) return;
         IsSkinned = true;
         Bones = new List<Matrix4X4<float>>();
-        Weights = new VertexWeight[MeshVAO.Length][];
-        for (int i = 0; i < MeshVAO.Length; i++) Weights[i] = new VertexWeight[MeshVAO[i].Mesh.Vertices.Length];
+        SkinnedVAO = new VAO[MeshVAO.Length];
     }
 }
 

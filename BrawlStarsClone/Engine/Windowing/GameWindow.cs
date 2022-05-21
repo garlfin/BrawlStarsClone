@@ -32,6 +32,7 @@ public class GameWindow
 
     public EmptyTexture ShadowMap;
     private ShaderProgram _skinningShader;
+    private Mesh _testSkeleton;
 
     public GameWindow(int width, int height, string name)
     {
@@ -86,7 +87,7 @@ public class GameWindow
         AssetManager.DeleteAllAssets();
     }
 
-    private void OnLoad()
+    private unsafe void OnLoad()
     {
         GL.Enable(EnableCap.DebugOutput);
 
@@ -171,10 +172,24 @@ public class GameWindow
         player.AddComponent(new SquareCollider(player,false));
         camera.AddComponent(new CameraMovement(player));
 
-        Mesh testSkeleton = MeshLoader.LoadMesh("../../../animated.bnk");
-        
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, playerMesh.MeshVAO[0].VBO);
+        _testSkeleton = MeshLoader.LoadMesh("../../../../bsModel/animated.bnk", false, true);
 
+        Matrix4X4<float>[] matArray = new Matrix4X4<float>[100];
+        Array.Fill(matArray, Matrix4X4<float>.Identity);
+        
+        UniformBuffer matBuffer = new UniformBuffer(6400, BufferUsageHint.StaticRead);
+        fixed(void* ptr = matArray) matBuffer.ReplaceData(ptr, 6400);
+        
+        _skinningShader.Use();
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, matBuffer.ID);
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, playerMesh.MeshVAO[0].VBO);
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _testSkeleton.SkinnedVAO[0].VBO);
+
+        GL.DispatchCompute(_testSkeleton.MeshVAO[0].Mesh.Vertices.Length, 1, 1);
+        GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
+        
+        matBuffer.Delete();
+        
         PhysicsSystem.Load();
         BehaviorSystem.Load();
     }
@@ -191,6 +206,7 @@ public class GameWindow
 
         GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
 
+       _testSkeleton[0].Render();
         MeshRendererSystem.Render(0f);
         ManagedMeshes.Render(this);
         State = EngineState.RenderTransparent;

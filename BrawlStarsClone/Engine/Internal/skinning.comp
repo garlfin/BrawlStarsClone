@@ -31,7 +31,9 @@ void main() {
     BoneTransform += BoneMatrix[vertex.BoneID[2]] * vertex.Weight[2];
     BoneTransform += BoneMatrix[vertex.BoneID[3]] * vertex.Weight[3];
 
-    verticesOut[gl_GlobalInvocationID.x].pos = vec3(BoneTransform * vec4(vertices[gl_GlobalInvocationID.x].pos, 1.0));
-    verticesOut[gl_GlobalInvocationID.x].normal = vec3(BoneTransform * vec4(vertices[gl_GlobalInvocationID.x].normal, 0.0));
+    //verticesOut[gl_GlobalInvocationID.x].pos = vec3(BoneTransform * vec4(vertices[gl_GlobalInvocationID.x].pos, 1.0));
+    //verticesOut[gl_GlobalInvocationID.x].normal = vec3(BoneTransform * vec4(vertices[gl_GlobalInvocationID.x].normal, 0.0));
+    verticesOut[gl_GlobalInvocationID.x].pos = vertices[gl_GlobalInvocationID.x].pos;
+    verticesOut[gl_GlobalInvocationID.x].normal = vertices[gl_GlobalInvocationID.x].normal;
     verticesOut[gl_GlobalInvocationID.x].uv = vertices[gl_GlobalInvocationID.x].uv;
 }
