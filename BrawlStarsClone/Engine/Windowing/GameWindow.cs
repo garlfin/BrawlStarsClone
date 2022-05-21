@@ -182,7 +182,7 @@ public class GameWindow
         
         _skinningShader.Use();
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, matBuffer.ID);
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, playerMesh.MeshVAO[0].VBO);
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _testSkeleton.MeshVAO[0].VBO);
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _testSkeleton.SkinnedVAO[0].VBO);
 
         GL.DispatchCompute(_testSkeleton.MeshVAO[0].Mesh.Vertices.Length, 1, 1);
