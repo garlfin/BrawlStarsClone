@@ -99,9 +99,9 @@ public static class Program
                 {
                     writer.Write((ushort) i);
                     writer.Write((ushort) ((float) i / channel.PositionKeyCount * animation.DurationInTicks));
-                    Matrix4X4<float> transform = Matrix4X4.CreateScale(channel.ScalingKeys[i].Value.To3DF());
+                    Matrix4X4<float> transform = Matrix4X4.CreateScale(channel.ScalingKeys[i].Value.To3Df());
                     transform *= channel.RotationKeys[i].Value.GetMatrix().To4X4();
-                    transform *= Matrix4X4.CreateTranslation(channel.PositionKeys[i].Value.To3DF());
+                    transform *= Matrix4X4.CreateTranslation(channel.PositionKeys[i].Value.To3Df());
 
                     byte[] transformRaw = new byte[64];
                     Marshal.Copy((IntPtr) (&transform), transformRaw, 0, 64);
@@ -113,8 +113,8 @@ public static class Program
             writer.Close();
         }
     }
-    
-    public static void Write(this BinaryWriter writer, Vector3D vert)
+
+    private static void Write(this BinaryWriter writer, Vector3D vert)
     {
         writer.Write(vert.X);
         writer.Write(vert.Y);
@@ -126,12 +126,8 @@ public static class Program
         public unsafe fixed ushort Bone[4];
         public unsafe fixed ushort Weight[4];
     }
-    public static float DegToRad(this float degrees)
-    {
-        return degrees * MathF.PI / 180f;
-    }
 
-    public static Matrix4X4<float> To4X4(this Matrix3x3 mat)
+    private static Matrix4X4<float> To4X4(this Matrix3x3 mat)
     {
         return new Matrix4X4<float>(mat.A1, mat.A2, mat.A3, 0,
                                     mat.B1, mat.B2, mat.B3, 0,
@@ -139,7 +135,7 @@ public static class Program
                                     0, 0, 0, 1);
     }
 
-    public static Vector3D<float> To3DF(this Vector3D vec)
+    private static Vector3D<float> To3Df(this Vector3D vec)
     {
         return new Vector3D<float>(vec.X, vec.Y, vec.Z);
     }

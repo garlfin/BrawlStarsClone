@@ -4,6 +4,7 @@ using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Component.Physics;
+using BrawlStarsClone.Engine.Utility;
 using BrawlStarsClone.Engine.Windowing;
 using BrawlStarsClone.res.Scripts;
 using Silk.NET.Maths;

@@ -8,6 +8,19 @@ public struct Animation
     public int FrameCount;
 
     public Channel[] ChannelFrames;
+
+    public Channel? this[string name]
+    {
+        get
+        {
+            for (ushort i = 0; i < ChannelFrames.Length; i++)
+                if (ChannelFrames[i].BoneName == name)
+                    return ChannelFrames[i];
+            return null;
+        }
+    }
+
+    public Channel this[int index] => ChannelFrames[index];
 }
 
 public struct Channel

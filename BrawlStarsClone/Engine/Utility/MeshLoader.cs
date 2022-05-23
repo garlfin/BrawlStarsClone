@@ -1,16 +1,15 @@
-﻿using System.Runtime.InteropServices;
-using BrawlStarsClone.Engine.Asset;
+﻿using BrawlStarsClone.Engine.Asset;
 using BrawlStarsClone.Engine.Asset.Mesh;
+using BrawlStarsClone.Engine.Map;
 using Silk.NET.Maths;
 
-namespace BrawlStarsClone.Engine.Map;
+namespace BrawlStarsClone.Engine.Utility;
 
 public static class MeshLoader
 {
     public static Mesh LoadMesh(string path, bool transparent = false, bool v2 = false)
     {
         var reader = new BinaryReader(File.Open(path, FileMode.Open));
-
         var meshCount = reader.ReadUInt16();
         var mesh = new Mesh
         {
