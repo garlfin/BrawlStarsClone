@@ -31,8 +31,6 @@ public class GameWindow
     private FrameBuffer _shadowBuffer;
 
     public EmptyTexture ShadowMap;
-    private ShaderProgram _skinningShader;
-    private Mesh _testSkeleton;
 
     public GameWindow(int width, int height, string name)
     {
@@ -87,7 +85,7 @@ public class GameWindow
         AssetManager.DeleteAllAssets();
     }
 
-    private unsafe void OnLoad()
+    private void OnLoad()
     {
         GL.Enable(EnableCap.DebugOutput);
 
@@ -118,7 +116,7 @@ public class GameWindow
 
         _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
 
-        _skinningShader = new ShaderProgram("../../../Engine/Internal/skinning.comp");
+        SkinningShader = new ShaderProgram("../../../Engine/Internal/skinning.comp");
 
         _shadowBuffer = new FrameBuffer(2048, 2048);
         _shadowBuffer.SetShadow();
@@ -162,37 +160,33 @@ public class GameWindow
         });
         var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
             new ImageTexture("../../../res/squeak.pvr"));
-        player.AddComponent(new Component.Material(new Material[]
+        var materials = new Material[]
         {
-           whiteBase, whiteBase, whiteBase, whiteBase, whiteBase
-        }));
+            whiteBase, whiteBase, whiteBase, whiteBase, whiteBase
+        };
+        player.AddComponent(new Component.Material(materials));
         Mesh playerMesh = MeshLoader.LoadMesh("../../../squeak.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
         player.AddComponent(new PlayerMovement());
         player.AddComponent(new SquareCollider(player,false));
         camera.AddComponent(new CameraMovement(player));
 
-        _testSkeleton = MeshLoader.LoadMesh("../../../../bsModel/animated.bnk", false, true);
+        var testSkinned = new Entity(this);
+        testSkinned.AddComponent(new Component.Material(materials));
+        testSkinned.AddComponent(new Transform(testSkinned));
+        testSkinned.AddComponent(new MeshRenderer(testSkinned, MeshLoader.LoadMesh("../../../animated.bnk", false, true)));
+        testSkinned.AddComponent(new Animator(testSkinned, MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
 
-        Matrix4X4<float>[] matArray = new Matrix4X4<float>[100];
-        Array.Fill(matArray, Matrix4X4<float>.Identity);
-        
-        UniformBuffer matBuffer = new UniformBuffer(6400, BufferUsageHint.StaticRead);
-        fixed(void* ptr = matArray) matBuffer.ReplaceData(ptr, 6400);
-        
-        _skinningShader.Use();
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, matBuffer.ID);
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _testSkeleton.MeshVAO[0].VBO);
-        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _testSkeleton.SkinnedVAO[0].VBO);
+        MatBuffer = new UniformBuffer(6400, BufferUsageHint.StreamDraw);
+        GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, MatBuffer.ID);
 
-        GL.DispatchCompute(_testSkeleton.MeshVAO[0].Mesh.Vertices.Length, 1, 1);
-        GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
-        
-        matBuffer.Delete();
-        
         PhysicsSystem.Load();
         BehaviorSystem.Load();
     }
+
+    public ShaderProgram SkinningShader { get; private set; }
+
+    public UniformBuffer MatBuffer { get; private set; }
 
     private void OnRender(FrameEventArgs frameEventArgs)
     {
@@ -202,11 +196,11 @@ public class GameWindow
         BehaviorSystem.Render((float) frameEventArgs.Time);
         TransformSystem.Update(0f);
         CameraSystem.Update(0f);
+        SkinManager.Render(0f);
         ProgramManager.InitFrame();
 
         GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
-
-       _testSkeleton[0].Render();
+        
         MeshRendererSystem.Render(0f);
         ManagedMeshes.Render(this);
         State = EngineState.RenderTransparent;

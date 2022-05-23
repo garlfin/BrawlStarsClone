@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using BrawlStarsClone.Engine.Asset;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using Silk.NET.Maths;
 
@@ -31,16 +32,20 @@ public static class MeshLoader
             
             mesh.Materials[u] = reader.ReadString();
 
-            int boneCount = 0;
+            var boneCount = 0;
             if (v2) boneCount = reader.ReadUInt16();
 
             if (boneCount != 0)
             {
                 mesh.SetSkinned();
-                for (int i = 0; i < boneCount; i++) mesh.Bones.Add(reader.ReadMat4());
+                for (var i = 0; i < boneCount; i++)
+                {
+                    mesh.BoneNames.Add(reader.ReadString());
+                    mesh.Bones.Add(reader.ReadMat4());
+                }
                 
                 data.Weights = new VertexWeight[data.Vertices.Length];
-                for (int i = 0; i < data.Vertices.Length; i++) data.Weights[i] = reader.ReadVertexWeight();
+                for (var i = 0; i < data.Vertices.Length; i++) data.Weights[i] = reader.ReadVertexWeight();
             }
             
             mesh.MeshVAO[u] = new MeshVao(data, boneCount != 0);
@@ -52,4 +57,30 @@ public static class MeshLoader
         mesh.Transparent = transparent;
         return mesh;
     }
+    
+    
+    public static Animation LoadAnimation(string path)
+    {
+        var file = File.Open(path, FileMode.Open);
+        var reader = new BinaryReader(file);
+        
+        var animation = new Animation();
+        
+        animation.FPS = reader.ReadUInt16();
+        
+        var frameCount = reader.ReadUInt16();
+        var channelCount = reader.ReadUInt16();
+
+        animation.ChannelFrames = new Channel[channelCount];
+        for (ushort i = 0; i < channelCount; i++)
+        {
+            var channel = new Channel();
+            channel.BoneName = reader.ReadString();
+            channel.Frames = new Matrix4X4<float>[frameCount];
+            for (ushort u = 0; u < frameCount; u++) channel.Frames[u] = reader.ReadMat4();
+            animation.ChannelFrames[i] = channel;
+        }
+        return animation;
+    }
+    
 }

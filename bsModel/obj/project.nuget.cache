@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "t+k8edPKGBJQXWD6KkWOI6SAP7YsVrtA58RgXG3pMl05sg2ztagSI0PoPC3CIlSVPGH8OASiH4ZVQgMnZGj0ag==",
+  "dgSpecHash": "mUBA3f3j7TGPwLQIBaJe+6jyCMu+riR7OF1To5KFAQy184NH2YM6fM88O9ZKNJQ3J5X/2ySTIDN9KN3B2Cgg+A==",
   "success": true,
-  "projectFilePath": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\bsModel\\bsModel.csproj",
+  "projectFilePath": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\bsModel\\bsModel.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\scion\\.nuget\\packages\\assimpnet\\4.1.0\\assimpnet.4.1.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
@@ -25,6 +25,7 @@
     "C:\\Users\\scion\\.nuget\\packages\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\scion\\.nuget\\packages\\silk.net.maths\\2.15.0\\silk.net.maths.2.15.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\system.appcontext\\4.3.0\\system.appcontext.4.3.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\system.buffers\\4.3.0\\system.buffers.4.3.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\system.collections\\4.3.0\\system.collections.4.3.0.nupkg.sha512",

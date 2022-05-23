@@ -111,9 +111,9 @@ internal static class ProgramManager
 
     public static unsafe void Init()
     {
-        _matricesData = new UniformBuffer(sizeof(Matrices), BufferUsageHint.DynamicDraw);
+        _matricesData = new UniformBuffer(sizeof(Matrices), BufferUsageHint.StreamDraw);
         _matricesData.Bind(2);
-        _capData = new UniformBuffer(sizeof(MatCapUniformBuffer), BufferUsageHint.DynamicDraw);
+        _capData = new UniformBuffer(sizeof(MatCapUniformBuffer), BufferUsageHint.StreamDraw);
         _capData.Bind(3);
     }
 

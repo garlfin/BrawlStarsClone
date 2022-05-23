@@ -1,6 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 using Assimp;
+using Silk.NET.Maths;
+using Vector3D = Assimp.Vector3D;
 
 namespace bsModel;
 
@@ -12,11 +14,11 @@ public static class Program
         var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open),
             PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes | PostProcessSteps.OptimizeGraph | PostProcessSteps.LimitBoneWeights);
 
-            string finalPath = $"{Path.GetDirectoryName(args[0])}\\{Path.GetFileNameWithoutExtension(args[0])}.bnk";
+        string finalPath = $"{Path.GetDirectoryName(args[0])}\\{Path.GetFileNameWithoutExtension(args[0])}.bnk";
         if (args.Length == 2) finalPath = $"{args[1]}{Path.GetFileNameWithoutExtension(args[0])}.bnk";
         
-        using var stream = File.Open(finalPath, FileMode.Create);
-        using var writer = new BinaryWriter(stream, Encoding.UTF8, false);
+        var stream = File.Open(finalPath, FileMode.Create);
+        var writer = new BinaryWriter(stream, Encoding.UTF8, false);
         
         writer.Write((ushort)scene.MeshCount);
         
@@ -55,7 +57,8 @@ public static class Program
             {
                 weights[j] = new VertexWeight();
             }
-            for (var index = 0; index < currentMesh.Bones.Count; index++)
+            
+            for (var index = 0; index < currentMesh.BoneCount; index++)
             {
                 var bone = currentMesh.Bones[index];
                 foreach (var weight in bone.VertexWeights)
@@ -63,14 +66,14 @@ public static class Program
                     int realIndex = 0;
                     for (int j = 0; j < 4; j++)
                     {
-                        if (weights[weight.VertexID].Weight[j] != 0) continue;
+                        if (weights[weight.VertexID].Weight[j] == 0) break;
                         realIndex++;
-                        break;
                     }
                     weights[weight.VertexID].Bone[realIndex] = (ushort) index;
                     weights[weight.VertexID].Weight[realIndex] = (ushort) (ushort.MaxValue * weight.Weight);
                 }
-                
+
+                writer.Write(bone.Name);
                 var offset = bone.OffsetMatrix;
                 Marshal.Copy((IntPtr) (&offset), matrixData, 0, 64);
                 writer.Write(matrixData);
@@ -79,9 +82,39 @@ public static class Program
             writer.Write(data);
         }
         writer.Close();
+        
+        foreach (var animation in scene.Animations)
+        {
+            stream = File.Open("animation.bnk", FileMode.Create);
+            writer = new BinaryWriter(stream, Encoding.UTF8, false);
+            
+            writer.Write((ushort) (animation.NodeAnimationChannels[0].PositionKeyCount / animation.DurationInTicks));
+            writer.Write((ushort) animation.NodeAnimationChannels[0].PositionKeyCount);
+            
+            writer.Write((ushort) animation.NodeAnimationChannelCount);
+            foreach (var channel in animation.NodeAnimationChannels)
+            {
+                writer.Write(channel.NodeName);
+                for (int i = 0; i < channel.PositionKeyCount; i++)
+                {
+                    writer.Write((ushort) i);
+                    writer.Write((ushort) ((float) i / channel.PositionKeyCount * animation.DurationInTicks));
+                    Matrix4X4<float> transform = Matrix4X4.CreateScale(channel.ScalingKeys[i].Value.To3DF());
+                    transform *= channel.RotationKeys[i].Value.GetMatrix().To4X4();
+                    transform *= Matrix4X4.CreateTranslation(channel.PositionKeys[i].Value.To3DF());
+
+                    byte[] transformRaw = new byte[64];
+                    Marshal.Copy((IntPtr) (&transform), transformRaw, 0, 64);
+                    writer.Write(transformRaw);
+                }    
+            }
+
+            stream.Close();
+            writer.Close();
+        }
     }
     
-    static void Write(this BinaryWriter writer, Vector3D vert)
+    public static void Write(this BinaryWriter writer, Vector3D vert)
     {
         writer.Write(vert.X);
         writer.Write(vert.Y);
@@ -92,5 +125,22 @@ public static class Program
     {
         public unsafe fixed ushort Bone[4];
         public unsafe fixed ushort Weight[4];
+    }
+    public static float DegToRad(this float degrees)
+    {
+        return degrees * MathF.PI / 180f;
+    }
+
+    public static Matrix4X4<float> To4X4(this Matrix3x3 mat)
+    {
+        return new Matrix4X4<float>(mat.A1, mat.A2, mat.A3, 0,
+                                    mat.B1, mat.B2, mat.B3, 0,
+                                    mat.C1, mat.C2, mat.C3, 0,
+                                    0, 0, 0, 1);
+    }
+
+    public static Vector3D<float> To3DF(this Vector3D vec)
+    {
+        return new Vector3D<float>(vec.X, vec.Y, vec.Z);
     }
 }

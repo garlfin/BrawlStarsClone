@@ -8,7 +8,8 @@
     ".NETCoreApp,Version=v6.0": {
       "bsModel/1.0.0": {
         "dependencies": {
-          "AssimpNet": "4.1.0"
+          "AssimpNet": "4.1.0",
+          "Silk.NET.Maths": "2.15.0"
         },
         "runtime": {
           "bsModel.dll": {}
@@ -152,6 +153,14 @@
       "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {},
       "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {},
       "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {},
+      "Silk.NET.Maths/2.15.0": {
+        "runtime": {
+          "lib/net5.0/Silk.NET.Maths.dll": {
+            "assemblyVersion": "2.15.0.0",
+            "fileVersion": "2.15.0.0"
+          }
+        }
+      },
       "System.AppContext/4.3.0": {
         "dependencies": {
           "System.Runtime": "4.3.0"
@@ -867,6 +876,13 @@
       "sha512": "sha512-VB5cn/7OzUfzdnC8tqAIMQciVLiq2epm2NrAm1E9OjNRyG4lVhfR61SMcLizejzQP8R8Uf/0l5qOIbUEi+RdEg==",
       "path": "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl/4.3.0",
       "hashPath": "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512"
+    },
+    "Silk.NET.Maths/2.15.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7aDFUR+wSU8kv/YrJX9PxTNye+ZO4ReYEoGI9YjLiipDHYivGJ/I+iR2xtSP+hkeKbC+xmOgE6TnZVf5INCqNg==",
+      "path": "silk.net.maths/2.15.0",
+      "hashPath": "silk.net.maths.2.15.0.nupkg.sha512"
     },
     "System.AppContext/4.3.0": {
       "type": "package",

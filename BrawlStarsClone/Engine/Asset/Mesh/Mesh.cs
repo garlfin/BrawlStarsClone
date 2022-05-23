@@ -14,7 +14,7 @@ public class Mesh // Id rather this be a struct...
     public string[] Materials;
     public MeshVao[] MeshVAO;
     
-    public bool IsSkinned { get; private set; }
+    public bool IsSkinned { get; set; }
     public VAO[] SkinnedVAO;
 
     public bool Instanced { get; private set; }
@@ -22,6 +22,7 @@ public class Mesh // Id rather this be a struct...
     public List<Entity> Users { get; } = new();
 
     public List<Matrix4X4<float>> Bones;
+    public List<string> BoneNames;
 
     public bool Transparent { get; set; }
 
@@ -71,6 +72,7 @@ public class Mesh // Id rather this be a struct...
         if (IsSkinned) return;
         IsSkinned = true;
         Bones = new List<Matrix4X4<float>>();
+        BoneNames = new List<string>();
         SkinnedVAO = new VAO[MeshVAO.Length];
     }
 }

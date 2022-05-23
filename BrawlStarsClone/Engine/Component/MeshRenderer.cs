@@ -9,31 +9,31 @@ namespace BrawlStarsClone.Engine.Component;
 
 public sealed class MeshRenderer : Component
 {
-    private readonly Mesh _mesh;
+    public readonly Mesh Mesh;
     private readonly bool _overrideInstance;
     public float Alpha = 1f;
 
     public MeshRenderer(Entity owner, Mesh mesh, bool overrideInstance = false) : base(owner)
     {
         MeshRendererSystem.Register(this);
-        _mesh = mesh;
+        Mesh = mesh;
         _overrideInstance = overrideInstance;
         if (!overrideInstance) mesh.Register(Owner);
     }
 
     public override unsafe void OnRender(float deltaTime)
     {
-        if (_mesh.Instanced && !_overrideInstance) return;
+        if (Mesh.Instanced && !_overrideInstance) return;
         var matrix = Owner.GetComponent<Transform>().Model;
         ProgramManager.PushModelMatrix(&matrix, sizeof(float) * 16);
         ProgramManager.MatCap.OtherData[0] = Alpha;
          
-        if (Alpha < 1 && _mesh.Transparent) GL.Enable(EnableCap.Blend);
+        if (Alpha < 1 && Mesh.Transparent) GL.Enable(EnableCap.Blend);
 
-        for (var i = 0; i < _mesh.MeshVAO.Length; i++)
+        for (var i = 0; i < Mesh.MeshVAO.Length; i++)
         {
             if (Owner.Window.State is EngineState.Render or EngineState.RenderTransparent) Owner.GetComponent<Material>()[i].Use();
-            _mesh[i].Render();
+            Mesh[i].Render();
         }
         GL.Disable(EnableCap.Blend);
         TexSlotManager.ResetUnit();

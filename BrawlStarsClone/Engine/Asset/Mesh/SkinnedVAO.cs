@@ -13,7 +13,7 @@ public class SkinnedVAO : VAO
 
         _vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, length * sizeof(Vertex), IntPtr.Zero, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, length * sizeof(Vertex), IntPtr.Zero, BufferUsageHint.StreamDraw);
         
         _ebo = ebo;
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
