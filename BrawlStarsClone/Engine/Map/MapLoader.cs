@@ -54,7 +54,7 @@ public static class MapLoader
             UseShadow = true
         };
         DiffuseProgram = new ShaderProgram("default.frag", "default.vert");
-        
+
         _tiles = new Mesh[2][];
         _tiles[0] = new[]
         {
@@ -120,8 +120,8 @@ public static class MapLoader
             entity.AddComponent(new Component.Material(materials));
             entity.AddComponent(new MeshRenderer(entity, mesh));
         }
-        
-        Random rng = new Random();
+
+        var rng = new Random();
         var tilePos = new Vector3D<float>(0.5f, 0f, 1f);
         for (var i = 0; i < mapData.Length; i++, tilePos += Vector3D<float>.UnitX)
         {
@@ -156,7 +156,10 @@ public static class MapLoader
                     entity.AddComponent(new SquareCollider(entity, true));
                     entity.GetComponent<Transform>().Rotation.Y = rng.Next(0, 5) * 90;
                 }
-                else if (tile == 'g') entity.AddComponent(new GrassScript(player));
+                else if (tile == 'g')
+                {
+                    entity.AddComponent(new GrassScript(player));
+                }
             }
 
             if ((i + 1) % 17 == 0) tilePos += new Vector3D<float>(-17, 0, 1);

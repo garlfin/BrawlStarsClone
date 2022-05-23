@@ -13,18 +13,21 @@ public class Mesh // Id rather this be a struct...
 
     public string[] Materials;
     public MeshVao[] MeshVAO;
-    
-    public bool IsSkinned { get; set; }
     public VAO[] SkinnedVAO;
+
+    public bool IsSkinned { get; set; }
 
     public bool Instanced { get; private set; }
 
     public List<Entity> Users { get; } = new();
 
-    public List<Matrix4X4<float>> Bones;
-    public List<string> BoneNames;
+    public BoneHierarchy Hierarchy { get; set; }
+    public BoneHierarchy[] FlattenedHierarchy { get; set; }
+
 
     public bool Transparent { get; set; }
+
+    public VAO this[int index] => IsSkinned ? SkinnedVAO[index] : MeshVAO[index];
 
     public void Register(Entity entity)
     {
@@ -41,11 +44,22 @@ public class Mesh // Id rather this be a struct...
     {
         if (Transparent)
         {
-            if (window.State is EngineState.RenderTransparent) GL.Enable(EnableCap.Blend);
-            else if (window.State is EngineState.Shadow) {}
-            else if (window.State is EngineState.Render or EngineState.PostProcess) return;
+            if (window.State is EngineState.RenderTransparent)
+            {
+                GL.Enable(EnableCap.Blend);
+            }
+            else if (window.State is EngineState.Shadow)
+            {
+            }
+            else if (window.State is EngineState.Render or EngineState.PostProcess)
+            {
+                return;
+            }
         }
-        else if (window.State is EngineState.RenderTransparent) return;
+        else if (window.State is EngineState.RenderTransparent)
+        {
+            return;
+        }
 
         for (var i = 0; i < MeshVAO.Length; i++)
         {
@@ -55,8 +69,13 @@ public class Mesh // Id rather this be a struct...
                 model[j] = Users[j].GetComponent<Transform>().Model;
                 ProgramManager.MatCap.OtherData[j * 4] = Users[j].GetComponent<MeshRenderer>().Alpha;
             }
-            if (window.State is EngineState.Render or EngineState.RenderTransparent) Users[0].GetComponent<Component.Material>()[i].Use();
-            fixed (void* ptr = model) ProgramManager.PushModelMatrix(ptr, sizeof(Matrix4X4<float>) * model.Length);
+
+            if (window.State is EngineState.Render or EngineState.RenderTransparent)
+                Users[0].GetComponent<Component.Material>()[i].Use();
+            fixed (void* ptr = model)
+            {
+                ProgramManager.PushModelMatrix(ptr, sizeof(Matrix4X4<float>) * model.Length);
+            }
 
             this[i].RenderInstanced(Users.Count);
             TexSlotManager.ResetUnit();
@@ -65,14 +84,12 @@ public class Mesh // Id rather this be a struct...
         if (Transparent) GL.Disable(EnableCap.Blend);
     }
 
-    public VAO this[int index] => IsSkinned ? SkinnedVAO[index] : MeshVAO[index];
-
-    public void SetSkinned()
+    public void SetSkinned(int boneCount)
     {
         if (IsSkinned) return;
         IsSkinned = true;
-        Bones = new List<Matrix4X4<float>>();
-        BoneNames = new List<string>();
+        Hierarchy = new BoneHierarchy();
+        FlattenedHierarchy = new BoneHierarchy[boneCount];
         SkinnedVAO = new VAO[MeshVAO.Length];
     }
 }
@@ -81,7 +98,10 @@ internal static class ManagedMeshes
 {
     public static List<Mesh> Meshes = new();
 
-    public static void Register(Mesh mesh) => Meshes.Add(mesh);
+    public static void Register(Mesh mesh)
+    {
+        Meshes.Add(mesh);
+    }
 
     public static void Render(GameWindow window)
     {
@@ -100,4 +120,13 @@ public struct VertexWeight
     public float Weight2;
     public float Weight3;
     public float Weight4;
+}
+
+public class BoneHierarchy
+{
+    public List<BoneHierarchy> Children;
+    public ushort Index;
+    public string Name;
+    public Matrix4X4<float> Offset;
+    public string Parent;
 }

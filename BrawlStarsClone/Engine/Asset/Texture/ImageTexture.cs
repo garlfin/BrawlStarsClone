@@ -28,7 +28,7 @@ public class ImageTexture : Texture
         reader.ReadUInt32();
         reader.ReadUInt32();
         reader.ReadUInt32();
-        
+
         var mipCount = reader.ReadUInt32();
         var metaDataSize = reader.ReadUInt32();
         reader.ReadBytes((int) metaDataSize);

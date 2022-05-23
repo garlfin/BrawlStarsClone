@@ -1,8 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using BrawlStarsClone.Engine.Asset.Texture;
+﻿using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Map;
 using BrawlStarsClone.Engine.Windowing;
-using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Material;

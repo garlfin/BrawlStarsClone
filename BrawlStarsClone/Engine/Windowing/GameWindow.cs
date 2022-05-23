@@ -27,6 +27,7 @@ public class GameWindow
     private readonly int _width;
 
     private ShaderProgram _depthShader;
+
     private bool _isClosed;
     private FrameBuffer _shadowBuffer;
 
@@ -58,18 +59,21 @@ public class GameWindow
         View.Run();
     }
 
-    private KeyboardState _input;
-    public KeyboardState Input => _input;
+    public KeyboardState Input { get; private set; }
 
     public Vector2D<int> Size => new(_width, _height);
     public OpenTK.Windowing.Desktop.GameWindow View { get; }
 
     public EngineState State { get; private set; }
 
+    public ShaderProgram SkinningShader { get; private set; }
+
+    public UniformBuffer MatBuffer { get; private set; }
+
     private void OnUpdate(FrameEventArgs obj)
     {
-        _input = View.KeyboardState.GetSnapshot();
-        if (_input.IsKeyDown(Keys.Escape)) View.Close();
+        Input = View.KeyboardState.GetSnapshot();
+        if (Input.IsKeyDown(Keys.Escape)) View.Close();
         PhysicsSystem.ResetCollisions();
         BehaviorSystem.Update((float) obj.Time);
         PhysicsSystem.Update((float) obj.Time);
@@ -97,7 +101,7 @@ public class GameWindow
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.CullFace);
-        
+
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
         GL.Viewport(new Size(_width, _height));
@@ -152,7 +156,7 @@ public class GameWindow
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
         camera.GetComponent<Camera>().Set();
-        
+
         player.AddComponent(new Transform(player)
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
@@ -166,17 +170,24 @@ public class GameWindow
             whiteBase, whiteBase, whiteBase, whiteBase, whiteBase
         };
         player.AddComponent(new Component.Material(materials));
-        Mesh playerMesh = MeshLoader.LoadMesh("../../../squeak.bnk");
+        var playerMesh = MeshLoader.LoadMesh("../../../squeak.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
         player.AddComponent(new PlayerMovement());
-        player.AddComponent(new SquareCollider(player,false));
+        player.AddComponent(new SquareCollider(player, false));
         camera.AddComponent(new CameraMovement(player));
 
         var testSkinned = new Entity(this);
         testSkinned.AddComponent(new Component.Material(materials));
-        testSkinned.AddComponent(new Transform(testSkinned));
-        testSkinned.AddComponent(new MeshRenderer(testSkinned, MeshLoader.LoadMesh("../../../animated.bnk", false, true)));
-        testSkinned.AddComponent(new Animator(testSkinned, MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
+        testSkinned.AddComponent(new Transform(testSkinned, new Transformation
+        {
+            Location = new Vector3D<float>(7.5f, 0, 3f),
+            Rotation = new Vector3D<float>(0, 90, 0),
+            Scale = Vector3D<float>.One
+        }));
+        testSkinned.AddComponent(new MeshRenderer(testSkinned,
+            MeshLoader.LoadMesh("../../../../bsModel/animated.bnk", false, true)));
+        testSkinned.AddComponent(new Animator(testSkinned,
+            MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
 
         MatBuffer = new UniformBuffer(6400, BufferUsageHint.StreamDraw);
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, MatBuffer.ID);
@@ -184,10 +195,6 @@ public class GameWindow
         PhysicsSystem.Load();
         BehaviorSystem.Load();
     }
-
-    public ShaderProgram SkinningShader { get; private set; }
-
-    public UniformBuffer MatBuffer { get; private set; }
 
     private void OnRender(FrameEventArgs frameEventArgs)
     {
@@ -201,7 +208,7 @@ public class GameWindow
         ProgramManager.InitFrame();
 
         GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
-        
+
         MeshRendererSystem.Render(0f);
         ManagedMeshes.Render(this);
         State = EngineState.RenderTransparent;

@@ -4,8 +4,8 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public class SkinnedVAO : VAO
 {
-    private int _faceCount; 
-    
+    private readonly int _faceCount;
+
     public unsafe SkinnedVAO(int length, int ebo, int faces)
     {
         _vao = GL.GenVertexArray();
@@ -14,7 +14,7 @@ public class SkinnedVAO : VAO
         _vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
         GL.BufferData(BufferTarget.ArrayBuffer, length * sizeof(Vertex), IntPtr.Zero, BufferUsageHint.StreamDraw);
-        
+
         _ebo = ebo;
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
 
@@ -30,7 +30,6 @@ public class SkinnedVAO : VAO
         GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, sizeof(Vertex), 48);
         GL.EnableVertexAttribArray(4);
         GL.VertexAttribPointer(4, 4, VertexAttribPointerType.Float, false, sizeof(Vertex), 64);
-
     }
 
     public override void Render()

@@ -1,9 +1,9 @@
 ﻿using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
+
 public abstract class VAO : Asset
 {
-    
     protected int _ebo;
     protected int _vao;
     protected int _vbo;

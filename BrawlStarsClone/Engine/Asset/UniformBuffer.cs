@@ -4,8 +4,6 @@ namespace BrawlStarsClone.Engine.Asset;
 
 public class UniformBuffer : Asset
 {
-    public int Size { get; }
-
     public UniformBuffer(int size, BufferUsageHint usageHint)
     {
         Size = size;
@@ -13,6 +11,8 @@ public class UniformBuffer : Asset
         GL.BindBuffer(BufferTarget.UniformBuffer, ID);
         GL.BufferData(BufferTarget.UniformBuffer, size, IntPtr.Zero, usageHint);
     }
+
+    public int Size { get; }
 
     public int ID { get; }
 

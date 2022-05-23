@@ -82,7 +82,10 @@ public class ShaderProgram : Asset
         GL.ProgramUniform1(ID, realLocation, data);
     }
 
-    public override void Delete() => GL.DeleteProgram(ID);
+    public override void Delete()
+    {
+        GL.DeleteProgram(ID);
+    }
 
     public void BindToUBO(UniformBuffer buffer, string uniformName)
     {
@@ -123,16 +126,28 @@ internal static class ProgramManager
         Matrices.View = CameraSystem.CurrentCamera.View;
         Matrices.LightProjection = CameraSystem.Sun.View * CameraSystem.Sun.Projection;
 
-        fixed (float* ptr = Matrices.Model) _matricesData.ReplaceData(ptr, sizeof(Matrices));
+        fixed (float* ptr = Matrices.Model)
+        {
+            _matricesData.ReplaceData(ptr, sizeof(Matrices));
+        }
     }
 
-    public static void Register(ShaderProgram program) => _Programs.Add(program);
+    public static void Register(ShaderProgram program)
+    {
+        _Programs.Add(program);
+    }
 
-    public static unsafe void PushModelMatrix(void* ptr, int size) => _matricesData.ReplaceData(ptr, size);
+    public static unsafe void PushModelMatrix(void* ptr, int size)
+    {
+        _matricesData.ReplaceData(ptr, size);
+    }
 
     public static unsafe void PushMatCap()
     {
-        fixed (void* ptr = &MatCap) _capData.ReplaceData(ptr, sizeof(MatCapUniformBuffer));
+        fixed (void* ptr = &MatCap)
+        {
+            _capData.ReplaceData(ptr, sizeof(MatCapUniformBuffer));
+        }
     }
 }
 
@@ -148,7 +163,10 @@ public struct Matrices
     {
         get
         {
-            fixed (float* ptr = &Model[index * 16]) return (Matrix4X4<float>*) ptr;
+            fixed (float* ptr = &Model[index * 16])
+            {
+                return (Matrix4X4<float>*) ptr;
+            }
         }
     }
 }

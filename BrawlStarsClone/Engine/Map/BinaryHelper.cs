@@ -28,11 +28,11 @@ public static class BinaryHelper
     public static Matrix4X4<float> ReadMat4(this BinaryReader reader)
     {
         return new Matrix4X4<float>(
-            reader.ReadSingle(),reader.ReadSingle(),reader.ReadSingle(),reader.ReadSingle(),
-            reader.ReadSingle(),reader.ReadSingle(),reader.ReadSingle(),reader.ReadSingle(),
-            reader.ReadSingle(),reader.ReadSingle(),reader.ReadSingle(),reader.ReadSingle(),
-            reader.ReadSingle(),reader.ReadSingle(),reader.ReadSingle(),reader.ReadSingle()
-            ); // I hate looking at this but idrk whats a better solution cause i cant cast a pointer to a generic structure... thanks c#...
+            reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+            reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+            reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+            reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()
+        ); // I hate looking at this but idrk whats a better solution cause i cant cast a pointer to a generic structure... thanks c#...
     }
 
     public static VertexWeight ReadVertexWeight(this BinaryReader reader)
@@ -43,7 +43,7 @@ public static class BinaryHelper
             Bone2 = reader.ReadUInt16(),
             Bone3 = reader.ReadUInt16(),
             Bone4 = reader.ReadUInt16(),
-            
+
             Weight1 = (float) reader.ReadUInt16() / ushort.MaxValue,
             Weight2 = (float) reader.ReadUInt16() / ushort.MaxValue,
             Weight3 = (float) reader.ReadUInt16() / ushort.MaxValue,

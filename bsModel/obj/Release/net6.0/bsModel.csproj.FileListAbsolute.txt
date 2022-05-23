@@ -41,3 +41,4 @@ C:\Users\scion\Documents\GitHub\BrawlStarsClone\bsModel\obj\Release\net6.0\bsMod
 C:\Users\scion\Documents\GitHub\BrawlStarsClone\bsModel\obj\Release\net6.0\bsModel.genruntimeconfig.cache
 C:\Users\scion\Documents\GitHub\BrawlStarsClone\bsModel\obj\Release\net6.0\ref\bsModel.dll
 C:\Users\scion\RiderProjects\BrawlStarsClone\bsModel\bin\Release\net6.0\Silk.NET.Maths.dll
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\bsModel\bin\Release\net6.0\Silk.NET.Maths.dll

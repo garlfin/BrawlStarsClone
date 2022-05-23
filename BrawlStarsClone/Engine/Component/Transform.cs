@@ -8,8 +8,6 @@ public sealed class Transform : Component
     public Vector3D<float> Location = Vector3D<float>.Zero;
     public Vector3D<float> Rotation = Vector3D<float>.Zero;
     public Vector3D<float> Scale = Vector3D<float>.One;
-    
-    public Vector3D<float> RenderLocation { get; private set; } = Vector3D<float>.One;
 
     public Transform(Entity owner) : base(owner)
     {
@@ -26,6 +24,8 @@ public sealed class Transform : Component
         OnUpdate(0f);
         TransformSystem.Register(this);
     }
+
+    public Vector3D<float> RenderLocation { get; private set; } = Vector3D<float>.One;
 
     public Matrix4X4<float> Model { get; private set; }
 

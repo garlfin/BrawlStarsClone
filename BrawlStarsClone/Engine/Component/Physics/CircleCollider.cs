@@ -5,14 +5,24 @@ namespace BrawlStarsClone.Engine.Component.Physics;
 public class CircleCollider : Collider
 {
     private Transform _entityTransform = null!;
+
+    public CircleCollider(bool isStatic, Vector2D<float>? scale = null, bool usePhysics = false) : base(isStatic, scale,
+        usePhysics)
+    {
+    }
+
     public float Radius => 0.5f * MathF.Max(Scale.X, Scale.Y);
-    public override void OnLoad() => _entityTransform = Owner.GetComponent<Transform>();
+
+    public override void OnLoad()
+    {
+        _entityTransform = Owner.GetComponent<Transform>();
+    }
 
     protected override bool Intersect(Collider other)
     {
         if (other.GetType() == typeof(CircleCollider))
             return Vector3D.Distance(_entityTransform.Location, other.Owner.GetComponent<Transform>().Location) <
-                   (Radius + ((CircleCollider) other).Radius);
+                   Radius + ((CircleCollider) other).Radius;
         if (other.GetType() == typeof(SquareCollider))
         {
             var box = (SquareCollider) other;
@@ -27,10 +37,7 @@ public class CircleCollider : Collider
 
             return distance < Radius;
         }
-        return false;
-    }
 
-    public CircleCollider(bool isStatic, Vector2D<float>? scale = null, bool usePhysics = false) : base(isStatic, scale, usePhysics)
-    {
+        return false;
     }
 }

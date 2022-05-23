@@ -6,15 +6,20 @@ public static class Mathf
     {
         return Math.Clamp(t - MathF.Floor(t / length) * length, 0.0f, length);
     }
+
     public static float LerpAngle(float a, float b, float t)
     {
-        float delta = Repeat(b - a, 360);
+        var delta = Repeat(b - a, 360);
         if (delta > 180)
             delta -= 360;
         return a + delta * t;
     }
-    public static float Lerp(float value, float value2, float t) => (1 - Math.Clamp(t, 0, 1)) * value + Math.Clamp(t, 0, 1) * value2;
-    
+
+    public static float Lerp(float value, float value2, float t)
+    {
+        return (1 - Math.Clamp(t, 0, 1)) * value + Math.Clamp(t, 0, 1) * value2;
+    }
+
     public static float DegToRad(this float degrees)
     {
         return degrees * MathF.PI / 180f;

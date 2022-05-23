@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "pEhzr9kgZkH0KBW7mXeRacLwB5S6PgMxdYjGe2VVTAW1sDQcOIPpTKD2iUig0BLBNN/5jC9coy7yutopPKSAQg==",
+  "dgSpecHash": "0is/gnZTl6YPtrrR+2RLUbWCtSv2SGcYPS6OIbO8TPzvKW5YiMLks6T4sMfMfvCn2cBjiHuQvWci6QMHod4Ong==",
   "success": true,
-  "projectFilePath": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\BrawlStarsClone\\BrawlStarsClone.csproj",
+  "projectFilePath": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\BrawlStarsClone\\BrawlStarsClone.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\scion\\.nuget\\packages\\opentk\\4.7.1\\opentk.4.7.1.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\opentk.compute\\4.7.1\\opentk.compute.4.7.1.nupkg.sha512",
