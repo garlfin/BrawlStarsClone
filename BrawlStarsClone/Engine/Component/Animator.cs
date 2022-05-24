@@ -41,7 +41,7 @@ public class Animator : Component
 
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
-            GL.DispatchCompute(_renderer.Mesh.MeshVAO[0].Mesh.Vertices.Length, 1, 1);
+            GL.DispatchCompute((uint) Math.Ceiling((double) _renderer.Mesh.MeshVAO[0].Mesh.Vertices.Length / 32), 1, 1);
             GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
         }
 
@@ -50,8 +50,7 @@ public class Animator : Component
 
     private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> globalTransform)
     {
-        globalTransform = globalTransform * Animation[bone.Name]?.Frames[CurrentFrame] ??
-                          Matrix4X4<float>.Identity * bone.Offset;
+        globalTransform = globalTransform * Animation[bone.Name]?.Frames[CurrentFrame] ?? Matrix4X4<float>.Identity * bone.Offset;
         _matTransform[bone.Index] = globalTransform;
         for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], globalTransform);
     }

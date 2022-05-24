@@ -84,12 +84,10 @@ public class Mesh // Id rather this be a struct...
         if (Transparent) GL.Disable(EnableCap.Blend);
     }
 
-    public void SetSkinned(int boneCount)
+    public void SetSkinned()
     {
         if (IsSkinned) return;
         IsSkinned = true;
-        Hierarchy = new BoneHierarchy();
-        FlattenedHierarchy = new BoneHierarchy[boneCount];
         SkinnedVAO = new VAO[MeshVAO.Length];
     }
 }

@@ -13,7 +13,8 @@ public static class MeshLoader
 
     public static Mesh LoadMesh(string path, bool transparent = false, bool v2 = false)
     {
-        var reader = new BinaryReader(File.Open(path, FileMode.Open));
+        var file = File.Open(path, FileMode.Open, FileAccess.Read);
+        var reader = new BinaryReader(file);
         var meshCount = reader.ReadUInt16();
         var mesh = new Mesh
         {
@@ -35,42 +36,50 @@ public static class MeshLoader
 
             mesh.Materials[u] = reader.ReadString();
 
-            var boneCount = 0;
-            if (v2) boneCount = reader.ReadUInt16();
+            uint meshBoneCount = 0;
+            if (v2) meshBoneCount = reader.ReadUInt32();
 
-            if (boneCount != 0)
+            if (meshBoneCount > 0)
             {
-                mesh.SetSkinned(boneCount);
-                for (var i = 0; i < boneCount; i++)
-                {
-                    mesh.FlattenedHierarchy[i] = new BoneHierarchy
-                    {
-                        Name = reader.ReadString(),
-                        Parent = reader.ReadString(),
-                        Offset = reader.ReadMat4(),
-                        Children = new List<BoneHierarchy>()
-                    };
-                    if (mesh.FlattenedHierarchy[i].Parent == "Armature") mesh.Hierarchy = mesh.FlattenedHierarchy[i];
-                    // I need to come up with a better way to determine the root bone TODO
-                }
-
-                for (var i = 0; i < boneCount; i++)
-                for (var y = 0; y < boneCount; y++)
-                {
-                    if (mesh.FlattenedHierarchy[i].Parent != mesh.FlattenedHierarchy[y].Name) continue;
-                    mesh.FlattenedHierarchy[y].Children.Add(mesh.FlattenedHierarchy[i]);
-                    break;
-                }
-
-                data.Weights = new VertexWeight[reader.ReadUInt16()];
+                mesh.SetSkinned();
+                data.Weights = new VertexWeight[data.Vertices.Length];
                 for (var i = 0; i < data.Weights.Length; i++) data.Weights[i] = reader.ReadVertexWeight();
             }
 
-            mesh.MeshVAO[u] = new MeshVao(data, boneCount != 0);
+            mesh.MeshVAO[u] = new MeshVao(data, meshBoneCount > 0);
 
-            if (boneCount != 0)
-                mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, mesh.MeshVAO[u].EBO, data.Faces.Length);
+            if (meshBoneCount > 0) mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, mesh.MeshVAO[u].EBO, data.Faces.Length);
         }
+
+        ushort boneCount = 0;
+        if (v2) boneCount = reader.ReadUInt16();
+        if (boneCount > 0)
+        {
+            mesh.FlattenedHierarchy = new BoneHierarchy[boneCount];
+            
+            for (int i = 0; i < boneCount; i++)
+            {
+                BoneHierarchy bone = new BoneHierarchy()
+                {
+                    Name = reader.ReadString(),
+                    Parent = reader.ReadString(),
+                    Offset = reader.ReadMat4(),
+                    Children = new List<BoneHierarchy>()
+                };
+
+                for (int u = 0; u < mesh.FlattenedHierarchy.Length; u++)
+                {
+                    if (mesh.FlattenedHierarchy[u] == null) continue;
+                    if (mesh.FlattenedHierarchy[u].Name == bone.Parent)
+                        mesh.FlattenedHierarchy[u].Children.Add(bone);    
+                }
+                
+                
+                mesh.FlattenedHierarchy[i] = bone;
+                if (bone.Parent == "Scene") mesh.Hierarchy = bone;
+            }
+        }
+        if (file.Position < file.Length) Console.WriteLine($"WARNING: {file.Length - file.Position} bytes unread in file {path}");
 
         reader.Close();
         mesh.Transparent = transparent;
@@ -100,7 +109,11 @@ public static class MeshLoader
             {
                 reader.ReadUInt16();
                 reader.ReadUInt16();
-                channel.Frames[u] = reader.ReadMat4();
+                var location = reader.ReadVector3D();
+                var rotation = reader.ReadMat4();
+                var scale = reader.ReadVector3D();
+                channel.Frames[u] = Matrix4X4.CreateScale(scale)
+                    * rotation * Matrix4X4.CreateTranslation(location);
             }
 
             animation.ChannelFrames[i] = channel;

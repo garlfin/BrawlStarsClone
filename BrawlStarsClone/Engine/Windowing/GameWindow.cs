@@ -180,14 +180,13 @@ public class GameWindow
         testSkinned.AddComponent(new Component.Material(materials));
         testSkinned.AddComponent(new Transform(testSkinned, new Transformation
         {
-            Location = new Vector3D<float>(7.5f, 0, 3f),
+            Location = new Vector3D<float>(7.5f, 5, 3f),
             Rotation = new Vector3D<float>(0, 90, 0),
             Scale = Vector3D<float>.One
         }));
         testSkinned.AddComponent(new MeshRenderer(testSkinned,
             MeshLoader.LoadMesh("../../../../bsModel/animated.bnk", false, true)));
-        testSkinned.AddComponent(new Animator(testSkinned,
-            MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
+        testSkinned.AddComponent(new Animator(testSkinned, MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
 
         MatBuffer = new UniformBuffer(6400, BufferUsageHint.StreamDraw);
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, MatBuffer.ID);

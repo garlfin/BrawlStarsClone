@@ -19,7 +19,10 @@ public static class Program
         
         var stream = File.Open(finalPath, FileMode.Create);
         var writer = new BinaryWriter(stream, Encoding.UTF8, false);
-        
+
+        List<Bone> bones = new List<Bone>();
+        foreach (var bone in scene.RootNode.Children) IterateBone(bone, bones);
+
         writer.Write((ushort)scene.MeshCount);
         
         byte[] matrixData = new byte[64];
@@ -48,18 +51,11 @@ public static class Program
                 }
 
                 writer.Write(scene.Materials[currentMesh.MaterialIndex].Name);
-
-                writer.Write((ushort) currentMesh.BoneCount);
+                //writer.Write(new char[]{'W','?'});
+                writer.Write((uint) currentMesh.Vertices.Count);
                 if (!currentMesh.HasBones) return;
-
                 VertexWeight[] weights = new VertexWeight[currentMesh.Vertices.Count];
-                byte[] data = new byte[24 * weights.Length];
-
-                for (int j = 0; j < weights.Length; j++)
-                {
-                    weights[j] = new VertexWeight();
-                }
-
+                
                 for (var index = 0; index < currentMesh.BoneCount; index++)
                 {
                     var bone = currentMesh.Bones[index];
@@ -72,23 +68,26 @@ public static class Program
                             realIndex++;
                         }
 
-                        weights[weight.VertexID].Bone[realIndex] = (ushort) index;
+                        weights[weight.VertexID].Bone[realIndex] = GetBoneIndexFromName(bones[index].Name, bones);
                         weights[weight.VertexID].Weight[realIndex] = (ushort) (ushort.MaxValue * weight.Weight);
                     }
-
-                    writer.Write(bone.Name);
-                    writer.Write(scene.RootNode.FindNode(bone.Name).Parent.Name);
-                    var offset = bone.OffsetMatrix;
-                    Marshal.Copy((IntPtr) (&offset), matrixData, 0, 64);
-                    writer.Write(matrixData);
                 }
 
-                writer.Write((ushort)weights.Length);
-                fixed (VertexWeight* ptr =
-                           weights) Marshal.Copy((IntPtr) ptr, data, 0, sizeof(VertexWeight) * weights.Length);
+                byte[] data = new byte[sizeof(VertexWeight) * weights.Length];
+                fixed (VertexWeight* ptr = weights) 
+                    Marshal.Copy((IntPtr) ptr, data, 0, sizeof(VertexWeight) * weights.Length);
                 writer.Write(data);
             }
 
+            writer.Write((ushort) bones.Count);
+            foreach (var bone in bones)
+            {
+                writer.Write(bone.Name);
+                writer.Write(bone.Parent);
+                fixed(void* ptr = &bone.Offset) Marshal.Copy((IntPtr) ptr, matrixData, 0, 64);
+                writer.Write(matrixData);
+            }
+            
             writer.Close();
         }
 
@@ -109,16 +108,14 @@ public static class Program
                 {
                     writer.Write((ushort) i);
                     writer.Write((ushort) ((float) i / channel.PositionKeyCount * animation.DurationInTicks));
-                    Matrix4X4<float> transform = Matrix4X4.CreateScale(channel.ScalingKeys[i].Value.To3Df());
-                    transform *= channel.RotationKeys[i].Value.GetMatrix().To4X4();
-                    transform *= Matrix4X4.CreateTranslation(channel.PositionKeys[i].Value.To3Df());
-
-                    byte[] transformRaw = new byte[64];
-                    Marshal.Copy((IntPtr) (&transform), transformRaw, 0, 64);
-                    writer.Write(transformRaw);
+                    writer.Write(channel.PositionKeys[i].Value);
+                    byte[] raw = new byte[64];
+                    var transform = channel.RotationKeys[i].Value.GetMatrix().To4X4();
+                    Marshal.Copy((IntPtr) (&transform), raw, 0, 64);
+                    writer.Write(raw);
+                    writer.Write(channel.ScalingKeys[i].Value);
                 }    
             }
-
             stream.Close();
             writer.Close();
         }
@@ -148,5 +145,48 @@ public static class Program
     private static Vector3D<float> To3Df(this Vector3D vec)
     {
         return new Vector3D<float>(vec.X, vec.Y, vec.Z);
+    }
+
+    public class Bone
+    {
+        public string Name;
+        public string Parent;
+        public Matrix4x4 Offset;
+        public List<Bone> Children;
+    }
+
+    public static void IterateBone(Node bone, List<Bone> bones)
+    {
+        Matrix4x4 transform = bone.Transform;
+        transform.Inverse();
+        Bone newBone = new Bone()
+        {
+            Name = bone.Name,
+            Parent = bone.Parent.Name,
+            Offset = transform,
+            Children = new List<Bone>()
+        };
+        bones.Add(newBone);
+        foreach (var vBone in bones)
+            if (vBone.Name == bone.Parent.Name)
+                vBone.Children.Add(newBone);
+
+        foreach (var child in bone.Children) IterateBone(child, bones);
+    }
+
+    public static ushort GetBoneIndexFromName(string name, List<Bone> bones)
+    {
+        for (int i = 0; i < bones.Count; i++)
+            if (bones[i].Name == name)
+                return (ushort) i;
+        return 0;
+    }
+
+    public static void Write(this BinaryWriter writer, Quaternion quaternion)
+    {
+        writer.Write(quaternion.X);
+        writer.Write(quaternion.Y);
+        writer.Write(quaternion.Z);
+        writer.Write(quaternion.W);
     }
 }
