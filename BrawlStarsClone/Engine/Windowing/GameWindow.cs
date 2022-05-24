@@ -180,8 +180,8 @@ public class GameWindow
         testSkinned.AddComponent(new Component.Material(materials));
         testSkinned.AddComponent(new Transform(testSkinned, new Transformation
         {
-            Location = new Vector3D<float>(7.5f, 5, 3f),
-            Rotation = new Vector3D<float>(0, 90, 0),
+            Location = new Vector3D<float>(7.5f, 0, 3f),
+            Rotation = new Vector3D<float>(-90, 90, 0),
             Scale = Vector3D<float>.One
         }));
         testSkinned.AddComponent(new MeshRenderer(testSkinned,

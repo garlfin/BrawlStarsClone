@@ -68,9 +68,8 @@ public static class Program
                             realIndex++;
                         }
 
-                        weights[weight.VertexID].Bone[realIndex] = GetBoneIndexFromName(bones[index].Name, bones);
-                        weights[weight.VertexID].Weight[realIndex] = (ushort) (ushort.MaxValue * weight.Weight);
-                        
+                        weights[weight.VertexID].Bone = weights[weight.VertexID].Bone.ReplaceItem(realIndex, GetBoneIndexFromName(bone.Name, bones));
+                        weights[weight.VertexID].Weight = weights[weight.VertexID].Weight.ReplaceItem(realIndex, (ushort) (ushort.MaxValue * weight.Weight));
                     }
                 }
 
@@ -128,12 +127,8 @@ public static class Program
 
     private struct VertexWeight
     {
-        public unsafe fixed ushort Bone[4];
-        public unsafe fixed ushort Weight[4];
-    }
-    private static Vector3D<float> To3Df(this Vector3D vec)
-    {
-        return new Vector3D<float>(vec.X, vec.Y, vec.Z);
+        public Vector4D<ushort> Bone;
+        public Vector4D<ushort> Weight;
     }
 
     public class Bone
@@ -148,7 +143,7 @@ public static class Program
     {
         Matrix4x4 transform = bone.Transform;
         transform.Inverse();
-        Bone newBone = new Bone()
+        Bone newBone = new Bone
         {
             Name = bone.Name,
             Parent = bone.Parent.Name,
@@ -206,5 +201,17 @@ public static class Program
         angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
 
         return angles;
+    }
+
+    public static Vector4D<T> ReplaceItem<T>(this Vector4D<T> vec, int index, T item) where T : unmanaged, IFormattable,IEquatable<T>, IComparable<T>
+    {
+        return index switch
+        {
+            0 => new Vector4D<T>(item, vec.Y, vec.Z, vec.W),
+            1 => new Vector4D<T>(vec.X, item, vec.Z, vec.W),
+            2 => new Vector4D<T>(vec.X, vec.Y, item, vec.W),
+            3 => new Vector4D<T>(vec.X, vec.Y, vec.Z, item),
+        };
+
     }
 }
