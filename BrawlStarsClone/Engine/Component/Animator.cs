@@ -27,18 +27,13 @@ public class Animator : Component
         Owner.Window.SkinningShader.Use();
 
         if (CurrentFrame == Animation.FrameCount) CurrentFrame = 0;
+
+        IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
+            
+        fixed (void* ptr = _matTransform) Owner.Window.MatBuffer.ReplaceData(ptr);
         
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
-            for (var j = 0; j < _renderer.Mesh.FlattenedHierarchy.Length; j++)
-                _renderer.Mesh.FlattenedHierarchy[j].Index = (ushort) j;
-
-            IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
-            fixed (void* ptr = _matTransform)
-            {
-                Owner.Window.MatBuffer.ReplaceData(ptr);
-            }
-
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
             GL.DispatchCompute((uint) Math.Ceiling((double) _renderer.Mesh.MeshVAO[0].Mesh.Vertices.Length / 32), 1, 1);
@@ -50,7 +45,15 @@ public class Animator : Component
 
     private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> globalTransform)
     {
-        globalTransform = globalTransform * Animation[bone.Name]?.Frames[CurrentFrame] ?? Matrix4X4<float>.Identity * bone.Offset;
+        var frame = Animation[bone.Name]?.Frames[CurrentFrame];
+        
+        if (frame is null)
+        {
+            Matrix4X4.Invert(bone.Offset, out var inverse);
+            globalTransform = globalTransform * inverse * bone.Offset;
+        }
+        else globalTransform = globalTransform * frame.Value * bone.Offset;
+
         _matTransform[bone.Index] = globalTransform;
         for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], globalTransform);
     }

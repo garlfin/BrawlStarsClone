@@ -70,6 +70,7 @@ public static class Program
 
                         weights[weight.VertexID].Bone[realIndex] = GetBoneIndexFromName(bones[index].Name, bones);
                         weights[weight.VertexID].Weight[realIndex] = (ushort) (ushort.MaxValue * weight.Weight);
+                        
                     }
                 }
 
@@ -109,10 +110,7 @@ public static class Program
                     writer.Write((ushort) i);
                     writer.Write((ushort) ((float) i / channel.PositionKeyCount * animation.DurationInTicks));
                     writer.Write(channel.PositionKeys[i].Value);
-                    byte[] raw = new byte[64];
-                    var transform = channel.RotationKeys[i].Value.GetMatrix().To4X4();
-                    Marshal.Copy((IntPtr) (&transform), raw, 0, 64);
-                    writer.Write(raw);
+                    writer.Write(channel.RotationKeys[i].Value.ToEulerAngles());
                     writer.Write(channel.ScalingKeys[i].Value);
                 }    
             }
@@ -133,15 +131,6 @@ public static class Program
         public unsafe fixed ushort Bone[4];
         public unsafe fixed ushort Weight[4];
     }
-
-    private static Matrix4X4<float> To4X4(this Matrix3x3 mat)
-    {
-        return new Matrix4X4<float>(mat.A1, mat.A2, mat.A3, 0,
-                                    mat.B1, mat.B2, mat.B3, 0,
-                                    mat.C1, mat.C2, mat.C3, 0,
-                                    0, 0, 0, 1);
-    }
-
     private static Vector3D<float> To3Df(this Vector3D vec)
     {
         return new Vector3D<float>(vec.X, vec.Y, vec.Z);
@@ -188,5 +177,34 @@ public static class Program
         writer.Write(quaternion.Y);
         writer.Write(quaternion.Z);
         writer.Write(quaternion.W);
+    }
+    // https://stackoverflow.com/questions/70462758/c-sharp-how-to-convert-quaternions-to-euler-angles-xyz
+    // Yoinked Code
+    public static Vector3D ToEulerAngles(this Quaternion q)
+    {
+        Vector3D angles = new();
+
+        // roll / x
+        double sinr_cosp = 2 * (q.W * q.X + q.Y * q.Z);
+        double cosr_cosp = 1 - 2 * (q.X * q.X + q.Y * q.Y);
+        angles.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+        // pitch / y
+        double sinp = 2 * (q.W * q.Y - q.Z * q.X);
+        if (Math.Abs(sinp) >= 1)
+        {
+            angles.Y = (float)Math.CopySign(Math.PI / 2, sinp);
+        }
+        else
+        {
+            angles.Y = (float)Math.Asin(sinp);
+        }
+
+        // yaw / z
+        double siny_cosp = 2 * (q.W * q.Z + q.X * q.Y);
+        double cosy_cosp = 1 - 2 * (q.Y * q.Y + q.Z * q.Z);
+        angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+        return angles;
     }
 }

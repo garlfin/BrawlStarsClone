@@ -9,8 +9,6 @@ namespace BrawlStarsClone.Engine.Utility;
 
 public static class MeshLoader
 {
-    private static BoneHierarchy bone;
-
     public static Mesh LoadMesh(string path, bool transparent = false, bool v2 = false)
     {
         var file = File.Open(path, FileMode.Open, FileAccess.Read);
@@ -66,17 +64,19 @@ public static class MeshLoader
                     Offset = reader.ReadMat4(),
                     Children = new List<BoneHierarchy>()
                 };
-
-                for (int u = 0; u < mesh.FlattenedHierarchy.Length; u++)
-                {
-                    if (mesh.FlattenedHierarchy[u] == null) continue;
-                    if (mesh.FlattenedHierarchy[u].Name == bone.Parent)
-                        mesh.FlattenedHierarchy[u].Children.Add(bone);    
-                }
-                
-                
                 mesh.FlattenedHierarchy[i] = bone;
                 if (bone.Parent == "Scene") mesh.Hierarchy = bone;
+            }
+
+            for (var i = 0; i < mesh.FlattenedHierarchy.Length; i++)
+            {
+                mesh.FlattenedHierarchy[i].Index = (ushort) i;
+                for (int u = 0; u < mesh.FlattenedHierarchy.Length; u++)
+                {
+                    if (mesh.FlattenedHierarchy[u].Name != mesh.FlattenedHierarchy[i].Parent) continue;
+                    mesh.FlattenedHierarchy[u].Children.Add(mesh.FlattenedHierarchy[i]);
+                    break;
+                }
             }
         }
         if (file.Position < file.Length) Console.WriteLine($"WARNING: {file.Length - file.Position} bytes unread in file {path}");
@@ -110,7 +110,9 @@ public static class MeshLoader
                 reader.ReadUInt16();
                 reader.ReadUInt16();
                 var location = reader.ReadVector3D();
-                var rotation = reader.ReadMat4();
+                var rotation = Matrix4X4.CreateRotationX(reader.ReadSingle())
+                                            * Matrix4X4.CreateRotationY(reader.ReadSingle())
+                                            * Matrix4X4.CreateRotationZ(reader.ReadSingle());
                 var scale = reader.ReadVector3D();
                 channel.Frames[u] = Matrix4X4.CreateScale(scale)
                     * rotation * Matrix4X4.CreateTranslation(location);
