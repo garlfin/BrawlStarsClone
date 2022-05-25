@@ -15,7 +15,7 @@ public abstract class Texture : Asset
     public Vector2D<int> Size => new(_width, _height);
     public int ID => _id;
 
-    public virtual int Use(int slot)
+    public override int Use(int slot)
     {
         if (TexSlotManager.IsSameSlot(slot, _id)) return slot;
         TexSlotManager.SetSlot(slot, _id);

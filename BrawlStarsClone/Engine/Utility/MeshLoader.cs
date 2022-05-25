@@ -14,6 +14,11 @@ public static class MeshLoader
     {
         var file = File.Open(path, FileMode.Open, FileAccess.Read);
         var reader = new BinaryReader(file);
+
+        var header = new string(reader.ReadChars(4));
+        if (header != "BS3D") throw new FileLoadException($"Invalid header in file {path}");
+        var version = reader.ReadUInt32();
+        if (version < 3) throw new FileLoadException($"Version {version} unsupported in file {path}!");
         var meshCount = reader.ReadUInt16();
         var mesh = new Mesh
         {
@@ -23,6 +28,7 @@ public static class MeshLoader
 
         for (var u = 0; u < meshCount; u++)
         {
+            string name = reader.ReadString();
             var data = new MeshData();
             data.Vertices = new Vector3D<float>[reader.ReadUInt32()];
             for (var i = 0; i < data.Vertices.Length; i++) data.Vertices[i] = reader.ReadVector3D();
@@ -35,36 +41,42 @@ public static class MeshLoader
 
             mesh.Materials[u] = reader.ReadString();
 
-            uint meshBoneCount = 0;
-            if (v2) meshBoneCount = reader.ReadUInt32();
-
-            if (meshBoneCount > 0)
+            var hasBones = reader.ReadBoolean();
+            if (hasBones)
             {
                 mesh.SetSkinned();
                 data.Weights = new VertexWeight[data.Vertices.Length];
                 for (var i = 0; i < data.Weights.Length; i++) data.Weights[i] = reader.ReadVertexWeight();
             }
 
-            mesh.MeshVAO[u] = new MeshVao(data, meshBoneCount > 0);
+            mesh.MeshVAO[u] = new MeshVao(data, hasBones);
 
-            if (meshBoneCount > 0) mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, mesh.MeshVAO[u].EBO, data.Faces.Length);
+            if (hasBones) mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, mesh.MeshVAO[u].EBO, data.Faces.Length);
         }
-
-        ushort boneCount = 0;
-        if (v2) boneCount = reader.ReadUInt16();
+        
+        var boneCount = reader.ReadUInt16();
         if (boneCount > 0)
         {
             mesh.FlattenedHierarchy = new BoneHierarchy[boneCount];
             
             for (int i = 0; i < boneCount; i++)
             {
-                BoneHierarchy bone = new BoneHierarchy()
+                BoneHierarchy bone = new BoneHierarchy
                 {
                     Name = reader.ReadString(),
                     Parent = reader.ReadString(),
-                    Offset = reader.ReadMat4(),
                     Children = new List<BoneHierarchy>()
                 };
+
+                if (version > 3)
+                {
+                    bool useTransform = reader.ReadBoolean();
+                    int index = reader.ReadUInt16();
+                    if (useTransform) mesh.MeshTransformsSkinned[index] = boneCount;
+                }
+
+                bone.Offset = reader.ReadMat4();
+                    
                 mesh.FlattenedHierarchy[i] = bone;
                 if (bone.Parent == "Scene") mesh.Hierarchy = bone;
             }

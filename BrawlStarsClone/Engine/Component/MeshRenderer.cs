@@ -24,7 +24,7 @@ public sealed class MeshRenderer : Component
     {
         if (Mesh.Instanced && !_overrideInstance) return;
         var matrix = Owner.GetComponent<Transform>().Model;
-        ProgramManager.PushModelMatrix(&matrix, sizeof(float) * 16);
+        ProgramManager.PushModelMatrix(&matrix, 64);
         ProgramManager.MatCap.OtherData[0] = Alpha;
 
         if (Alpha < 1 && Mesh.Transparent) GL.Enable(EnableCap.Blend);

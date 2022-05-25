@@ -54,6 +54,11 @@ public class ShaderProgram : Asset
         GL.ProgramUniform1(ID, realLocation, data);
     }
 
+    public void SetUniform(int uniform, int data)
+    {
+        GL.ProgramUniform1(ID, uniform, data);
+    }
+
     public unsafe void SetUniform(string uniform, Vector3D<float> data)
     {
         var realLocation = GL.GetUniformLocation(ID, uniform);

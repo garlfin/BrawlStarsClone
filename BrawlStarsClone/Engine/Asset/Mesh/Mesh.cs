@@ -14,6 +14,7 @@ public class Mesh // Id rather this be a struct...
     public string[] Materials;
     public MeshVao[] MeshVAO;
     public VAO[] SkinnedVAO;
+    public int[] MeshTransformsSkinned;
 
     public bool IsSkinned { get; set; }
 
@@ -89,6 +90,7 @@ public class Mesh // Id rather this be a struct...
         if (IsSkinned) return;
         IsSkinned = true;
         SkinnedVAO = new VAO[MeshVAO.Length];
+        MeshTransformsSkinned = new int[MeshVAO.Length];
     }
 }
 

@@ -91,7 +91,7 @@ public class GameWindow
         AssetManager.DeleteAllAssets();
     }
 
-    private void OnLoad()
+    private unsafe void OnLoad()
     {
         GL.Enable(EnableCap.DebugOutput);
 
@@ -164,32 +164,22 @@ public class GameWindow
             Rotation = new Vector3D<float>(90, 0, 180),
             Scale = new Vector3D<float>(0.15f, 0.15f, 0.15f)
         });
+        
         var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
-            new ImageTexture("../../../res/squeak.pvr"));
+            new ImageTexture("../../../res/shelly.pvr"));
         var materials = new Material[]
         {
-            whiteBase, whiteBase, whiteBase, whiteBase, whiteBase
+            whiteBase, whiteBase, whiteBase, whiteBase, whiteBase, whiteBase, whiteBase, whiteBase, whiteBase
         };
         player.AddComponent(new Component.Material(materials));
-        var playerMesh = MeshLoader.LoadMesh("../../../squeak.bnk");
+        var playerMesh = MeshLoader.LoadMesh("../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
+        player.AddComponent(new Animator(player, MeshLoader.LoadAnimation("C:/Users/scion/Documents/GitHub/BrawlStarsClone/bsModel/bin/Release/net6.0/animation.bnk")));
         player.AddComponent(new PlayerMovement());
         player.AddComponent(new SquareCollider(player, false));
         camera.AddComponent(new CameraMovement(player));
 
-        var testSkinned = new Entity(this);
-        testSkinned.AddComponent(new Component.Material(materials));
-        testSkinned.AddComponent(new Transform(testSkinned, new Transformation
-        {
-            Location = new Vector3D<float>(7.5f, 0, 3f),
-            Rotation = new Vector3D<float>(180, 90, 0),
-            Scale = Vector3D<float>.One
-        }));
-        testSkinned.AddComponent(new MeshRenderer(testSkinned,
-            MeshLoader.LoadMesh("../../../../bsModel/animated.bnk", false, true)));
-        testSkinned.AddComponent(new Animator(testSkinned, MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
-
-        MatBuffer = new UniformBuffer(6400, BufferUsageHint.StreamDraw);
+        MatBuffer = new UniformBuffer(sizeof(Matrix4X4<float>) * 255, BufferUsageHint.StreamDraw);
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, MatBuffer.ID);
 
         PhysicsSystem.Load();
