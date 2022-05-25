@@ -13,7 +13,7 @@ public class ImageTexture : Texture
         reader.ReadUInt32();
         reader.ReadUInt32();
 
-        var internalFormat = (Format) reader.ReadUInt64() switch
+        var internalFormat = (Format)reader.ReadUInt64() switch
         {
             Format.BC1 => InternalFormat.CompressedRgbaS3tcDxt1Ext,
             Format.BC3 => InternalFormat.CompressedRgbaS3tcDxt3Ext,
@@ -31,7 +31,7 @@ public class ImageTexture : Texture
 
         var mipCount = reader.ReadUInt32();
         var metaDataSize = reader.ReadUInt32();
-        reader.ReadBytes((int) metaDataSize);
+        reader.ReadBytes((int)metaDataSize);
         var calcMip = !(mipCount > 1);
 
         _id = GL.GenTexture();
@@ -41,20 +41,22 @@ public class ImageTexture : Texture
         {
             var currentMipSize = GetMipSize(mip);
             var imageData =
-                reader.ReadBytes((int) MathF.Ceiling(currentMipSize.X * currentMipSize.Y / 16f) * 16);
+                reader.ReadBytes((int)MathF.Ceiling(currentMipSize.X * currentMipSize.Y / 16f) * 16);
             fixed (void* ptr = imageData)
             {
                 GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, internalFormat, currentMipSize.X,
-                    currentMipSize.Y, 0, imageData.Length, (IntPtr) ptr);
+                    currentMipSize.Y, 0, imageData.Length, (IntPtr)ptr);
             }
         }
 
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) TextureWrapMode.Repeat);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) TextureWrapMode.Repeat);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-            (int) (calcMip && genMips || mipCount > 1 ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
+            (int)((calcMip && genMips) || mipCount > 1
+                ? TextureMinFilter.LinearMipmapLinear
+                : TextureMinFilter.Linear));
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
         if (calcMip && genMips) GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         reader.Close();
         file.Close();

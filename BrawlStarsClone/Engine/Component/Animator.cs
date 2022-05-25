@@ -10,6 +10,8 @@ public class Animator : Component
     private readonly Matrix4X4<float>[] _matTransform = new Matrix4X4<float>[255];
     private readonly MeshRenderer _renderer;
 
+    private float _currentTime;
+
     public Animator(Entity owner, Animation animation) : base(owner)
     {
         SkinManager.Register(this);
@@ -20,13 +22,27 @@ public class Animator : Component
     }
 
     public Animation Animation { get; set; }
+    public bool Paused { get; set; }
 
-    private float _currentTime;
-    public bool Paused { get; set; } = false;
-    public void Reset() => _currentTime = 0;
-    public void PlayPause() => Paused = !Paused;
-    public void Pause() => Paused = true;
-    public void Play() => Paused = false;
+    public void Reset()
+    {
+        _currentTime = 0;
+    }
+
+    public void PlayPause()
+    {
+        Paused = !Paused;
+    }
+
+    public void Pause()
+    {
+        Paused = true;
+    }
+
+    public void Play()
+    {
+        Paused = false;
+    }
 
     public override unsafe void OnRender(float deltaTime)
     {
@@ -35,50 +51,47 @@ public class Animator : Component
         if (_currentTime > Animation.Time) _currentTime = 0;
 
         IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
-        
-        fixed (void* ptr = _matTransform) Owner.Window.MatBuffer.ReplaceData(ptr, 16320, 0);
-      
+
+        fixed (void* ptr = _matTransform)
+        {
+            Owner.Window.MatBuffer.ReplaceData(ptr, 16320);
+        }
+
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
-                Owner.Window.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransformsSkinned[i]);
-                GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
-                GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
-                GL.DispatchCompute((uint)Math.Ceiling((double)_renderer.Mesh.MeshVAO[i].Mesh.Vertices.Length / 32), 1, 1);
-                GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
+            Owner.Window.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransformsSkinned[i]);
+            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
+            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
+            GL.DispatchCompute((uint)Math.Ceiling((double)_renderer.Mesh.MeshVAO[i].Mesh.Vertices.Length / 32), 1, 1);
+            GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
         }
-        
+
         if (!Paused) _currentTime += deltaTime;
     }
 
-    private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> globalTransform)
+    private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> parentTransform)
     {
-        var frame = Animation[bone.Name]?.Frames[(int) MathF.Floor(_currentTime * Animation.FPS)];
+        var frame = Animation[bone.Name]?.Frames[(int)MathF.Floor(_currentTime * Animation.FPS)];
 
-        if (frame is null)
-        {
-            Matrix4X4.Invert(bone.Offset, out var inverse);
-            globalTransform *= bone.Offset; 
-        }
-        else
-        {
-            /*
-            var secondTime = CurrentTime * Animation.FPS;
-            var frame2 = Animation[bone.Name]?.Frames[(int)MathF.Min(MathF.Ceiling(secondTime), Animation.FrameCount-1)];
-            var location = Vector3D.Lerp(frame.Value.Location, frame2!.Value.Location, secondTime - CurrentTime);
-            var rotation = Mathf.LerpAngle(frame.Value.Rotation, frame2.Value.Location, secondTime - CurrentTime);
-            var scale = Vector3D.Lerp(frame.Value.Scale, frame2.Value.Scale, secondTime - CurrentTime);
-            */
-            
-            var finalTransform = Matrix4X4.CreateScale(frame.Value.Scale)
-                                 * Matrix4X4.CreateRotationX(frame.Value.Rotation.X)
-                                 * Matrix4X4.CreateRotationY(frame.Value.Rotation.Y)
-                                 * Matrix4X4.CreateRotationZ(frame.Value.Rotation.Z)
-                                 * Matrix4X4.CreateTranslation(frame.Value.Location);
-            globalTransform = globalTransform * finalTransform * bone.Offset;
-        }
+        /*
+        var secondTime = CurrentTime * Animation.FPS;
+        var frame2 = Animation[bone.Name]?.Frames[(int)MathF.Min(MathF.Ceiling(secondTime), Animation.FrameCount-1)];
+        var location = Vector3D.Lerp(frame.Value.Location, frame2!.Value.Location, secondTime - CurrentTime);
+        var rotation = Mathf.LerpAngle(frame.Value.Rotation, frame2.Value.Location, secondTime - CurrentTime);
+        var scale = Vector3D.Lerp(frame.Value.Scale, frame2.Value.Scale, secondTime - CurrentTime);
+        */
 
-        _matTransform[bone.Index] = globalTransform;
-        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], globalTransform);
+        var finalTransform = Matrix4X4<float>.Identity;
+        if (frame is not null)
+            finalTransform = Matrix4X4.CreateTranslation(frame.Value.Location)
+                             * Matrix4X4.CreateFromQuaternion(frame.Value.Rotation)
+                             * Matrix4X4.CreateScale(frame.Value.Scale);
+
+        parentTransform *= finalTransform;
+
+        _matTransform[bone.Index] = _renderer.Mesh.Hierarchy.Offset * parentTransform * bone.Offset;
+
+        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], parentTransform);
     }
 }
 

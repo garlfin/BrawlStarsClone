@@ -12,7 +12,8 @@ public static class Program
     {
         var context = new AssimpContext();
         var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open),
-            PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes | PostProcessSteps.OptimizeGraph | PostProcessSteps.LimitBoneWeights);
+            PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes |
+            PostProcessSteps.LimitBoneWeights);
 
         var finalPath = $"{Path.GetDirectoryName(args[0])}\\{Path.GetFileNameWithoutExtension(args[0])}.bnk";
         if (args.Length == 2) finalPath = $"{args[1]}{Path.GetFileNameWithoutExtension(args[0])}.bnk";
@@ -22,14 +23,14 @@ public static class Program
 
         var bones = new List<Bone>();
         IterateBone(scene.RootNode, bones);
-        
+
 
         var matrixData = new byte[64];
         if (scene.HasMeshes)
         {
-            writer.Write(new char[] {'B', 'S', '3', 'D'});
-            writer.Write((uint) 4); // Version 
-            writer.Write((ushort) scene.MeshCount);
+            writer.Write(new[] { 'B', 'S', '3', 'D' });
+            writer.Write((uint)4); // Version 
+            writer.Write((ushort)scene.MeshCount);
             for (var i = 0; i < scene.MeshCount; i++)
             {
                 var currentMesh = scene.Meshes[i];
@@ -48,10 +49,11 @@ public static class Program
                 writer.Write(currentMesh.Faces.Count);
                 foreach (var face in currentMesh.Faces)
                 {
-                    writer.Write((ushort) face.Indices[0]);
-                    writer.Write((ushort) face.Indices[1]);
-                    writer.Write((ushort) face.Indices[2]);
+                    writer.Write((ushort)face.Indices[0]);
+                    writer.Write((ushort)face.Indices[1]);
+                    writer.Write((ushort)face.Indices[2]);
                 }
+
                 writer.Write(scene.Materials[currentMesh.MaterialIndex].Name);
                 writer.Write(currentMesh.HasBones);
                 if (!currentMesh.HasBones) continue;
@@ -69,35 +71,38 @@ public static class Program
                             realIndex++;
                         }
 
-                        weights[weight.VertexID].Bone = weights[weight.VertexID].Bone
-                            .ReplaceItem(realIndex, GetBoneIndexFromName(bone.Name, bones));
+                        var boneIndex = GetBoneIndexFromName(bone.Name, bones);
+                        bones[boneIndex].Offset = bone.OffsetMatrix;
+                        weights[weight.VertexID].Bone = weights[weight.VertexID].Bone.ReplaceItem(realIndex, boneIndex);
                         weights[weight.VertexID].Weight = weights[weight.VertexID].Weight
-                            .ReplaceItem(realIndex, (ushort) (ushort.MaxValue * weight.Weight));
+                            .ReplaceItem(realIndex, (ushort)(ushort.MaxValue * weight.Weight));
                     }
                 }
 
                 var data = new byte[sizeof(VertexWeight) * weights.Length];
                 fixed (VertexWeight* ptr = weights)
                 {
-                    Marshal.Copy((IntPtr) ptr, data, 0, sizeof(VertexWeight) * weights.Length);
+                    Marshal.Copy((IntPtr)ptr, data, 0, sizeof(VertexWeight) * weights.Length);
                 }
 
                 writer.Write(data);
             }
 
-            writer.Write((ushort) bones.Count);
+            writer.Write((ushort)bones.Count);
             foreach (var bone in bones)
             {
                 writer.Write(bone.Name);
                 writer.Write(bone.Parent);
                 writer.Write(bone.MeshIndex is not null);
-                writer.Write((ushort) (bone.MeshIndex ?? 0));
+                writer.Write((ushort)(bone.MeshIndex ?? 0));
                 fixed (void* ptr = &bone.Offset)
                 {
-                    Marshal.Copy((IntPtr) ptr, matrixData, 0, 64);
+                    Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
                 }
+
                 writer.Write(matrixData);
             }
+
             writer.Close();
             stream.Close();
         }
@@ -108,19 +113,19 @@ public static class Program
             stream = File.Open("animation.bnk", FileMode.Create);
             writer = new BinaryWriter(stream, Encoding.UTF8, false);
 
-            writer.Write((ushort) (animation.NodeAnimationChannels[0].PositionKeyCount / animation.DurationInTicks));
-            writer.Write((ushort) animation.NodeAnimationChannels[0].PositionKeyCount);
+            writer.Write((ushort)(animation.NodeAnimationChannels[0].PositionKeyCount / animation.DurationInTicks));
+            writer.Write((ushort)animation.NodeAnimationChannels[0].PositionKeyCount);
 
-            writer.Write((ushort) animation.NodeAnimationChannelCount);
+            writer.Write((ushort)animation.NodeAnimationChannelCount);
             foreach (var channel in animation.NodeAnimationChannels)
             {
                 writer.Write(channel.NodeName);
                 for (var i = 0; i < channel.PositionKeyCount; i++)
                 {
-                    writer.Write((ushort) i);
-                    writer.Write((ushort) ((float) i / channel.PositionKeyCount * animation.DurationInTicks));
+                    writer.Write((ushort)i);
+                    writer.Write((ushort)((float)i / channel.PositionKeyCount * animation.DurationInTicks));
                     writer.Write(channel.PositionKeys[i].Value);
-                    writer.Write(channel.RotationKeys[i].Value.ToEulerAngles());
+                    writer.Write(channel.RotationKeys[i].Value);
                     writer.Write(channel.ScalingKeys[i].Value);
                 }
             }
@@ -145,12 +150,12 @@ public static class Program
         {
             Name = bone.Name,
             Parent = bone.Parent?.Name ?? "",
-            Offset = transform,
-            Children = new List<Bone>()
+            Children = new List<Bone>(),
+            Offset = transform
         };
-        
+
         if (bone.MeshIndices.Count > 0) newBone.MeshIndex = bone.MeshIndices[0];
-        
+
         bones.Add(newBone);
         foreach (var vBone in bones)
             if (vBone.Name == bone.Parent?.Name)
@@ -163,7 +168,7 @@ public static class Program
     {
         for (var i = 0; i < bones.Count; i++)
             if (bones[i].Name == name)
-                return (ushort) i;
+                return (ushort)i;
         return 0;
     }
 
@@ -173,32 +178,6 @@ public static class Program
         writer.Write(quaternion.Y);
         writer.Write(quaternion.Z);
         writer.Write(quaternion.W);
-    }
-
-    // https://stackoverflow.com/questions/70462758/c-sharp-how-to-convert-quaternions-to-euler-angles-xyz
-    // Yoinked Code
-    private static Vector3D ToEulerAngles(this Quaternion q)
-    {
-        Vector3D angles = new();
-
-        // roll / x
-        double sinr_cosp = 2 * (q.W * q.X + q.Y * q.Z);
-        double cosr_cosp = 1 - 2 * (q.X * q.X + q.Y * q.Y);
-        angles.X = (float) Math.Atan2(sinr_cosp, cosr_cosp);
-
-        // pitch / y
-        double sinp = 2 * (q.W * q.Y - q.Z * q.X);
-        if (Math.Abs(sinp) >= 1)
-            angles.Y = (float) Math.CopySign(Math.PI / 2, sinp);
-        else
-            angles.Y = (float) Math.Asin(sinp);
-
-        // yaw / z
-        double siny_cosp = 2 * (q.W * q.Z + q.X * q.Y);
-        double cosy_cosp = 1 - 2 * (q.Y * q.Y + q.Z * q.Z);
-        angles.Z = (float) Math.Atan2(siny_cosp, cosy_cosp);
-
-        return angles;
     }
 
     public static Vector4D<T> ReplaceItem<T>(this Vector4D<T> vec, int index, T item)
@@ -223,9 +202,9 @@ public static class Program
     public class Bone
     {
         public List<Bone> Children;
+        public int? MeshIndex;
         public string Name;
         public Matrix4x4 Offset;
         public string Parent;
-        public int? MeshIndex;
     }
 }

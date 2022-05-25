@@ -44,10 +44,10 @@ public static class BinaryHelper
             Bone3 = reader.ReadUInt16(),
             Bone4 = reader.ReadUInt16(),
 
-            Weight1 = (float) reader.ReadUInt16() / ushort.MaxValue,
-            Weight2 = (float) reader.ReadUInt16() / ushort.MaxValue,
-            Weight3 = (float) reader.ReadUInt16() / ushort.MaxValue,
-            Weight4 = (float) reader.ReadUInt16() / ushort.MaxValue
+            Weight1 = (float)reader.ReadUInt16() / ushort.MaxValue,
+            Weight2 = (float)reader.ReadUInt16() / ushort.MaxValue,
+            Weight3 = (float)reader.ReadUInt16() / ushort.MaxValue,
+            Weight4 = (float)reader.ReadUInt16() / ushort.MaxValue
         };
     }
 

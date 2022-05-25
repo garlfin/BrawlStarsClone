@@ -63,21 +63,21 @@ public class ShaderProgram : Asset
     {
         var realLocation = GL.GetUniformLocation(ID, uniform);
         if (realLocation == -1) return;
-        GL.ProgramUniform3(ID, realLocation, 1, (float*) &data);
+        GL.ProgramUniform3(ID, realLocation, 1, (float*)&data);
     }
 
     public unsafe void SetUniform(string uniform, Matrix4X4<float>* data)
     {
         var realLocation = GL.GetUniformLocation(ID, uniform);
         if (realLocation == -1) return;
-        GL.ProgramUniformMatrix4(ID, realLocation, 1, false, (float*) data);
+        GL.ProgramUniformMatrix4(ID, realLocation, 1, false, (float*)data);
     }
 
     public unsafe void SetUniform(string uniform, Matrix4X4<float> data)
     {
         var realLocation = GL.GetUniformLocation(ID, uniform);
         if (realLocation == -1) return;
-        GL.ProgramUniformMatrix4(ID, realLocation, 1, false, (float*) &data);
+        GL.ProgramUniformMatrix4(ID, realLocation, 1, false, (float*)&data);
     }
 
     public void SetUniform(string uniform, float data)
@@ -170,7 +170,7 @@ public struct Matrices
         {
             fixed (float* ptr = &Model[index * 16])
             {
-                return (Matrix4X4<float>*) ptr;
+                return (Matrix4X4<float>*)ptr;
             }
         }
     }

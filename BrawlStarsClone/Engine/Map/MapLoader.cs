@@ -79,7 +79,7 @@ public static class MapLoader
         for (var i = 0; i < matCapMaterials.Length; i++)
         {
             var name = reader.ReadPythonString();
-            var currentCap = (MatCapType) reader.ReadUInt32() switch
+            var currentCap = (MatCapType)reader.ReadUInt32() switch
             {
                 MatCapType.Diffuse => Default,
                 MatCapType.Specular => Specular,
@@ -149,7 +149,7 @@ public static class MapLoader
                     if (matCapMaterial.Item2 == finalTile.Materials[0])
                         material = matCapMaterial.Item1;
 
-                entity.AddComponent(new Component.Material(new[] {material}!));
+                entity.AddComponent(new Component.Material(new[] { material }!));
                 entity.AddComponent(new MeshRenderer(entity, finalTile));
                 if (tile != 'g')
                 {

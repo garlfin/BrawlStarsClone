@@ -22,10 +22,10 @@ public class CircleCollider : Collider
     {
         if (other.GetType() == typeof(CircleCollider))
             return Vector3D.Distance(_entityTransform.Location, other.Owner.GetComponent<Transform>().Location) <
-                   Radius + ((CircleCollider) other).Radius;
+                   Radius + ((CircleCollider)other).Radius;
         if (other.GetType() == typeof(SquareCollider))
         {
-            var box = (SquareCollider) other;
+            var box = (SquareCollider)other;
 
             var pos2D = new Vector2D<float>(_entityTransform.Location.X, _entityTransform.Location.Z);
 

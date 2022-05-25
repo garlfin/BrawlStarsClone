@@ -14,7 +14,7 @@ public class FrameBuffer : Asset
 
         ID = GL.GenFramebuffer();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
-        GL.DrawBuffers(1, new[] {DrawBuffersEnum.ColorAttachment0});
+        GL.DrawBuffers(1, new[] { DrawBuffersEnum.ColorAttachment0 });
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
@@ -34,7 +34,7 @@ public class FrameBuffer : Asset
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
         GL.Viewport(0, 0, _width, _height);
-        if (mask != null) GL.Clear((ClearBufferMask) mask);
+        if (mask != null) GL.Clear((ClearBufferMask)mask);
     }
 
     public void SetShadow()

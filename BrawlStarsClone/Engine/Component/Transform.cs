@@ -48,3 +48,10 @@ public struct Transformation
     public Vector3D<float> Rotation;
     public Vector3D<float> Scale;
 }
+
+public struct TransformationQuaternion
+{
+    public Vector3D<float> Location;
+    public Quaternion<float> Rotation;
+    public Vector3D<float> Scale;
+}

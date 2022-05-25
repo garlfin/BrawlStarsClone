@@ -11,11 +11,11 @@ public class EmptyTexture : Texture
         _id = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, _id);
         GL.TexImage2D(TextureTarget.Texture2D, 0, format, width, height, 0, pixelFormat, PixelType.Short, IntPtr.Zero);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) wrapMode);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) wrapMode);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
         if (shadow)
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode,
-                (int) TextureCompareMode.CompareRefToTexture);
+                (int)TextureCompareMode.CompareRefToTexture);
 
         TextureMinFilter filter;
         var magFilter =
@@ -26,8 +26,8 @@ public class EmptyTexture : Texture
                 : TextureMinFilter.LinearMipmapNearest;
 
 
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) magFilter);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) filter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filter);
 
         if (genMips) GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
     }

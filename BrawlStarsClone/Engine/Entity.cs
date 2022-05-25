@@ -17,7 +17,7 @@ public class Entity
     {
         foreach (var component in _components)
             if (component.GetType() == typeof(T))
-                return (T) component;
+                return (T)component;
         return null!;
     }
 

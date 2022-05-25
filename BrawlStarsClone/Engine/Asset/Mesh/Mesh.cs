@@ -12,9 +12,9 @@ public class Mesh // Id rather this be a struct...
     private int _modelBO;
 
     public string[] Materials;
+    public int[] MeshTransformsSkinned;
     public MeshVao[] MeshVAO;
     public VAO[] SkinnedVAO;
-    public int[] MeshTransformsSkinned;
 
     public bool IsSkinned { get; set; }
 
@@ -24,6 +24,15 @@ public class Mesh // Id rather this be a struct...
 
     public BoneHierarchy Hierarchy { get; set; }
     public BoneHierarchy[] FlattenedHierarchy { get; set; }
+
+    public Matrix4X4<float> InverseTransform
+    {
+        get
+        {
+            Matrix4X4.Invert(Hierarchy.Offset, out var dupe);
+            return dupe;
+        }
+    }
 
 
     public bool Transparent { get; set; }

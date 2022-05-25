@@ -13,7 +13,7 @@ public abstract class Collider : Component
         Static = isStatic;
         UsePhysics = usePhysics;
         PhysicsSystem.Register(this);
-        if (scale is not null) Scale = (Vector2D<float>) scale;
+        if (scale is not null) Scale = (Vector2D<float>)scale;
     }
 
     public bool UsePhysics { get; }

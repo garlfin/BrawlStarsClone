@@ -164,7 +164,7 @@ public class GameWindow
             Rotation = new Vector3D<float>(90, 0, 180),
             Scale = new Vector3D<float>(0.15f, 0.15f, 0.15f)
         });
-        
+
         var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
             new ImageTexture("../../../res/shelly.pvr"));
         var materials = new Material[]
@@ -174,7 +174,8 @@ public class GameWindow
         player.AddComponent(new Component.Material(materials));
         var playerMesh = MeshLoader.LoadMesh("../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
-        player.AddComponent(new Animator(player, MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
+        player.AddComponent(new Animator(player,
+            MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
         player.AddComponent(new PlayerMovement());
         player.AddComponent(new SquareCollider(player, false));
         camera.AddComponent(new CameraMovement(player));

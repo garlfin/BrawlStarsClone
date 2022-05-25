@@ -29,8 +29,8 @@ public static class Mathf
 
     public static Vector3D<float> LerpAngle(Vector3D<float> vector3D, Vector3D<float> vector3D2, float t)
     {
-        return new Vector3D<float>( LerpAngle(vector3D.X, vector3D2.X, t),
-                                    LerpAngle(vector3D.Y, vector3D2.Y, t),
-                                    LerpAngle(vector3D.Z, vector3D2.Z, t));
+        return new Vector3D<float>(LerpAngle(vector3D.X, vector3D2.X, t),
+            LerpAngle(vector3D.Y, vector3D2.Y, t),
+            LerpAngle(vector3D.Z, vector3D2.Z, t));
     }
 }

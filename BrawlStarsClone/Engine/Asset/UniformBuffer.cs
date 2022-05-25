@@ -22,7 +22,7 @@ public class UniformBuffer : Asset
     {
         if (size == 0) size = Size;
         GL.BindBuffer(BufferTarget.UniformBuffer, ID);
-        GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr) offset, size, (IntPtr) data);
+        GL.BufferSubData(BufferTarget.UniformBuffer, (IntPtr)offset, size, (IntPtr)data);
     }
 
 

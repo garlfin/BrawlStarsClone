@@ -51,7 +51,7 @@ public class Camera : BaseCamera
 
     protected override void UpdateProjection()
     {
-        _projection = Matrix4X4.CreatePerspectiveFieldOfView(_fov, (float) Owner.Window.Size.X / Owner.Window.Size.Y,
+        _projection = Matrix4X4.CreatePerspectiveFieldOfView(_fov, (float)Owner.Window.Size.X / Owner.Window.Size.Y,
             ClipNear, ClipEnd);
     }
 

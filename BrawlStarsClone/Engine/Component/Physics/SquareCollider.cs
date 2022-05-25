@@ -17,7 +17,7 @@ public class SquareCollider : Collider
 
     protected override bool Intersect(Collider other)
     {
-        var collider = (SquareCollider) other;
+        var collider = (SquareCollider)other;
         var transform = _transform.Location;
         var otherTransform = other.Owner.GetComponent<Transform>().Location;
 

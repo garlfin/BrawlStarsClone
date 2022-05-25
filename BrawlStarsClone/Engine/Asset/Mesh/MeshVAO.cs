@@ -37,7 +37,7 @@ public sealed class MeshVao : VAO
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
         fixed (void* ptr = finalData)
         {
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(Vertex) * finalData.Length, (IntPtr) ptr,
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(Vertex) * finalData.Length, (IntPtr)ptr,
                 BufferUsageHint.StaticDraw);
         }
 
@@ -45,7 +45,7 @@ public sealed class MeshVao : VAO
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
         fixed (void* ptr = _mesh.Faces)
         {
-            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr) ptr,
+            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr)ptr,
                 BufferUsageHint.StaticRead);
         }
 

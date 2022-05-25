@@ -19,6 +19,6 @@ internal static class Debug
     {
         Console.WriteLine("DEBUG: Debug initialize");
         GL.Enable(EnableCap.DebugOutput);
-        GL.DebugMessageCallback(_dp, (IntPtr) 0);
+        GL.DebugMessageCallback(_dp, (IntPtr)0);
     }
 }

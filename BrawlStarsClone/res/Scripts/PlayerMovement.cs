@@ -7,13 +7,12 @@ namespace BrawlStarsClone.res.Scripts;
 
 public class PlayerMovement : Behavior
 {
-    private Transform _entityTransform;
+    private readonly bool[] key = new bool[4];
     private Animator _animator;
+    private Transform _entityTransform;
 
     public Tuple<Vector3D<float>, Vector3D<float>> Bounds = new(new Vector3D<float>(0),
         new Vector3D<float>(17, 100, 33));
-
-    private readonly bool[] key = new bool[4];
 
     public override void OnLoad()
     {
@@ -37,7 +36,11 @@ public class PlayerMovement : Behavior
         {
             _animator.Pause();
             rotation = 0;
-        } else _animator.Play();
+        }
+        else
+        {
+            _animator.Play();
+        }
 
         if (key[0])
         {

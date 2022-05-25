@@ -28,7 +28,7 @@ public static class MeshLoader
 
         for (var u = 0; u < meshCount; u++)
         {
-            string name = reader.ReadString();
+            var name = reader.ReadString();
             var data = new MeshData();
             data.Vertices = new Vector3D<float>[reader.ReadUInt32()];
             for (var i = 0; i < data.Vertices.Length; i++) data.Vertices[i] = reader.ReadVector3D();
@@ -51,17 +51,18 @@ public static class MeshLoader
 
             mesh.MeshVAO[u] = new MeshVao(data, hasBones);
 
-            if (hasBones) mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, mesh.MeshVAO[u].EBO, data.Faces.Length);
+            if (hasBones)
+                mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, mesh.MeshVAO[u].EBO, data.Faces.Length);
         }
-        
+
         var boneCount = reader.ReadUInt16();
         if (boneCount > 0)
         {
             mesh.FlattenedHierarchy = new BoneHierarchy[boneCount];
-            
-            for (int i = 0; i < boneCount; i++)
+
+            for (var i = 0; i < boneCount; i++)
             {
-                BoneHierarchy bone = new BoneHierarchy
+                var bone = new BoneHierarchy
                 {
                     Name = reader.ReadString(),
                     Parent = reader.ReadString(),
@@ -70,21 +71,22 @@ public static class MeshLoader
 
                 if (version > 3)
                 {
-                    bool useTransform = reader.ReadBoolean();
+                    var useTransform = reader.ReadBoolean();
                     int index = reader.ReadUInt16();
                     if (useTransform) mesh.MeshTransformsSkinned[index] = boneCount;
                 }
 
                 bone.Offset = reader.ReadMat4();
-                    
+
                 mesh.FlattenedHierarchy[i] = bone;
-                if ((bone.Parent == "" && version > 3) || (version == 3 && bone.Parent == "Scene")) mesh.Hierarchy = bone;
+                if ((bone.Parent == "" && version > 3) || (version == 3 && bone.Parent == "Scene"))
+                    mesh.Hierarchy = bone;
             }
 
             for (var i = 0; i < mesh.FlattenedHierarchy.Length; i++)
             {
-                mesh.FlattenedHierarchy[i].Index = (ushort) i;
-                for (int u = 0; u < mesh.FlattenedHierarchy.Length; u++)
+                mesh.FlattenedHierarchy[i].Index = (ushort)i;
+                for (var u = 0; u < mesh.FlattenedHierarchy.Length; u++)
                 {
                     if (mesh.FlattenedHierarchy[u].Name != mesh.FlattenedHierarchy[i].Parent) continue;
                     mesh.FlattenedHierarchy[u].Children.Add(mesh.FlattenedHierarchy[i]);
@@ -92,7 +94,9 @@ public static class MeshLoader
                 }
             }
         }
-        if (file.Position < file.Length) Console.WriteLine($"WARNING: {file.Length - file.Position} bytes unread in file {path}");
+
+        if (file.Position < file.Length)
+            Console.WriteLine($"WARNING: {file.Length - file.Position} bytes unread in file {path}");
 
         reader.Close();
         mesh.Transparent = transparent;
@@ -117,15 +121,15 @@ public static class MeshLoader
         {
             var channel = new Channel();
             channel.BoneName = reader.ReadString();
-            channel.Frames = new Transformation[animation.FrameCount];
+            channel.Frames = new TransformationQuaternion[animation.FrameCount];
             for (ushort u = 0; u < animation.FrameCount; u++)
             {
                 reader.ReadUInt16();
                 reader.ReadUInt16();
-                channel.Frames[u] = new Transformation()
+                channel.Frames[u] = new TransformationQuaternion
                 {
                     Location = reader.ReadVector3D(),
-                    Rotation = reader.ReadVector3D(),
+                    Rotation = new Quaternion<float>(reader.ReadVector3D(), reader.ReadSingle()),
                     Scale = reader.ReadVector3D()
                 };
             }
