@@ -174,7 +174,7 @@ public class GameWindow
         player.AddComponent(new Component.Material(materials));
         var playerMesh = MeshLoader.LoadMesh("../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
-        player.AddComponent(new Animator(player, MeshLoader.LoadAnimation("C:/Users/scion/Documents/GitHub/BrawlStarsClone/bsModel/bin/Release/net6.0/animation.bnk")));
+        player.AddComponent(new Animator(player, MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
         player.AddComponent(new PlayerMovement());
         player.AddComponent(new SquareCollider(player, false));
         camera.AddComponent(new CameraMovement(player));

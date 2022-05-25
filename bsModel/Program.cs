@@ -21,7 +21,7 @@ public static class Program
         var writer = new BinaryWriter(stream, Encoding.UTF8, true);
 
         var bones = new List<Bone>();
-        foreach (var bone in scene.RootNode.Children) IterateBone(bone, bones);
+        IterateBone(scene.RootNode, bones);
         
 
         var matrixData = new byte[64];
@@ -144,7 +144,7 @@ public static class Program
         var newBone = new Bone
         {
             Name = bone.Name,
-            Parent = bone.Parent.Name,
+            Parent = bone.Parent?.Name ?? "",
             Offset = transform,
             Children = new List<Bone>()
         };
@@ -153,7 +153,7 @@ public static class Program
         
         bones.Add(newBone);
         foreach (var vBone in bones)
-            if (vBone.Name == bone.Parent.Name)
+            if (vBone.Name == bone.Parent?.Name)
                 vBone.Children.Add(newBone);
 
         foreach (var child in bone.Children) IterateBone(child, bones);

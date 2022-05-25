@@ -78,7 +78,7 @@ public static class MeshLoader
                 bone.Offset = reader.ReadMat4();
                     
                 mesh.FlattenedHierarchy[i] = bone;
-                if (bone.Parent == "Scene") mesh.Hierarchy = bone;
+                if ((bone.Parent == "" && version > 3) || (version == 3 && bone.Parent == "Scene")) mesh.Hierarchy = bone;
             }
 
             for (var i = 0; i < mesh.FlattenedHierarchy.Length; i++)

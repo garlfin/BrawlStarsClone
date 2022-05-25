@@ -8,6 +8,7 @@ namespace BrawlStarsClone.res.Scripts;
 public class PlayerMovement : Behavior
 {
     private Transform _entityTransform;
+    private Animator _animator;
 
     public Tuple<Vector3D<float>, Vector3D<float>> Bounds = new(new Vector3D<float>(0),
         new Vector3D<float>(17, 100, 33));
@@ -17,6 +18,7 @@ public class PlayerMovement : Behavior
     public override void OnLoad()
     {
         _entityTransform = Owner.GetComponent<Transform>();
+        _animator = Owner.GetComponent<Animator>();
     }
 
     public override void OnUpdate(float gameTime)
@@ -31,7 +33,11 @@ public class PlayerMovement : Behavior
         key[3] = input.IsKeyDown(Keys.D);
 
 
-        if (key[0] || key[1] || key[2] || key[3]) rotation = 0;
+        if (key[0] || key[1] || key[2] || key[3])
+        {
+            _animator.Pause();
+            rotation = 0;
+        } else _animator.Play();
 
         if (key[0])
         {

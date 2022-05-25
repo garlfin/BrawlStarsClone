@@ -30,8 +30,6 @@ public class Animator : Component
 
     public override unsafe void OnRender(float deltaTime)
     {
-        if (Paused) return;
-        
         Owner.Window.SkinningShader.Use();
 
         if (_currentTime > Animation.Time) _currentTime = 0;
@@ -39,17 +37,17 @@ public class Animator : Component
         IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
         
         fixed (void* ptr = _matTransform) Owner.Window.MatBuffer.ReplaceData(ptr, 16320, 0);
-        
+      
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
-            Owner.Window.SkinningShader.SetUniform(0,  _renderer.Mesh.MeshTransformsSkinned[i]);
-            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
-            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
-            GL.DispatchCompute((uint) Math.Ceiling((double) _renderer.Mesh.MeshVAO[i].Mesh.Vertices.Length / 32), 1, 1);
-            GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
+                Owner.Window.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransformsSkinned[i]);
+                GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
+                GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
+                GL.DispatchCompute((uint)Math.Ceiling((double)_renderer.Mesh.MeshVAO[i].Mesh.Vertices.Length / 32), 1, 1);
+                GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
         }
-
-        _currentTime += deltaTime;
+        
+        if (!Paused) _currentTime += deltaTime;
     }
 
     private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> globalTransform)
@@ -57,7 +55,10 @@ public class Animator : Component
         var frame = Animation[bone.Name]?.Frames[(int) MathF.Floor(_currentTime * Animation.FPS)];
 
         if (frame is null)
-            globalTransform *= bone.Offset; //Matrix4X4.Invert(bone.Offset, out var inverse);
+        {
+            Matrix4X4.Invert(bone.Offset, out var inverse);
+            globalTransform *= bone.Offset; 
+        }
         else
         {
             /*
