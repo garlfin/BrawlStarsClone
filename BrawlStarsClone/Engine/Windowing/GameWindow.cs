@@ -72,11 +72,12 @@ public class GameWindow
 
     private void OnUpdate(FrameEventArgs obj)
     {
+        var time = (float)obj.Time;
         Input = View.KeyboardState.GetSnapshot();
         if (Input.IsKeyDown(Keys.Escape)) View.Close();
         PhysicsSystem.ResetCollisions();
-        BehaviorSystem.Update((float) obj.Time);
-        PhysicsSystem.Update((float) obj.Time);
+        BehaviorSystem.Update(time);
+        PhysicsSystem.Update(time);
     }
 
     private void OnMouseMove(MouseMoveEventArgs obj)
@@ -181,7 +182,7 @@ public class GameWindow
         testSkinned.AddComponent(new Transform(testSkinned, new Transformation
         {
             Location = new Vector3D<float>(7.5f, 0, 3f),
-            Rotation = new Vector3D<float>(-90, 90, 0),
+            Rotation = new Vector3D<float>(180, 90, 0),
             Scale = Vector3D<float>.One
         }));
         testSkinned.AddComponent(new MeshRenderer(testSkinned,
@@ -197,13 +198,14 @@ public class GameWindow
 
     private void OnRender(FrameEventArgs frameEventArgs)
     {
+        var time = (float)frameEventArgs.Time;
         if (_isClosed) return;
         // Main Render Pass
         State = EngineState.Render;
-        BehaviorSystem.Render((float) frameEventArgs.Time);
-        TransformSystem.Update(0f);
-        CameraSystem.Update(0f);
-        SkinManager.Render(0f);
+        BehaviorSystem.Render(time);
+        TransformSystem.Update(time);
+        CameraSystem.Update(time);
+        SkinManager.Render(time);
         ProgramManager.InitFrame();
 
         GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);

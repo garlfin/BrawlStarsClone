@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using BrawlStarsClone.Engine.Component;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset;
 
@@ -8,6 +9,8 @@ public struct Animation
     public int FrameCount;
 
     public Channel[] ChannelFrames;
+
+    public double Time => (double) FrameCount / FPS;
 
     public Channel? this[string name]
     {
@@ -26,5 +29,5 @@ public struct Animation
 public struct Channel
 {
     public string BoneName;
-    public Matrix4X4<float>[] Frames;
+    public Transformation[] Frames;
 }

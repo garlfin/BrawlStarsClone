@@ -2,6 +2,7 @@
 
 using BrawlStarsClone.Engine.Asset;
 using BrawlStarsClone.Engine.Asset.Mesh;
+using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Map;
 using Silk.NET.Maths;
 
@@ -104,18 +105,17 @@ public static class MeshLoader
         {
             var channel = new Channel();
             channel.BoneName = reader.ReadString();
-            channel.Frames = new Matrix4X4<float>[animation.FrameCount];
+            channel.Frames = new Transformation[animation.FrameCount];
             for (ushort u = 0; u < animation.FrameCount; u++)
             {
                 reader.ReadUInt16();
                 reader.ReadUInt16();
-                var location = reader.ReadVector3D();
-                var rotation = Matrix4X4.CreateRotationX(reader.ReadSingle())
-                                            * Matrix4X4.CreateRotationY(reader.ReadSingle())
-                                            * Matrix4X4.CreateRotationZ(reader.ReadSingle());
-                var scale = reader.ReadVector3D();
-                channel.Frames[u] = Matrix4X4.CreateScale(scale)
-                    * rotation * Matrix4X4.CreateTranslation(location);
+                channel.Frames[u] = new Transformation()
+                {
+                    Location = reader.ReadVector3D(),
+                    Rotation = reader.ReadVector3D(),
+                    Scale = reader.ReadVector3D()
+                };
             }
 
             animation.ChannelFrames[i] = channel;

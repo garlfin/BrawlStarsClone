@@ -1,5 +1,6 @@
 ﻿using BrawlStarsClone.Engine.Asset;
 using BrawlStarsClone.Engine.Asset.Mesh;
+using BrawlStarsClone.Engine.Utility;
 using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
 
@@ -15,18 +16,18 @@ public class Animator : Component
         SkinManager.Register(this);
         _renderer = owner.GetComponent<MeshRenderer>();
         Animation = animation;
-        CurrentFrame = 0;
+        CurrentTime = 0;
     }
 
     public Animation Animation { get; set; }
 
-    public uint CurrentFrame { get; set; }
+    public float CurrentTime;
 
     public override unsafe void OnRender(float deltaTime)
     {
         Owner.Window.SkinningShader.Use();
 
-        if (CurrentFrame == Animation.FrameCount) CurrentFrame = 0;
+        if (CurrentTime > Animation.Time) CurrentTime = 0;
 
         IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
             
@@ -40,19 +41,32 @@ public class Animator : Component
             GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
         }
 
-        CurrentFrame++;
+        CurrentTime += deltaTime;
     }
 
     private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> globalTransform)
     {
-        var frame = Animation[bone.Name]?.Frames[CurrentFrame];
-        
+        var frame = Animation[bone.Name]?.Frames[(int) MathF.Floor(CurrentTime * Animation.FPS)];
+
         if (frame is null)
-        {
-            Matrix4X4.Invert(bone.Offset, out var inverse);
-            globalTransform = globalTransform * inverse * bone.Offset;
+            globalTransform *= bone.Offset; //Matrix4X4.Invert(bone.Offset, out var inverse);
+        else
+        { 
+            /*
+           var secondTime = CurrentTime * Animation.FPS;
+           var frame2 = Animation[bone.Name]?.Frames[(int)MathF.Min(MathF.Ceiling(secondTime), Animation.FrameCount-1)];
+           var location = Vector3D.Lerp(frame.Value.Location, frame2!.Value.Location, secondTime - CurrentTime);
+           var rotation = Mathf.LerpAngle(frame.Value.Rotation, frame2.Value.Location, secondTime - CurrentTime);
+           var scale = Vector3D.Lerp(frame.Value.Scale, frame2.Value.Scale, secondTime - CurrentTime);
+           */
+            
+            var finalTransform = Matrix4X4.CreateScale(frame.Value.Scale)
+                                 * Matrix4X4.CreateRotationX(frame.Value.Rotation.X)
+                                 * Matrix4X4.CreateRotationY(frame.Value.Rotation.Y)
+                                 * Matrix4X4.CreateRotationZ(frame.Value.Rotation.Z)
+                                 * Matrix4X4.CreateTranslation(frame.Value.Location);
+            globalTransform = globalTransform * finalTransform * bone.Offset;
         }
-        else globalTransform = globalTransform * frame.Value * bone.Offset;
 
         _matTransform[bone.Index] = globalTransform;
         for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], globalTransform);
