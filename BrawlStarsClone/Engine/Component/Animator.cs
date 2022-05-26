@@ -50,7 +50,7 @@ public class Animator : Component
 
         if (_currentTime > Animation.Time) _currentTime = 0;
 
-        IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
+        
 
         fixed (void* ptr = _matTransform)
         {
@@ -59,6 +59,7 @@ public class Animator : Component
 
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
+            IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
             Owner.Window.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransformsSkinned[i]);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
@@ -83,13 +84,13 @@ public class Animator : Component
 
         var finalTransform = Matrix4X4<float>.Identity;
         if (frame is not null)
-            finalTransform = Matrix4X4.CreateTranslation(frame.Value.Location)
+            finalTransform = Matrix4X4.CreateScale(frame.Value.Scale)
                              * Matrix4X4.CreateFromQuaternion(frame.Value.Rotation)
-                             * Matrix4X4.CreateScale(frame.Value.Scale);
-
+                             * Matrix4X4.CreateTranslation(frame.Value.Location);
+        
         parentTransform *= finalTransform;
 
-        _matTransform[bone.Index] = _renderer.Mesh.Hierarchy.Offset * parentTransform * bone.Offset;
+        _matTransform[bone.Index] = _renderer.Mesh.InverseTransform * parentTransform * bone.Offset;
 
         for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], parentTransform);
     }

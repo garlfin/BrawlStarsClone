@@ -151,7 +151,7 @@ public static class Program
             Name = bone.Name,
             Parent = bone.Parent?.Name ?? "",
             Children = new List<Bone>(),
-            Offset = transform
+            Offset = Matrix4x4.Identity
         };
 
         if (bone.MeshIndices.Count > 0) newBone.MeshIndex = bone.MeshIndices[0];

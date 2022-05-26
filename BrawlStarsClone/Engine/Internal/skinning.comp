@@ -14,7 +14,6 @@ struct Vertex {
 layout(location = 0) uniform int MeshMat;
 
 layout (std140, binding = 4) buffer BoneMatrices {
-//ivec4 MiscInfo;
     mat4 BoneMatrix[];
 };
 
@@ -37,7 +36,7 @@ void main() {
     BoneTransform += BoneMatrix[vertex.BoneID[2]] * vertex.Weight[2];
     BoneTransform += BoneMatrix[vertex.BoneID[3]] * vertex.Weight[3];
 
-    verticesOut[gl_GlobalInvocationID.x].pos = vec3(BoneTransform * BoneMatrix[MeshMat] * vec4(vertices[gl_GlobalInvocationID.x].pos, 1.0));
-    verticesOut[gl_GlobalInvocationID.x].normal = vec3(BoneTransform * BoneMatrix[MeshMat] * vec4(vertices[gl_GlobalInvocationID.x].normal, 0.0));
+    verticesOut[gl_GlobalInvocationID.x].pos = vec3(BoneTransform * vec4(vertices[gl_GlobalInvocationID.x].pos, 1.0));
+    verticesOut[gl_GlobalInvocationID.x].normal = vec3(BoneTransform * vec4(vertices[gl_GlobalInvocationID.x].normal, 0.0));
     verticesOut[gl_GlobalInvocationID.x].uv = vertices[gl_GlobalInvocationID.x].uv;
 }
