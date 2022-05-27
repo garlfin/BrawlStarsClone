@@ -77,6 +77,7 @@ public static class MeshLoader
                 }
 
                 bone.Offset = reader.ReadMat4();
+                if (version > 4) bone.Transform = reader.ReadMat4();
 
                 mesh.FlattenedHierarchy[i] = bone;
                 if ((bone.Parent == "" && version > 3) || (version == 3 && bone.Parent == "Scene"))

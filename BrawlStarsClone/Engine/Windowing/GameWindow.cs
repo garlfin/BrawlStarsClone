@@ -161,8 +161,8 @@ public class GameWindow
         player.AddComponent(new Transform(player)
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
-            Rotation = new Vector3D<float>(90, 0, 180),
-            Scale = new Vector3D<float>(0.15f, 0.15f, 0.15f)
+            Rotation = new Vector3D<float>(0, 0, 180),
+            Scale = new Vector3D<float>(1f)
         });
 
         var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,

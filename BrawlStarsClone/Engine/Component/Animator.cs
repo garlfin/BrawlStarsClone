@@ -49,9 +49,7 @@ public class Animator : Component
         Owner.Window.SkinningShader.Use();
 
         if (_currentTime > Animation.Time) _currentTime = 0;
-
         
-
         fixed (void* ptr = _matTransform)
         {
             Owner.Window.MatBuffer.ReplaceData(ptr, 16320);
@@ -73,26 +71,17 @@ public class Animator : Component
     private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> parentTransform)
     {
         var frame = Animation[bone.Name]?.Frames[(int)MathF.Floor(_currentTime * Animation.FPS)];
-
-        /*
-        var secondTime = CurrentTime * Animation.FPS;
-        var frame2 = Animation[bone.Name]?.Frames[(int)MathF.Min(MathF.Ceiling(secondTime), Animation.FrameCount-1)];
-        var location = Vector3D.Lerp(frame.Value.Location, frame2!.Value.Location, secondTime - CurrentTime);
-        var rotation = Mathf.LerpAngle(frame.Value.Rotation, frame2.Value.Location, secondTime - CurrentTime);
-        var scale = Vector3D.Lerp(frame.Value.Scale, frame2.Value.Scale, secondTime - CurrentTime);
-        */
-
-        var finalTransform = Matrix4X4<float>.Identity;
+        var nodeTransform = bone.Transform;
         if (frame is not null)
-            finalTransform = Matrix4X4.CreateScale(frame.Value.Scale)
+            nodeTransform = Matrix4X4.CreateTranslation(frame.Value.Location)
                              * Matrix4X4.CreateFromQuaternion(frame.Value.Rotation)
-                             * Matrix4X4.CreateTranslation(frame.Value.Location);
+                             * Matrix4X4.CreateScale(frame.Value.Scale);
         
-        parentTransform *= finalTransform;
+        var globalTransform = parentTransform * nodeTransform;
 
-        _matTransform[bone.Index] = _renderer.Mesh.InverseTransform * parentTransform * bone.Offset;
+        _matTransform[bone.Index] = globalTransform * bone.Offset;
 
-        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], parentTransform);
+        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], globalTransform);
     }
 }
 

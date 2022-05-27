@@ -138,4 +138,5 @@ public class BoneHierarchy
     public string Name;
     public Matrix4X4<float> Offset;
     public string Parent;
+    public Matrix4X4<float> Transform;
 }

@@ -23,13 +23,19 @@ public static class Program
 
         var bones = new List<Bone>();
         IterateBone(scene.RootNode, bones);
-
+        
+        foreach (var bone in bones)
+        foreach (var parent in bones)
+        {
+            if (bone.Parent != parent.Name) continue;
+            parent.Children.Add(bone);
+        }
 
         var matrixData = new byte[64];
         if (scene.HasMeshes)
         {
             writer.Write(new[] { 'B', 'S', '3', 'D' });
-            writer.Write((uint)4); // Version 
+            writer.Write((uint)5); // Version 
             writer.Write((ushort)scene.MeshCount);
             for (var i = 0; i < scene.MeshCount; i++)
             {
@@ -70,7 +76,6 @@ public static class Program
                             if (weights[weight.VertexID].Weight[j] == 0) break;
                             realIndex++;
                         }
-
                         var boneIndex = GetBoneIndexFromName(bone.Name, bones);
                         bones[boneIndex].Offset = bone.OffsetMatrix;
                         weights[weight.VertexID].Bone = weights[weight.VertexID].Bone.ReplaceItem(realIndex, boneIndex);
@@ -95,11 +100,17 @@ public static class Program
                 writer.Write(bone.Parent);
                 writer.Write(bone.MeshIndex is not null);
                 writer.Write((ushort)(bone.MeshIndex ?? 0));
+                
                 fixed (void* ptr = &bone.Offset)
                 {
                     Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
                 }
-
+                writer.Write(matrixData);
+                
+                fixed (void* ptr = &bone.Transform)
+                {
+                    Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
+                }
                 writer.Write(matrixData);
             }
 
@@ -112,8 +123,7 @@ public static class Program
         {
             stream = File.Open("animation.bnk", FileMode.Create);
             writer = new BinaryWriter(stream, Encoding.UTF8, false);
-
-            writer.Write((ushort)(animation.NodeAnimationChannels[0].PositionKeyCount / animation.DurationInTicks));
+            writer.Write((ushort)(animation.TicksPerSecond));
             writer.Write((ushort)animation.NodeAnimationChannels[0].PositionKeyCount);
 
             writer.Write((ushort)animation.NodeAnimationChannelCount);
@@ -123,7 +133,7 @@ public static class Program
                 for (var i = 0; i < channel.PositionKeyCount; i++)
                 {
                     writer.Write((ushort)i);
-                    writer.Write((ushort)((float)i / channel.PositionKeyCount * animation.DurationInTicks));
+                    writer.Write((ushort)( 1 / animation.TicksPerSecond * i));
                     writer.Write(channel.PositionKeys[i].Value);
                     writer.Write(channel.RotationKeys[i].Value);
                     writer.Write(channel.ScalingKeys[i].Value);
@@ -144,22 +154,18 @@ public static class Program
 
     private static void IterateBone(Node bone, List<Bone> bones)
     {
-        var transform = bone.Transform;
-        transform.Inverse();
         var newBone = new Bone
         {
             Name = bone.Name,
             Parent = bone.Parent?.Name ?? "",
             Children = new List<Bone>(),
-            Offset = Matrix4x4.Identity
+            Offset = new Matrix4x4(),
+            Transform = bone.Transform
         };
 
         if (bone.MeshIndices.Count > 0) newBone.MeshIndex = bone.MeshIndices[0];
 
         bones.Add(newBone);
-        foreach (var vBone in bones)
-            if (vBone.Name == bone.Parent?.Name)
-                vBone.Children.Add(newBone);
 
         foreach (var child in bone.Children) IterateBone(child, bones);
     }
@@ -206,5 +212,6 @@ public static class Program
         public string Name;
         public Matrix4x4 Offset;
         public string Parent;
+        public Matrix4x4 Transform;
     }
 }
