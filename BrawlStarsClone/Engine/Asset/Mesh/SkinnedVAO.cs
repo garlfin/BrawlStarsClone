@@ -5,6 +5,7 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 public class SkinnedVAO : VAO
 {
     private readonly int _faceCount;
+    private int _ebo;
 
     public unsafe SkinnedVAO(int length, int ebo, int faces)
     {

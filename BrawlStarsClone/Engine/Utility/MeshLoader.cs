@@ -66,7 +66,8 @@ public static class MeshLoader
                 {
                     Name = reader.ReadString(),
                     Parent = reader.ReadString(),
-                    Children = new List<BoneHierarchy>()
+                    Children = new List<BoneHierarchy>(),
+                    Index = (ushort) i
                 };
 
                 if (version > 3)
@@ -75,10 +76,8 @@ public static class MeshLoader
                     int index = reader.ReadUInt16();
                     if (useTransform) mesh.MeshTransformsSkinned[index] = boneCount;
                 }
-
                 bone.Offset = reader.ReadMat4();
                 if (version > 4) bone.Transform = reader.ReadMat4();
-
                 mesh.FlattenedHierarchy[i] = bone;
                 if ((bone.Parent == "" && version > 3) || (version == 3 && bone.Parent == "Scene"))
                     mesh.Hierarchy = bone;
@@ -86,7 +85,6 @@ public static class MeshLoader
 
             for (var i = 0; i < mesh.FlattenedHierarchy.Length; i++)
             {
-                mesh.FlattenedHierarchy[i].Index = (ushort)i;
                 for (var u = 0; u < mesh.FlattenedHierarchy.Length; u++)
                 {
                     if (mesh.FlattenedHierarchy[u].Name != mesh.FlattenedHierarchy[i].Parent) continue;
@@ -98,7 +96,8 @@ public static class MeshLoader
 
         if (file.Position < file.Length)
             Console.WriteLine($"WARNING: {file.Length - file.Position} bytes unread in file {path}");
-
+        
+        file.Close();
         reader.Close();
         mesh.Transparent = transparent;
         return mesh;
@@ -140,6 +139,9 @@ public static class MeshLoader
 
         if (file.Length - file.Position > 0)
             throw new FileLoadException($"Extra data: {file.Length - file.Position} bytes");
+        
+        file.Close();
+        reader.Close();
         return animation;
     }
 }

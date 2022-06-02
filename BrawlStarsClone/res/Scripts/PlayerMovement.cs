@@ -46,13 +46,13 @@ public class PlayerMovement : Behavior
         {
             pressCount++;
             _entityTransform.Location -= Vector3D<float>.UnitZ * 4 * gameTime; // Forward
+            rotation += 180;
         }
 
         if (key[1])
         {
             pressCount++;
             _entityTransform.Location += Vector3D<float>.UnitZ * 4 * gameTime; // Backwards
-            rotation += 180;
         }
 
         if (key[2])
@@ -72,7 +72,7 @@ public class PlayerMovement : Behavior
             }
 
         _entityTransform.Location = Vector3D.Clamp(_entityTransform.Location, Bounds.Item1, Bounds.Item2);
-        rotation = key[0] && key[2] ? 315 : rotation / Math.Max(pressCount, 1);
+        rotation = key[1] && key[2] ? 315 : rotation / Math.Max(pressCount, 1);
         _entityTransform.Rotation.Y = Mathf.LerpAngle(_entityTransform.Rotation.Y, rotation, gameTime * 10);
     }
 }

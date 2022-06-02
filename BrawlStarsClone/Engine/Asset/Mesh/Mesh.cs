@@ -29,7 +29,7 @@ public class Mesh // Id rather this be a struct...
     {
         get
         {
-            Matrix4X4.Invert(Hierarchy.Offset, out var dupe);
+            if (!Matrix4X4.Invert(Hierarchy.Transform, out var dupe)) Console.WriteLine("Could not invert global transform.");
             return dupe;
         }
     }

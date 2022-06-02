@@ -11,6 +11,9 @@ public class Animator : Component
     private readonly MeshRenderer _renderer;
 
     private float _currentTime;
+    
+    private PointVAO _debugVao;
+    private Vector3D<float>[] _boneTransform;
 
     public Animator(Entity owner, Animation animation) : base(owner)
     {
@@ -19,6 +22,8 @@ public class Animator : Component
         Animation = animation;
         _currentTime = 0;
         Array.Fill(_matTransform, Matrix4X4<float>.Identity);
+        _debugVao = new PointVAO(_renderer.Mesh.FlattenedHierarchy.Length);
+        _boneTransform = new Vector3D<float>[_renderer.Mesh.FlattenedHierarchy.Length];
     }
 
     public Animation Animation { get; set; }
@@ -50,14 +55,13 @@ public class Animator : Component
 
         if (_currentTime > Animation.Time) _currentTime = 0;
         
-        fixed (void* ptr = _matTransform)
-        {
-            Owner.Window.MatBuffer.ReplaceData(ptr, 16320);
-        }
+        IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
+        
+        fixed (void* ptr = _boneTransform) _debugVao.UpdateData(ptr);
+        fixed (void* ptr = _matTransform) Owner.Window.MatBuffer.ReplaceData(ptr, 16320);
 
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
-            IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
             Owner.Window.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransformsSkinned[i]);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
@@ -71,17 +75,26 @@ public class Animator : Component
     private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> parentTransform)
     {
         var frame = Animation[bone.Name]?.Frames[(int)MathF.Floor(_currentTime * Animation.FPS)];
-        var nodeTransform = bone.Transform;
-        if (frame is not null)
-            nodeTransform = Matrix4X4.CreateTranslation(frame.Value.Location)
-                             * Matrix4X4.CreateFromQuaternion(frame.Value.Rotation)
-                             * Matrix4X4.CreateScale(frame.Value.Scale);
-        
-        var globalTransform = parentTransform * nodeTransform;
 
-        _matTransform[bone.Index] = globalTransform * bone.Offset;
+
+        var transform = bone.Transform;
+
+        if (frame is not null)
+            transform = Matrix4X4.CreateScale(frame.Value.Scale)
+                        * Matrix4X4.CreateFromQuaternion(frame.Value.Rotation)
+                        *  Matrix4X4.CreateTranslation(frame.Value.Location);
+        
+        var globalTransform = parentTransform * transform;
+
+        _boneTransform[bone.Index] = new Vector3D<float>(globalTransform.M14, globalTransform.M24, globalTransform.M34);
+        _matTransform[bone.Index] = _renderer.Mesh.InverseTransform * globalTransform * bone.Offset;
 
         for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], globalTransform);
+    }
+
+    public void RenderDebug()
+    {
+        _debugVao.Render();
     }
 }
 

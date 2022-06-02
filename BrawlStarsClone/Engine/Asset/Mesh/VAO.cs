@@ -4,9 +4,8 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public abstract class VAO : Asset
 {
-    protected int _ebo;
-    protected int _vao;
     protected int _vbo;
+    protected int _vao;
     public int VBO => _vbo;
     public abstract void Render();
     public abstract void RenderInstanced(int count);

@@ -38,7 +38,7 @@ public class GameWindow
         var nativeWindowSettings = NativeWindowSettings.Default;
         nativeWindowSettings.Size = new Vector2i(width, height);
         nativeWindowSettings.Title = name;
-        //nativeWindowSettings.Flags = ContextFlags.Debug;
+        nativeWindowSettings.Flags = ContextFlags.Debug;
 
         var gameWindowSettings = GameWindowSettings.Default;
         gameWindowSettings.RenderFrequency = 144;
@@ -102,6 +102,8 @@ public class GameWindow
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.CullFace);
+        
+        GL.Enable(EnableCap.ProgramPointSize);
 
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
@@ -161,8 +163,8 @@ public class GameWindow
         player.AddComponent(new Transform(player)
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
-            Rotation = new Vector3D<float>(0, 0, 180),
-            Scale = new Vector3D<float>(1f)
+            Rotation = new Vector3D<float>(-90, 180, 0),
+            Scale = new Vector3D<float>(0.15f)
         });
 
         var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
@@ -187,7 +189,7 @@ public class GameWindow
         BehaviorSystem.Load();
     }
 
-    private void OnRender(FrameEventArgs frameEventArgs)
+    private unsafe void OnRender(FrameEventArgs frameEventArgs)
     {
         var time = (float)frameEventArgs.Time;
         if (_isClosed) return;
@@ -199,12 +201,24 @@ public class GameWindow
         SkinManager.Render(time);
         ProgramManager.InitFrame();
 
-        GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
+        GL.Clear(ClearBufferMask.DepthBufferBit);
 
         MeshRendererSystem.Render(0f);
         ManagedMeshes.Render(this);
         State = EngineState.RenderTransparent;
         ManagedMeshes.Render(this);
+        
+        foreach (var animator in SkinManager.Components)
+        {
+            var transform = animator.Owner.GetComponent<Transform>();
+            var matCopy = Matrix4X4.CreateScale(transform.Scale) * 
+                                          Matrix4X4.CreateRotationX((transform.Rotation.X + 90).DegToRad()) *
+                                          Matrix4X4.CreateRotationY(transform.Rotation.Y.DegToRad()) *
+                                          Matrix4X4.CreateRotationZ(transform.Rotation.Z.DegToRad()) *
+                                          Matrix4X4.CreateTranslation(transform.Location);
+            ProgramManager.PushModelMatrix(&matCopy, sizeof(Matrix4X4<float>));
+            animator.RenderDebug();
+        }
         View.SwapBuffers();
     }
 }

@@ -63,13 +63,14 @@ public static class Program
                 writer.Write(scene.Materials[currentMesh.MaterialIndex].Name);
                 writer.Write(currentMesh.HasBones);
                 if (!currentMesh.HasBones) continue;
+                
                 var weights = new VertexWeight[currentMesh.Vertices.Count];
-
                 for (var index = 0; index < currentMesh.BoneCount; index++)
                 {
                     var bone = currentMesh.Bones[index];
                     foreach (var weight in bone.VertexWeights)
                     {
+                        if (weight.Weight == 0) continue;
                         var realIndex = 0;
                         for (var j = 0; j < 4; j++)
                         {
@@ -78,9 +79,8 @@ public static class Program
                         }
                         var boneIndex = GetBoneIndexFromName(bone.Name, bones);
                         bones[boneIndex].Offset = bone.OffsetMatrix;
-                        weights[weight.VertexID].Bone = weights[weight.VertexID].Bone.ReplaceItem(realIndex, boneIndex);
-                        weights[weight.VertexID].Weight = weights[weight.VertexID].Weight
-                            .ReplaceItem(realIndex, (ushort)(ushort.MaxValue * weight.Weight));
+                        ReplaceItem(ref weights[weight.VertexID].Bone, realIndex, boneIndex);
+                        ReplaceItem(ref weights[weight.VertexID].Weight, realIndex, (ushort)(ushort.MaxValue * weight.Weight));
                     }
                 }
 
@@ -117,14 +117,16 @@ public static class Program
             writer.Close();
             stream.Close();
         }
-
-        if (!scene.HasAnimations) return;
+            
         foreach (var animation in scene.Animations)
         {
             stream = File.Open("animation.bnk", FileMode.Create);
             writer = new BinaryWriter(stream, Encoding.UTF8, false);
-            writer.Write((ushort)(animation.TicksPerSecond));
-            writer.Write((ushort)animation.NodeAnimationChannels[0].PositionKeyCount);
+            if (animation.DurationInTicks == 0)
+                writer.Write((ushort)(animation.TicksPerSecond));
+            else 
+                writer.Write((ushort) Math.Round(animation.NodeAnimationChannels[0].PositionKeyCount / animation.DurationInTicks));
+            writer.Write((ushort) animation.NodeAnimationChannels[0].PositionKeyCount);
 
             writer.Write((ushort)animation.NodeAnimationChannelCount);
             foreach (var channel in animation.NodeAnimationChannels)
@@ -159,7 +161,7 @@ public static class Program
             Name = bone.Name,
             Parent = bone.Parent?.Name ?? "",
             Children = new List<Bone>(),
-            Offset = new Matrix4x4(),
+            Offset = Matrix4x4.Identity,
             Transform = bone.Transform
         };
 
@@ -172,10 +174,7 @@ public static class Program
 
     private static ushort GetBoneIndexFromName(string name, List<Bone> bones)
     {
-        for (var i = 0; i < bones.Count; i++)
-            if (bones[i].Name == name)
-                return (ushort)i;
-        return 0;
+        return (ushort) bones.IndexOf(bones.First(bone => bone.Name == name));
     }
 
     public static void Write(this BinaryWriter writer, Quaternion quaternion)
@@ -186,15 +185,15 @@ public static class Program
         writer.Write(quaternion.W);
     }
 
-    public static Vector4D<T> ReplaceItem<T>(this Vector4D<T> vec, int index, T item)
+    public static void ReplaceItem<T>(ref Vector4D<T> vec, int index, T item)
         where T : unmanaged, IFormattable, IEquatable<T>, IComparable<T>
     {
-        return index switch
+        var vecX = index switch
         {
-            0 => new Vector4D<T>(item, vec.Y, vec.Z, vec.W),
-            1 => new Vector4D<T>(vec.X, item, vec.Z, vec.W),
-            2 => new Vector4D<T>(vec.X, vec.Y, item, vec.W),
-            3 => new Vector4D<T>(vec.X, vec.Y, vec.Z, item),
+            0 => vec.X = item,
+            1 => vec.Y = item,
+            2 => vec.Z = item,
+            3 => vec.W = item,
             _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
         };
     }
@@ -203,6 +202,12 @@ public static class Program
     {
         public Vector4D<ushort> Bone;
         public Vector4D<ushort> Weight;
+
+        public VertexWeight()
+        {
+            Bone = new Vector4D<ushort>();
+            Weight = new Vector4D<ushort>();
+        }
     }
 
     public class Bone

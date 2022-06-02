@@ -6,6 +6,7 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 public sealed class MeshVao : VAO
 {
     private readonly MeshData _mesh;
+    private int _ebo;
 
     public unsafe MeshVao(MeshData mesh, bool skinned = false)
     {

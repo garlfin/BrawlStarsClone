@@ -49,6 +49,16 @@ public struct Transformation
     public Vector3D<float> Scale;
 }
 
+/// <summary>
+/// Describes the animation of a single node. The name specifies the bone/node which is affected by
+/// this animation chanenl. The keyframes are given in three separate seties of values,
+/// one for each position, rotation, and scaling. The transformation matrix is computed from
+/// these values and replaces the node's original transformation matrix at a specific time.
+/// <para>This means all keys are absolute and not relative to the bone default pose.
+/// The order which the transformations are to be applied is scaling, rotation, and translation (SRT).</para>
+/// <para>Keys are in chronological order and duplicate keys do not pass the validation step. There most likely will be no
+/// negative time values, but they are not forbidden.</para>
+/// </summary>
 public struct TransformationQuaternion
 {
     public Vector3D<float> Location;
