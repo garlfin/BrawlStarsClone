@@ -163,8 +163,8 @@ public class GameWindow
         player.AddComponent(new Transform(player)
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
-            Rotation = new Vector3D<float>(-90, 180, 0),
-            Scale = new Vector3D<float>(0.15f)
+            Rotation = new Vector3D<float>(0, 180, 0),
+            Scale = new Vector3D<float>(1f)
         });
 
         var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
@@ -211,11 +211,11 @@ public class GameWindow
         foreach (var animator in SkinManager.Components)
         {
             var transform = animator.Owner.GetComponent<Transform>();
-            var matCopy = Matrix4X4.CreateScale(transform.Scale) * 
+            var matCopy = transform.Model; /*Matrix4X4.CreateScale(transform.Scale) * 
                                           Matrix4X4.CreateRotationX((transform.Rotation.X + 90).DegToRad()) *
                                           Matrix4X4.CreateRotationY(transform.Rotation.Y.DegToRad()) *
                                           Matrix4X4.CreateRotationZ(transform.Rotation.Z.DegToRad()) *
-                                          Matrix4X4.CreateTranslation(transform.Location);
+                                          Matrix4X4.CreateTranslation(transform.Location);*/
             ProgramManager.PushModelMatrix(&matCopy, sizeof(Matrix4X4<float>));
             animator.RenderDebug();
         }

@@ -75,14 +75,13 @@ public class Animator : Component
     private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> parentTransform)
     {
         var frame = Animation[bone.Name]?.Frames[(int)MathF.Floor(_currentTime * Animation.FPS)];
-
-
+        
         var transform = bone.Transform;
 
         if (frame is not null)
             transform = Matrix4X4.CreateScale(frame.Value.Scale)
-                        * Matrix4X4.CreateFromQuaternion(frame.Value.Rotation)
-                        *  Matrix4X4.CreateTranslation(frame.Value.Location);
+                              * Matrix4X4.CreateFromQuaternion(frame.Value.Rotation)
+                              *  Matrix4X4.CreateTranslation(frame.Value.Location);
         
         var globalTransform = parentTransform * transform;
 

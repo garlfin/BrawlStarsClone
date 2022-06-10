@@ -122,10 +122,10 @@ public static class Program
         {
             stream = File.Open("animation.bnk", FileMode.Create);
             writer = new BinaryWriter(stream, Encoding.UTF8, false);
-            if (animation.DurationInTicks == 0)
-                writer.Write((ushort)(animation.TicksPerSecond));
-            else 
+            if ((int) animation.TicksPerSecond == 1)
                 writer.Write((ushort) Math.Round(animation.NodeAnimationChannels[0].PositionKeyCount / animation.DurationInTicks));
+            else 
+                writer.Write((ushort)(animation.TicksPerSecond)); 
             writer.Write((ushort) animation.NodeAnimationChannels[0].PositionKeyCount);
 
             writer.Write((ushort)animation.NodeAnimationChannelCount);
@@ -188,14 +188,23 @@ public static class Program
     public static void ReplaceItem<T>(ref Vector4D<T> vec, int index, T item)
         where T : unmanaged, IFormattable, IEquatable<T>, IComparable<T>
     {
-        var vecX = index switch
+        switch (index)
         {
-            0 => vec.X = item,
-            1 => vec.Y = item,
-            2 => vec.Z = item,
-            3 => vec.W = item,
-            _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
-        };
+            case 0 :
+                vec.X = item; 
+                break;
+            case 1 : 
+                vec.Y = item;
+                break;
+            case 2 : 
+                vec.Z = item;
+                break;
+            case 3 :
+                vec.W = item; 
+                break;
+            default : throw new ArgumentOutOfRangeException(nameof(index), index, null);
+        }
+    
     }
 
     private struct VertexWeight
