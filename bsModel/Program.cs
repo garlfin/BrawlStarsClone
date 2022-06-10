@@ -13,7 +13,7 @@ public static class Program
         var context = new AssimpContext();
         var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open),
             PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes |
-            PostProcessSteps.LimitBoneWeights);
+            PostProcessSteps.LimitBoneWeights | PostProcessSteps.);
 
         var finalPath = $"{Path.GetDirectoryName(args[0])}\\{Path.GetFileNameWithoutExtension(args[0])}.bnk";
         if (args.Length == 2) finalPath = $"{args[1]}{Path.GetFileNameWithoutExtension(args[0])}.bnk";

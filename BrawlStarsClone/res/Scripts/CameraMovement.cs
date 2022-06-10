@@ -1,5 +1,6 @@
 ﻿using BrawlStarsClone.Engine;
 using BrawlStarsClone.Engine.Component;
+using BrawlStarsClone.Engine.Exception;
 using Silk.NET.Maths;
 
 namespace BrawlStarsClone.res.Scripts;
@@ -15,22 +16,22 @@ public class CameraMovement : Behavior
 
     public CameraMovement(Entity player)
     {
-        _player = player.GetComponent<Transform>();
+        _player = player.GetComponent<Transform>() ?? throw new ComponentException("Transform component not found.");
     }
 
     public override void OnLoad()
     {
         _entityTransform = Owner.GetComponent<Transform>();
         _entityTransform.Rotation = new Vector3D<float>(-59, -90, 0);
-        _entityTransform.Location = Vector3D.Clamp(new Vector3D<float>(8.5f, 25, _player.Location.Z + 15),
+        _entityTransform.Location = Vector3D.Clamp(new Vector3D<float>(_player.Location.X, 25, _player.Location.Z + 15),
             _bounds.Item1, _bounds.Item2);
     }
 
     public override void OnRender(float deltaTime)
     {
         // Smooth Follow
-        var newPos = Vector3D.Clamp(new Vector3D<float>(8.5f, 25, _player.Location.Z + 15), _bounds.Item1,
-            _bounds.Item2);
+        var newPos = Vector3D.Clamp(new Vector3D<float>(_player.Location.X, 25, _player.Location.Z + 15),
+            _bounds.Item1, _bounds.Item2);
         _entityTransform.Location = Vector3D.Lerp(_entityTransform.Location, newPos, deltaTime * 3);
     }
 }

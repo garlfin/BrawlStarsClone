@@ -1,5 +1,6 @@
 ﻿using BrawlStarsClone.Engine.Utility;
 using Silk.NET.Maths;
+using Debug = System.Diagnostics.Debug;
 
 namespace BrawlStarsClone.Engine.Component;
 
@@ -11,7 +12,6 @@ public sealed class Transform : Component
 
     public Transform(Entity owner) : base(owner)
     {
-        Model = Matrix4X4<float>.Identity;
         OnUpdate(0f);
         TransformSystem.Register(this);
     }
@@ -25,21 +25,27 @@ public sealed class Transform : Component
         TransformSystem.Register(this);
     }
 
-    public Vector3D<float> RenderLocation { get; private set; } = Vector3D<float>.One;
-
     public Matrix4X4<float> Model { get; private set; }
 
     public override void OnUpdate(float deltaTime)
     {
-        Model = Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
-                Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) * Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
-                Matrix4X4.CreateTranslation(Location);
-        RenderLocation = Location;
+        if (Owner.Name == "Player") Console.Write("");
+        Model = (Owner.Parent?.GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity) *
+                    (Matrix4X4.CreateScale(Scale) * 
+                     Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
+                     Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) *
+                     Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
+                     Matrix4X4.CreateTranslation(Location));
     }
 }
 
 internal class TransformSystem : ComponentSystem<Transform>
 {
+    public static void Update(Entity root)
+    {
+        root.GetComponent<Transform>()?.OnUpdate(0f);
+        foreach (var t in root.Children) Update(t);
+    }
 }
 
 public struct Transformation

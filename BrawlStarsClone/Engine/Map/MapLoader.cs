@@ -137,7 +137,7 @@ public static class MapLoader
                 };
                 var finalTile = tileArr[rng.Next(0, tileArr.Length)];
 
-                var entity = new Entity(window);
+                var entity = new Entity(window, name: tile.ToString());
                 entity.AddComponent(new Transform(entity, new Transformation
                 {
                     Location = tilePos,

@@ -23,7 +23,7 @@ public sealed class MeshRenderer : Component
     public override unsafe void OnRender(float deltaTime)
     {
         if (Mesh.Instanced && !_overrideInstance) return;
-        var matrix = Owner.GetComponent<Transform>().Model;
+        var matrix = Owner.GetComponent<Transform>()?.Model ?? throw new InvalidOperationException();
         ProgramManager.PushModelMatrix(&matrix, 64);
         ProgramManager.MatCap.OtherData[0] = Alpha;
 

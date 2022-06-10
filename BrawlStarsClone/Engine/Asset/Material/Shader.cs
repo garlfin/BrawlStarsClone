@@ -13,7 +13,7 @@ public class Shader : Asset
         GL.CompileShader(_id);
 
         var log = GL.GetShaderInfoLog(_id);
-        if (!string.IsNullOrEmpty(log)) throw new Exception(log);
+        if (!string.IsNullOrEmpty(log)) throw new System.Exception(log);
     }
 
     public void Attach(ShaderProgram program)

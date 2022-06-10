@@ -1,4 +1,5 @@
 ﻿using BrawlStarsClone.Engine.Asset;
+using BrawlStarsClone.Engine.Asset.Material;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;

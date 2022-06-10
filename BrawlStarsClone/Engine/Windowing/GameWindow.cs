@@ -33,6 +33,8 @@ public class GameWindow
 
     public EmptyTexture ShadowMap;
 
+    public Entity Root { get; private set; }
+
     public GameWindow(int width, int height, string name)
     {
         var nativeWindowSettings = NativeWindowSettings.Default;
@@ -104,12 +106,13 @@ public class GameWindow
         GL.Enable(EnableCap.CullFace);
         
         GL.Enable(EnableCap.ProgramPointSize);
-
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
         GL.Viewport(new Size(_width, _height));
 
-        var camera = new Entity(this);
+        Root = new Entity(this, name: "Root");
+        Root.AddComponent(new Transform(Root));
+        
+        var camera = new Entity(this, name: "Camera");
         var transform = new Transform(camera)
         {
             Location = new Vector3D<float>(0, 0, 10),
@@ -118,7 +121,7 @@ public class GameWindow
         camera.AddComponent(transform);
         camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f));
         camera.GetComponent<Camera>().Set();
-        var player = new Entity(this);
+        var player = new Entity(this, name: "Player");
         MapLoader.LoadMap("../../../res/model/test.map", this,
             File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""), player);
 
@@ -133,7 +136,7 @@ public class GameWindow
             TexFilterMode.Linear, PixelFormat.DepthComponent, false, true);
         ShadowMap.BindToBuffer(_shadowBuffer, FramebufferAttachment.DepthAttachment);
 
-        var sun = new Entity(this);
+        var sun = new Entity(this, name: "Sun");
         sun.AddComponent(new Transform(sun, new Transformation
         {
             Location = new Vector3D<float>(20, 40, -20) * 2
@@ -196,7 +199,7 @@ public class GameWindow
         // Main Render Pass
         State = EngineState.Render;
         BehaviorSystem.Render(time);
-        TransformSystem.Update(time);
+        TransformSystem.Update(Root);
         CameraSystem.Update(time);
         SkinManager.Render(time);
         ProgramManager.InitFrame();
@@ -211,11 +214,7 @@ public class GameWindow
         foreach (var animator in SkinManager.Components)
         {
             var transform = animator.Owner.GetComponent<Transform>();
-            var matCopy = transform.Model; /*Matrix4X4.CreateScale(transform.Scale) * 
-                                          Matrix4X4.CreateRotationX((transform.Rotation.X + 90).DegToRad()) *
-                                          Matrix4X4.CreateRotationY(transform.Rotation.Y.DegToRad()) *
-                                          Matrix4X4.CreateRotationZ(transform.Rotation.Z.DegToRad()) *
-                                          Matrix4X4.CreateTranslation(transform.Location);*/
+            var matCopy = transform.Model;
             ProgramManager.PushModelMatrix(&matCopy, sizeof(Matrix4X4<float>));
             animator.RenderDebug();
         }
