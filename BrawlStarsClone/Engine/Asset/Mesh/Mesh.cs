@@ -12,7 +12,7 @@ public class Mesh // Id rather this be a struct...
     private int _modelBO;
 
     public string[] Materials;
-    public int[] MeshTransformsSkinned;
+    public int[] MeshTransform;
     public MeshVao[] MeshVAO;
     public VAO[] SkinnedVAO;
 
@@ -99,7 +99,7 @@ public class Mesh // Id rather this be a struct...
         if (IsSkinned) return;
         IsSkinned = true;
         SkinnedVAO = new VAO[MeshVAO.Length];
-        MeshTransformsSkinned = new int[MeshVAO.Length];
+        MeshTransform = new int[MeshVAO.Length];
     }
 }
 
@@ -139,4 +139,6 @@ public class BoneHierarchy
     public Matrix4X4<float> Offset;
     public string Parent;
     public Matrix4X4<float> Transform;
+
+    public override string ToString() => Name;
 }

@@ -29,4 +29,6 @@ public struct Channel
 {
     public string BoneName;
     public TransformationQuaternion[] Frames;
+
+    public override string ToString() => BoneName;
 }

@@ -13,7 +13,7 @@ public static class Program
         var context = new AssimpContext();
         var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open),
             PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes |
-            PostProcessSteps.LimitBoneWeights | PostProcessSteps.);
+            PostProcessSteps.LimitBoneWeights);
 
         var finalPath = $"{Path.GetDirectoryName(args[0])}\\{Path.GetFileNameWithoutExtension(args[0])}.bnk";
         if (args.Length == 2) finalPath = $"{args[1]}{Path.GetFileNameWithoutExtension(args[0])}.bnk";
@@ -100,13 +100,13 @@ public static class Program
                 writer.Write(bone.Parent);
                 writer.Write(bone.MeshIndex is not null);
                 writer.Write((ushort)(bone.MeshIndex ?? 0));
-                
+                bone.Offset.Transpose(); // Transpose because it reads it row major in MeshLoader.cs
                 fixed (void* ptr = &bone.Offset)
                 {
                     Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
                 }
                 writer.Write(matrixData);
-                
+                bone.Transform.Transpose();
                 fixed (void* ptr = &bone.Transform)
                 {
                     Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
@@ -117,16 +117,18 @@ public static class Program
             writer.Close();
             stream.Close();
         }
-            
-        foreach (var animation in scene.Animations)
+
+        for (var index = 0; index < scene.Animations.Count; index++)
         {
-            stream = File.Open("animation.bnk", FileMode.Create);
+            var animation = scene.Animations[index];
+            stream = File.Open($"animation-{index}.bnk", FileMode.Create);
             writer = new BinaryWriter(stream, Encoding.UTF8, false);
-            if ((int) animation.TicksPerSecond == 1)
-                writer.Write((ushort) Math.Round(animation.NodeAnimationChannels[0].PositionKeyCount / animation.DurationInTicks));
-            else 
-                writer.Write((ushort)(animation.TicksPerSecond)); 
-            writer.Write((ushort) animation.NodeAnimationChannels[0].PositionKeyCount);
+            if ((int)animation.TicksPerSecond == 1)
+                writer.Write((ushort)Math.Round(animation.NodeAnimationChannels[0].PositionKeyCount /
+                                                animation.DurationInTicks));
+            else
+                writer.Write((ushort)(animation.TicksPerSecond));
+            writer.Write((ushort)animation.NodeAnimationChannels[0].PositionKeyCount);
 
             writer.Write((ushort)animation.NodeAnimationChannelCount);
             foreach (var channel in animation.NodeAnimationChannels)
@@ -135,7 +137,7 @@ public static class Program
                 for (var i = 0; i < channel.PositionKeyCount; i++)
                 {
                     writer.Write((ushort)i);
-                    writer.Write((ushort)( 1 / animation.TicksPerSecond * i));
+                    writer.Write((ushort)(1 / animation.TicksPerSecond * i));
                     writer.Write(channel.PositionKeys[i].Value);
                     writer.Write(channel.RotationKeys[i].Value);
                     writer.Write(channel.ScalingKeys[i].Value);

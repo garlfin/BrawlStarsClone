@@ -1,6 +1,5 @@
 ﻿using BrawlStarsClone.Engine.Utility;
 using Silk.NET.Maths;
-using Debug = System.Diagnostics.Debug;
 
 namespace BrawlStarsClone.Engine.Component;
 
@@ -29,13 +28,12 @@ public sealed class Transform : Component
 
     public override void OnUpdate(float deltaTime)
     {
-        if (Owner.Name == "Player") Console.Write("");
         Model = (Owner.Parent?.GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity) *
-                    (Matrix4X4.CreateScale(Scale) * 
-                     Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
-                     Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) *
-                     Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
-                     Matrix4X4.CreateTranslation(Location));
+                (Matrix4X4.CreateScale(Scale) * 
+                 Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
+                 Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) *
+                 Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
+                 Matrix4X4.CreateTranslation(Location));
     }
 }
 
@@ -44,7 +42,7 @@ internal class TransformSystem : ComponentSystem<Transform>
     public static void Update(Entity root)
     {
         root.GetComponent<Transform>()?.OnUpdate(0f);
-        foreach (var t in root.Children) Update(t);
+        for (var i = 0; i < root.Children.Count; i++) Update(root.Children[i]);
     }
 }
 

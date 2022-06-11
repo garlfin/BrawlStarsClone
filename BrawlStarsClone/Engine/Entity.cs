@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using BrawlStarsClone.Engine.Windowing;
+﻿using BrawlStarsClone.Engine.Windowing;
 
 namespace BrawlStarsClone.Engine;
 

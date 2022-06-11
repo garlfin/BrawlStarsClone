@@ -25,14 +25,15 @@ public static class BinaryHelper
         return new string(reader.ReadChars(reader.ReadUInt16()));
     }
 
-    public static Matrix4X4<float> ReadMat4(this BinaryReader reader)
+    public static Vector4D<float> ReadVector4D(this BinaryReader reader)
     {
-        return new Matrix4X4<float>(
-            reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-            reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-            reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
-            reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()
-        ); // I hate looking at this but idrk whats a better solution cause i cant cast a pointer to a generic structure... thanks c#...
+        return new Vector4D<float>(reader.ReadVector3D(), reader.ReadSingle());
+    }
+
+    public static Matrix4X4<float> ReadMatrix4D(this BinaryReader reader)
+    {
+        return new Matrix4X4<float>(reader.ReadVector4D(), reader.ReadVector4D(), reader.ReadVector4D(),
+            reader.ReadVector4D());
     }
 
     public static VertexWeight ReadVertexWeight(this BinaryReader reader)

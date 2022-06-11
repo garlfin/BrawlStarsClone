@@ -74,10 +74,10 @@ public static class MeshLoader
                 {
                     var useTransform = reader.ReadBoolean();
                     int index = reader.ReadUInt16();
-                    if (useTransform) mesh.MeshTransformsSkinned[index] = boneCount;
+                    if (useTransform) mesh.MeshTransform[index] = i;
                 }
-                bone.Offset = reader.ReadMat4();
-                if (version > 4) bone.Transform = reader.ReadMat4();
+                bone.Offset = reader.ReadMatrix4D();
+                if (version > 4) bone.Transform = reader.ReadMatrix4D();
                 mesh.FlattenedHierarchy[i] = bone;
                 if ((bone.Parent == "" && version > 3) || (version == 3 && bone.Parent == "Scene"))
                     mesh.Hierarchy = bone;

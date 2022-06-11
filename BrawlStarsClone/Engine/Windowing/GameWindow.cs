@@ -167,7 +167,7 @@ public class GameWindow
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
             Rotation = new Vector3D<float>(0, 180, 0),
-            Scale = new Vector3D<float>(1f)
+            Scale = new Vector3D<float>(0.15f)
         });
 
         var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
@@ -210,14 +210,6 @@ public class GameWindow
         ManagedMeshes.Render(this);
         State = EngineState.RenderTransparent;
         ManagedMeshes.Render(this);
-        
-        foreach (var animator in SkinManager.Components)
-        {
-            var transform = animator.Owner.GetComponent<Transform>();
-            var matCopy = transform.Model;
-            ProgramManager.PushModelMatrix(&matCopy, sizeof(Matrix4X4<float>));
-            animator.RenderDebug();
-        }
         View.SwapBuffers();
     }
 }
