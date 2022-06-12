@@ -18,9 +18,6 @@
         <None Update="cube.bnk">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="ash_tex.pvr">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
         <None Update="res\skin_diffuse.pvr">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
@@ -37,6 +34,10 @@
     <ItemGroup>
         <PackageReference Include="OpenTK" Version="4.7.1" />
         <PackageReference Include="Silk.NET.Maths" Version="2.15.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="res\shader" />
     </ItemGroup>
 
 </Project>

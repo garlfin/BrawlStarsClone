@@ -14,9 +14,9 @@ public static class Program
         var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open),
             PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes |
             PostProcessSteps.LimitBoneWeights);
-
-        var finalPath = $"{Path.GetDirectoryName(args[0])}\\{Path.GetFileNameWithoutExtension(args[0])}.bnk";
-        if (args.Length == 2) finalPath = $"{args[1]}{Path.GetFileNameWithoutExtension(args[0])}.bnk";
+        var fileName = Path.GetFileNameWithoutExtension(args[0]);
+        var finalPath = $"{Path.GetDirectoryName(args[0])}\\{fileName}.bnk";
+        if (args.Length == 2) finalPath = $"{args[1]}{fileName}.bnk";
 
         var stream = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
         var writer = new BinaryWriter(stream, Encoding.UTF8, true);
@@ -121,7 +121,7 @@ public static class Program
         for (var index = 0; index < scene.Animations.Count; index++)
         {
             var animation = scene.Animations[index];
-            stream = File.Open($"animation-{index}.bnk", FileMode.Create);
+            stream = File.Open($"{fileName}-{animation.Name}.bnk", FileMode.Create);
             writer = new BinaryWriter(stream, Encoding.UTF8, false);
             if ((int)animation.TicksPerSecond == 1)
                 writer.Write((ushort)Math.Round(animation.NodeAnimationChannels[0].PositionKeyCount /

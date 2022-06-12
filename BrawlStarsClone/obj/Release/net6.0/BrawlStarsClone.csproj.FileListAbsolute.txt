@@ -31,7 +31,6 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Release\net6.0\
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Release\net6.0\OpenTK.Windowing.GraphicsLibraryFramework.dll
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Release\net6.0\runtimes\linux-x64\native\libglfw.so.3.3
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Release\net6.0\cube.bnk
-C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Release\net6.0\ash_tex.pvr
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Release\net6.0\res\skin_diffuse.pvr
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Release\net6.0\res\skin_spec.pvr
 C:\Users\scion\RiderProjects\BrawlStarsClone\BrawlStarsClone\bin\Release\net6.0\tutorial.bnk

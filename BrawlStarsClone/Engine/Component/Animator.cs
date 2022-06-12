@@ -13,7 +13,7 @@ public class Animator : Component
     private float _currentTime;
     private int _currentFrame;
     
-    private PointVAO _debugVao;
+    //private PointVAO _debugVao;
     //private Vector3D<float>[] _boneTransform;
 
     public Animator(Entity owner, Animation animation) : base(owner)
@@ -27,7 +27,7 @@ public class Animator : Component
         _currentFrame = 0;
         
         _matTransform = new Matrix4X4<float>[_renderer.Mesh.FlattenedHierarchy.Length];
-        _debugVao = new PointVAO(_renderer.Mesh.FlattenedHierarchy.Length);
+        //_debugVao = new PointVAO(_renderer.Mesh.FlattenedHierarchy.Length);
         //_boneTransform = new Vector3D<float>[_renderer.Mesh.FlattenedHierarchy.Length];
     }
 
@@ -96,7 +96,7 @@ public class Animator : Component
 
     public void RenderDebug()
     {
-        _debugVao.Render();
+        //_debugVao.Render();
     }
 }
 

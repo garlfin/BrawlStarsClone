@@ -31,25 +31,17 @@ public abstract class Texture : Asset
 
     public Vector2D<int> GetMipSize(int level)
     {
-        var width = _width;
-        var height = _height;
-        for (var i = level; i > 0; i--)
-        {
-            width /= 2;
-            height /= 2;
-        }
-
-        return new Vector2D<int>(width, height);
+        return new Vector2D<int>(_width >> level, _height >> level); // Thank you bit shift ily
     }
 
     public virtual void BindToBuffer(FrameBuffer.FrameBuffer buffer, FramebufferAttachment attachmentLevel,
         TextureTarget target = TextureTarget.Texture2D, int level = 0)
-    {
-        GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
+        {
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, attachmentLevel, target, _id, level);
     }
 
-    public sealed override void Delete()
+    public override void Delete()
     {
         GL.DeleteTexture(_id);
     }

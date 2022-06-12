@@ -6,19 +6,20 @@ public class ImageTexture : Texture
 {
     public unsafe ImageTexture(string path, bool genMips = true)
     {
-        if (!File.Exists(path)) throw new FileNotFoundException();
+        if (!File.Exists(path)) throw new FileNotFoundException(path);
         var file = File.Open(path, FileMode.Open);
         var reader = new BinaryReader(file);
 
         reader.ReadUInt32();
         reader.ReadUInt32();
 
-        var internalFormat = (Format)reader.ReadUInt64() switch
+        var pvrFormat = (Format)reader.ReadUInt64();
+        var internalFormat = pvrFormat switch
         {
             Format.BC1 => InternalFormat.CompressedRgbaS3tcDxt1Ext,
             Format.BC3 => InternalFormat.CompressedRgbaS3tcDxt3Ext,
             Format.BC5 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException($"Unsupported format {pvrFormat}.")
         };
         if (reader.ReadUInt32() == 1) internalFormat += 2140; // I hate looking at this but it works...
         reader.ReadUInt32();
@@ -40,7 +41,7 @@ public class ImageTexture : Texture
         for (var mip = 0; mip < mipCount; mip++)
         {
             var currentMipSize = GetMipSize(mip);
-            var imageData =
+            var imageData = 
                 reader.ReadBytes((int)MathF.Ceiling(currentMipSize.X * currentMipSize.Y / 16f) * 16);
             fixed (void* ptr = imageData)
             {
