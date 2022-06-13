@@ -7,6 +7,8 @@ public abstract class Collider : Component
     public readonly List<Collider> Collisions = new();
     public readonly bool Static;
     protected Vector2D<float> Scale = Vector2D<float>.One;
+    private readonly List<ColliderDistance> _collidersSorted = new();
+    private readonly ColliderCompare _comparer = new();
 
     protected Collider(bool isStatic, Vector2D<float>? scale = null, bool usePhysics = false)
     {
@@ -26,24 +28,24 @@ public abstract class Collider : Component
     public override void OnUpdate(float deltaTime)
     {
         if (Static) return;
+        
+        _collidersSorted.Clear();
 
-        var collidersSorted = new ColliderDistance[PhysicsSystem.Components.Count];
-
-        for (var i = 0; i < collidersSorted.Length; i++)
+        for (var i = 0; i < PhysicsSystem.Components.Count; i++)
         {
             var component = PhysicsSystem.Components[i];
             if (component == this) continue;
             var distance = Vector3D.Distance(Owner.GetComponent<Transform>().Location,
                 component.Owner.GetComponent<Transform>().Location);
             if (distance > 5) continue;
-            collidersSorted[i] = new ColliderDistance(component, distance);
+            _collidersSorted.Add(new ColliderDistance(component, distance));
         }
+        
+        _collidersSorted.Sort(_comparer);
 
-        Array.Sort(collidersSorted, new ColliderCompare());
-
-        for (var i = 0; i < collidersSorted.Length; i++)
+        for (var i = 0; i < _collidersSorted.Count; i++)
         {
-            var collider = collidersSorted[i].Collider;
+            var collider = _collidersSorted[i].Collider;
             if (collider == this || collider == null) continue;
             if (Static && collider.Static) continue;
             if (Collisions.Contains(collider)) continue;
@@ -73,10 +75,10 @@ internal class PhysicsSystem : ComponentSystem<Collider>
     }
 }
 
-public struct ColliderDistance
+public readonly struct ColliderDistance
 {
-    public Collider Collider;
-    public float Distance;
+    public readonly Collider Collider;
+    public readonly float Distance;
 
     public ColliderDistance(Collider collider, float distance)
     {

@@ -27,6 +27,8 @@ public class Mesh // Id rather this be a struct...
     public BoneHierarchy Hierarchy { get; set; }
     public BoneHierarchy[] FlattenedHierarchy { get; set; }
 
+    private Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
+
     public Matrix4X4<float> InverseTransform
     {
         get
@@ -75,18 +77,18 @@ public class Mesh // Id rather this be a struct...
 
         for (var i = 0; i < MeshVAO.Length; i++)
         {
-            var model = new Matrix4X4<float>[Users.Count];
-            for (var j = 0; j < Math.Min(Users.Count, 100); j++)
+            var users = Math.Min(Users.Count, 100);
+            for (var j = 0; j < users; j++)
             {
-                model[j] = Users[j].GetComponent<Transform>().Model;
+                _model[j] = Users[j].GetComponent<Transform>().Model;
                 ProgramManager.MatCap.OtherData[j * 4] = Users[j].GetComponent<MeshRenderer>().Alpha;
             }
 
             if (window.State is EngineState.Render or EngineState.RenderTransparent)
                 Users[0].GetComponent<Component.Material>()[i].Use();
-            fixed (void* ptr = model)
+            fixed (void* ptr = _model)
             {
-                ProgramManager.PushModelMatrix(ptr, sizeof(Matrix4X4<float>) * model.Length);
+                ProgramManager.PushModelMatrix(ptr, sizeof(Matrix4X4<float>) * users);
             }
 
             this[i].RenderInstanced(Users.Count);

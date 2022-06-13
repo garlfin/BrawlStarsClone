@@ -61,7 +61,7 @@ public class GameWindow
         View.Run();
     }
 
-    public KeyboardState Input { get; private set; }
+    public KeyboardState Input => View.KeyboardState;
 
     public Vector2D<int> Size => new(_width, _height);
     public OpenTK.Windowing.Desktop.GameWindow View { get; }
@@ -75,7 +75,6 @@ public class GameWindow
     private void OnUpdate(FrameEventArgs obj)
     {
         var time = (float)obj.Time;
-        Input = View.KeyboardState.GetSnapshot();
         if (Input.IsKeyDown(Keys.Escape)) View.Close();
         PhysicsSystem.ResetCollisions();
         BehaviorSystem.Update(time);
@@ -167,7 +166,7 @@ public class GameWindow
 
         player.AddComponent(new Transform(player)
         {
-            Location = new Vector3D<float>(8.5f, 0.5f, 0),
+            Location = new Vector3D<float>(8.5f, 0, 0),
             Scale = new Vector3D<float>(0.15f)
         });
         
