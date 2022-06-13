@@ -19,11 +19,19 @@ public static class MeshLoader
         if (header != "BS3D") throw new FileLoadException($"Invalid header in file {path}");
         var version = reader.ReadUInt32();
         if (version < 3) throw new FileLoadException($"Version {version} unsupported in file {path}!");
+
+        var matCount = 0;
+        if (version > 5) reader.ReadUInt16();
+        for (int i = 0; i < matCount; i++)
+        {
+            
+        }
         var meshCount = reader.ReadUInt16();
         var mesh = new Mesh
         {
             Materials = new string[meshCount],
-            MeshVAO = new MeshVao[meshCount]
+            MeshVAO = new MeshVao[meshCount],
+            MaterialCount = matCount
         };
 
         for (var u = 0; u < meshCount; u++)
@@ -39,8 +47,12 @@ public static class MeshLoader
             data.Faces = new Vector3D<int>[reader.ReadUInt32()];
             for (var i = 0; i < data.Faces.Length; i++) data.Faces[i] = reader.ReadVector3Di();
 
-            mesh.Materials[u] = reader.ReadString();
-
+            var matName = reader.ReadString();
+            if (!mesh.Materials.Contains(matName))
+                mesh.MaterialCount++;
+            mesh.Materials[u] = matName;
+            
+          
             var hasBones = reader.ReadBoolean();
             if (hasBones)
             {

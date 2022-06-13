@@ -11,6 +11,8 @@ public class Mesh // Id rather this be a struct...
 {
     private int _modelBO;
 
+    public int MaterialCount { get; set; }
+
     public string[] Materials;
     public int[] MeshTransform;
     public MeshVao[] MeshVAO;

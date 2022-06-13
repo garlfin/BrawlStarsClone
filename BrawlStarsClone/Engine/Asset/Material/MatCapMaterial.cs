@@ -22,8 +22,8 @@ public class MatCapMaterial : Material
     private readonly Texture.Texture _albedo;
     private readonly MatCap _matCap;
 
-    public MatCapMaterial(GameWindow window, ShaderProgram program, MatCap matCap, Texture.Texture albedo) : base(
-        window, program)
+    public MatCapMaterial(GameWindow window, ShaderProgram program, MatCap matCap, Texture.Texture albedo, string name) : base(
+        window, program, name)
     {
         _matCap = matCap;
         _albedo = albedo;

@@ -19,7 +19,7 @@ public class ImageTexture : Texture
             Format.BC1 => InternalFormat.CompressedRgbaS3tcDxt1Ext,
             Format.BC3 => InternalFormat.CompressedRgbaS3tcDxt3Ext,
             Format.BC5 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
-            _ => throw new ArgumentOutOfRangeException($"Unsupported format {pvrFormat}.")
+            _ => throw new ArgumentOutOfRangeException($"Unsupported format {pvrFormat} in file {path}")
         };
         if (reader.ReadUInt32() == 1) internalFormat += 2140; // I hate looking at this but it works...
         reader.ReadUInt32();

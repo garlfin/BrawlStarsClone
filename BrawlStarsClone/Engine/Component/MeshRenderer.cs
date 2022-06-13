@@ -32,12 +32,15 @@ public sealed class MeshRenderer : Component
         for (var i = 0; i < Mesh.MeshVAO.Length; i++)
         {
             if (Owner.Window.State is EngineState.Render or EngineState.RenderTransparent)
-                Owner.GetComponent<Material>()[i].Use();
+                (Owner.GetComponent<Material>()![Mesh.Materials[i]] ?? Owner.GetComponent<Material>()![i]).Use();
+            
             Mesh[i].Render();
+            //Owner.GetComponent<Animator>()?.RenderDebug();
+            TexSlotManager.ResetUnit();
         }
 
         GL.Disable(EnableCap.Blend);
-        TexSlotManager.ResetUnit();
+        
     }
 }
 

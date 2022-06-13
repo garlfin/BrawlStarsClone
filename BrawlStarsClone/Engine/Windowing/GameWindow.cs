@@ -118,9 +118,11 @@ public class GameWindow
             Location = new Vector3D<float>(0, 0, 10),
             Rotation = new Vector3D<float>(0, -90, 0)
         };
+        
         camera.AddComponent(transform);
         camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f));
         camera.GetComponent<Camera>().Set();
+        
         var player = new Entity(this, name: "Player");
         MapLoader.LoadMap("../../../res/model/test.map", this,
             File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""), player);
@@ -137,10 +139,10 @@ public class GameWindow
         ShadowMap.BindToBuffer(_shadowBuffer, FramebufferAttachment.DepthAttachment);
 
         var sun = new Entity(this, name: "Sun");
-        sun.AddComponent(new Transform(sun, new Transformation
+        sun.AddComponent(new Transform(sun)
         {
             Location = new Vector3D<float>(20, 40, -20) * 2
-        }));
+        });
         sun.AddComponent(new Sun(sun, 60));
         sun.GetComponent<Sun>().Offset = new Vector3D<float>(0, 0, 15);
 
@@ -166,21 +168,17 @@ public class GameWindow
         player.AddComponent(new Transform(player)
         {
             Location = new Vector3D<float>(8.5f, 0.5f, 0),
-            Rotation = new Vector3D<float>(0, 180, 0),
             Scale = new Vector3D<float>(0.15f)
         });
-
-        var whiteBase = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
-            new ImageTexture("../../../res/shelly.pvr"));
-        var materials = new Material[]
-        {
-            whiteBase, whiteBase, whiteBase, whiteBase, whiteBase, whiteBase, whiteBase, whiteBase, whiteBase
-        };
+        
+        var materials = new Material?[] { new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
+            new ImageTexture("../../../res/shelly.pvr"), "DefaultMaterial") };
+        
         player.AddComponent(new Component.Material(materials));
         var playerMesh = MeshLoader.LoadMesh("../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
         player.AddComponent(new Animator(player,
-            MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/animation.bnk")));
+            MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_walk.bnk")));
         player.AddComponent(new PlayerMovement());
         player.AddComponent(new SquareCollider(player, false));
         camera.AddComponent(new CameraMovement(player));

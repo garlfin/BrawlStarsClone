@@ -13,6 +13,7 @@ public class Animator : Component
     private float _currentTime;
     private int _currentFrame;
     
+    // Commented stuff is leftover debug stuff I can keep for later if needed.
     //private PointVAO _debugVao;
     //private Vector3D<float>[] _boneTransform;
 
@@ -88,7 +89,7 @@ public class Animator : Component
                         Matrix4X4.CreateFromQuaternion(frame.Value.Rotation) * 
                         Matrix4X4.CreateTranslation(frame.Value.Location);
         var globalTransform = transform * parentTransform;
-        //_boneTransform[bone.Index] = new Vector3D<float>(globalTransform.M41, -globalTransform.M43, globalTransform.M42);
+        //_boneTransform[bone.Index] = new Vector3D<float>(globalTransform.M41, -globalTransform.M43, globalTransform.M42); // Convert 
         _matTransform[bone.Index] = bone.Offset * globalTransform * _renderer.Mesh.InverseTransform;
 
         for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], globalTransform);

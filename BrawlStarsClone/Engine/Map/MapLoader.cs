@@ -75,7 +75,7 @@ public static class MapLoader
         var textures = new ImageTexture[reader.ReadUInt32()];
         for (var i = 0; i < textures.Length; i++) textures[i] = new ImageTexture(reader.ReadPythonString());
 
-        var matCapMaterials = new Tuple<MatCapMaterial, string>[reader.ReadUInt32()];
+        var matCapMaterials = new MatCapMaterial[reader.ReadUInt32()];
         for (var i = 0; i < matCapMaterials.Length; i++)
         {
             var name = reader.ReadPythonString();
@@ -89,8 +89,7 @@ public static class MapLoader
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            matCapMaterials[i] = new Tuple<MatCapMaterial, string>(
-                new MatCapMaterial(window, DiffuseProgram, currentCap, textures[reader.ReadUInt32()]), name);
+            matCapMaterials[i] = new MatCapMaterial(window, DiffuseProgram, currentCap, textures[reader.ReadUInt32()], name);
         }
 
         var meshes = new Mesh[reader.ReadUInt32()];
@@ -100,22 +99,19 @@ public static class MapLoader
         for (var i = 0; i < objectCount; i++)
         {
             var entity = new Entity(window);
-            entity.AddComponent(new Transform(entity, new Transformation
+            entity.AddComponent(new Transform(entity)
             {
                 Location = reader.ReadVector3D(),
                 Rotation = reader.ReadVector3D(),
                 Scale = reader.ReadVector3D()
-            }));
+            });
             var mesh = meshes[reader.ReadUInt32()];
-            var materials = new Material[mesh.MeshVAO.Length];
-            for (var j = 0; j < materials.Length; j++)
-            {
-                foreach (var matCapMaterial in matCapMaterials)
-                    if (matCapMaterial.Item2 == mesh.Materials[j])
-                        materials[j] = matCapMaterial.Item1;
-                if (materials[j] == null) throw new NoNullAllowedException($"Null material {mesh.Materials[j]}");
-                // Positively Awful Code
-            }
+            var materials = new Material?[mesh.MaterialCount];
+
+            for (int j = 0; j < mesh.MaterialCount; j++)
+                for (var index = 0; index < matCapMaterials.Length; index++)
+                    if (matCapMaterials[index].Name == mesh.Materials[j])
+                        materials[j] = matCapMaterials[index];
 
             entity.AddComponent(new Component.Material(materials));
             entity.AddComponent(new MeshRenderer(entity, mesh));
@@ -138,23 +134,25 @@ public static class MapLoader
                 var finalTile = tileArr[rng.Next(0, tileArr.Length)];
 
                 var entity = new Entity(window, name: tile.ToString());
-                entity.AddComponent(new Transform(entity, new Transformation
+                entity.AddComponent(new Transform(entity)
                 {
                     Location = tilePos,
                     Rotation = Vector3D<float>.Zero,
                     Scale = Vector3D<float>.One
-                }));
-                Material material = null;
-                foreach (var matCapMaterial in matCapMaterials)
-                    if (matCapMaterial.Item2 == finalTile.Materials[0])
-                        material = matCapMaterial.Item1;
+                });
+                Material[] materials = new Material[finalTile.MaterialCount];
+                
+                for (int j = 0; j < finalTile.MaterialCount; j++)
+                    for (var index = 0; index < matCapMaterials.Length; index++)
+                        if (matCapMaterials[index].Name == finalTile.Materials[j])
+                            materials[j] = matCapMaterials[index];
 
-                entity.AddComponent(new Component.Material(new[] { material }!));
+                entity.AddComponent(new Component.Material(materials));
                 entity.AddComponent(new MeshRenderer(entity, finalTile));
                 if (tile != 'g')
                 {
                     entity.AddComponent(new SquareCollider(entity, true));
-                    entity.GetComponent<Transform>().Rotation.Y = rng.Next(0, 5) * 90;
+                    entity.GetComponent<Transform>()!.Rotation.Y = rng.Next(0, 5) * 90;
                 }
                 else if (tile == 'g')
                 {
@@ -166,6 +164,7 @@ public static class MapLoader
         }
     }
 }
+
 
 public enum MatCapType
 {

@@ -18,9 +18,6 @@ public static class Program
         var finalPath = $"{Path.GetDirectoryName(args[0])}\\{fileName}.bnk";
         if (args.Length == 2) finalPath = $"{args[1]}{fileName}.bnk";
 
-        var stream = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
-        var writer = new BinaryWriter(stream, Encoding.UTF8, true);
-
         var bones = new List<Bone>();
         IterateBone(scene.RootNode, bones);
         
@@ -34,8 +31,15 @@ public static class Program
         var matrixData = new byte[64];
         if (scene.HasMeshes)
         {
+            var stream = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
+            var writer = new BinaryWriter(stream, Encoding.UTF8, true);
             writer.Write(new[] { 'B', 'S', '3', 'D' });
-            writer.Write((uint)5); // Version 
+            writer.Write((uint)6); // Version 
+            writer.Write((ushort) scene.MaterialCount);
+            for (int i = 0; i < scene.MaterialCount; i++)
+            {
+                
+            }
             writer.Write((ushort)scene.MeshCount);
             for (var i = 0; i < scene.MeshCount; i++)
             {
@@ -121,8 +125,8 @@ public static class Program
         for (var index = 0; index < scene.Animations.Count; index++)
         {
             var animation = scene.Animations[index];
-            stream = File.Open($"{fileName}-{animation.Name}.bnk", FileMode.Create);
-            writer = new BinaryWriter(stream, Encoding.UTF8, false);
+            var stream = File.Open($"{fileName}_{animation.Name}.bnk", FileMode.Create);
+            var writer = new BinaryWriter(stream, Encoding.UTF8, false);
             if ((int)animation.TicksPerSecond == 1)
                 writer.Write((ushort)Math.Round(animation.NodeAnimationChannels[0].PositionKeyCount /
                                                 animation.DurationInTicks));

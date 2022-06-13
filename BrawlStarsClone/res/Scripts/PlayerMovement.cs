@@ -11,6 +11,14 @@ public class PlayerMovement : Behavior
     private Animator _animator;
     private Transform _entityTransform;
 
+    public int Speed
+    {
+        get => (int)(_internalSpeed * 100);
+        set => _internalSpeed = (float)value / 100;
+    }
+
+    private float _internalSpeed;
+
     public Tuple<Vector3D<float>, Vector3D<float>> Bounds = new(new Vector3D<float>(0),
         new Vector3D<float>(17, 100, 33));
 
@@ -18,6 +26,7 @@ public class PlayerMovement : Behavior
     {
         _entityTransform = Owner.GetComponent<Transform>();
         _animator = Owner.GetComponent<Animator>();
+        Speed = 300;
     }
 
     public override void OnUpdate(float gameTime)
@@ -45,21 +54,21 @@ public class PlayerMovement : Behavior
         if (key[0])
         {
             pressCount++;
-            _entityTransform.Location -= Vector3D<float>.UnitZ * 4 * gameTime; // Forward
+            _entityTransform.Location -= Vector3D<float>.UnitZ * _internalSpeed * gameTime; // Forward
             rotation += 180;
         }
 
         if (key[1])
         {
             pressCount++;
-            _entityTransform.Location += Vector3D<float>.UnitZ * 4 * gameTime; // Backwards
+            _entityTransform.Location += Vector3D<float>.UnitZ * _internalSpeed * gameTime; // Backwards
         }
 
         if (key[2])
             if (pressCount != 2)
             {
                 pressCount++;
-                _entityTransform.Location -= Vector3D<float>.UnitX * 4 * gameTime; // Forward
+                _entityTransform.Location -= Vector3D<float>.UnitX * _internalSpeed * gameTime; // Forward
                 rotation += 270;
             }
 
@@ -67,7 +76,7 @@ public class PlayerMovement : Behavior
             if (pressCount != 2)
             {
                 pressCount++;
-                _entityTransform.Location += Vector3D<float>.UnitX * 4 * gameTime; // Backwards
+                _entityTransform.Location += Vector3D<float>.UnitX * _internalSpeed * gameTime; // Backwards
                 rotation += 90;
             }
 
