@@ -176,9 +176,14 @@ public class GameWindow
         player.AddComponent(new Component.Material(materials));
         var playerMesh = MeshLoader.LoadMesh("../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
-        player.AddComponent(new Animator(player,
-            MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_walk.bnk")));
-        player.AddComponent(new PlayerMovement());
+        player.AddComponent(new Animator(player));
+        player.AddComponent(new PlayerMovement()
+        {
+            RunAnimation = MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_run.bnk"),
+            IdleAnimation = MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_idle.bnk"),
+            Speed = 150
+        });
+
         player.AddComponent(new SquareCollider(player, false));
         camera.AddComponent(new CameraMovement(player));
 

@@ -131,7 +131,7 @@ public static class Program
                 writer.Write((ushort)Math.Round(animation.NodeAnimationChannels[0].PositionKeyCount /
                                                 animation.DurationInTicks));
             else
-                writer.Write((ushort)(animation.TicksPerSecond));
+                writer.Write((ushort)animation.TicksPerSecond);
             writer.Write((ushort)animation.NodeAnimationChannels[0].PositionKeyCount);
 
             writer.Write((ushort)animation.NodeAnimationChannelCount);

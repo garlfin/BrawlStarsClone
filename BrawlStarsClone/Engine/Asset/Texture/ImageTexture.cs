@@ -10,29 +10,30 @@ public class ImageTexture : Texture
         var file = File.Open(path, FileMode.Open);
         var reader = new BinaryReader(file);
 
-        reader.ReadUInt32();
-        reader.ReadUInt32();
+        reader.ReadUInt32(); // Version
+        reader.ReadUInt32(); // Flags 
 
         var pvrFormat = (Format)reader.ReadUInt64();
         var internalFormat = pvrFormat switch
         {
-            Format.BC1 => InternalFormat.CompressedRgbaS3tcDxt1Ext,
+            Format.BC1 => InternalFormat.CompressedRgbS3tcDxt1Ext,
             Format.BC3 => InternalFormat.CompressedRgbaS3tcDxt3Ext,
             Format.BC5 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
             _ => throw new ArgumentOutOfRangeException($"Unsupported format {pvrFormat} in file {path}")
         };
-        if (reader.ReadUInt32() == 1) internalFormat += 2140; // I hate looking at this but it works...
-        reader.ReadUInt32();
+        // The read UInt32 is the color space - 0 being linear; 1 sRGB
+        if (reader.ReadUInt32() == 1) internalFormat += 2140; // Adding 2140 brings linear to sRGB enum
+        reader.ReadUInt32(); // Channel Type
         _width = reader.ReadInt32();
         _height = reader.ReadInt32();
 
-        reader.ReadUInt32();
-        reader.ReadUInt32();
-        reader.ReadUInt32();
+        reader.ReadUInt32(); // Depth 
+        reader.ReadUInt32(); // Surfaces
+        reader.ReadUInt32(); // Faces
 
         var mipCount = reader.ReadUInt32();
         var metaDataSize = reader.ReadUInt32();
-        reader.ReadBytes((int)metaDataSize);
+        file.Position += metaDataSize; // Ignoring MetaData...
         var calcMip = !(mipCount > 1);
 
         _id = GL.GenTexture();
@@ -54,11 +55,11 @@ public class ImageTexture : Texture
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-            (int)((calcMip && genMips) || mipCount > 1
+            (int)((calcMip && genMips) || mipCount > 1 // If we want to calculate mips and generate mips, or we already have mips set the filter to mip mode
                 ? TextureMinFilter.LinearMipmapLinear
                 : TextureMinFilter.Linear));
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        if (calcMip && genMips) GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        if (calcMip && genMips && mipCount == 1) GL.GenerateMipmap(GenerateMipmapTarget.Texture2D); // If we have no mips, generate them
         reader.Close();
         file.Close();
     }

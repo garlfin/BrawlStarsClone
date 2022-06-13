@@ -17,13 +17,14 @@ public class Animator : Component
     //private PointVAO _debugVao;
     //private Vector3D<float>[] _boneTransform;
 
-    public Animator(Entity owner, Animation animation) : base(owner)
+    public Animator(Entity owner, Animation? animation = null) : base(owner)
     {
         SkinManager.Register(this);
         
         _renderer = owner.GetComponent<MeshRenderer>();
+
+        if (animation is not null) _animation = animation;
         
-        Animation = animation;
         _currentTime = 0;
         _currentFrame = 0;
         
@@ -32,7 +33,13 @@ public class Animator : Component
         //_boneTransform = new Vector3D<float>[_renderer.Mesh.FlattenedHierarchy.Length];
     }
 
-    public Animation Animation { get; set; }
+    public Animation Animation
+    {
+        get => (Animation) _animation;
+        set => _animation = value;
+    }
+
+    private Animation? _animation;
     public bool Paused { get; set; }
 
     public void Reset()
@@ -57,10 +64,11 @@ public class Animator : Component
 
     public override unsafe void OnRender(float deltaTime)
     {
+        if (_animation is null) return; 
         Owner.Window.SkinningShader.Use();
 
         if (_currentTime > Animation.Time) _currentTime = 0;
-        _currentFrame = (int)MathF.Floor(_currentTime * Animation.FPS);
+        _currentFrame = (int)MathF.Floor(_currentTime * Animation!.FPS);
         
         IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
 
@@ -98,6 +106,13 @@ public class Animator : Component
     public void RenderDebug()
     {
         //_debugVao.Render();
+    }
+
+    public void SetAnimation(Animation animation, bool resetTime = false)
+    {
+        if (animation.Equals(_animation)) return;
+        if (resetTime) _currentTime = 0;
+        _animation = animation;
     }
 }
 

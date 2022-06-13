@@ -21,7 +21,7 @@ public struct Animation
             return null;
         }
     }
-
+    
     public Channel this[int index] => ChannelFrames[index];
 }
 
