@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using OpenTK.Graphics.OpenGL4;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
 
@@ -6,9 +7,23 @@ public abstract class VAO : Asset
 {
     protected int _vbo;
     protected int _vao;
+    
+    protected MeshData _mesh;
+    public MeshData Mesh => _mesh;
+    
     public int VBO => _vbo;
     public abstract void Render();
-    public abstract void RenderInstanced(int count);
+
+    public virtual void RenderInstanced(int count)
+    {
+        GL.BindVertexArray(_vao);
+        
+        if (_mesh.Faces is null)
+            GL.DrawArraysInstanced(PrimitiveType.Triangles, 0, _mesh.Vertices.Length * 3, count);
+        else
+            GL.DrawElementsInstanced(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
+                IntPtr.Zero, count);
+    }
 }
 
 public struct Vertex
@@ -19,6 +34,5 @@ public struct Vertex
     private float _pad1;
     public Vector2D<float> UV;
     private Vector2D<float> _pad2;
-    public Vector4D<uint> BoneID;
-    public Vector4D<float> Weight;
+    public VertexWeight Weight;
 }

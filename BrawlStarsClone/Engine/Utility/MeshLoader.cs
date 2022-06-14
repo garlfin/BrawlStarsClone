@@ -10,7 +10,7 @@ namespace BrawlStarsClone.Engine.Utility;
 
 public static class MeshLoader
 {
-    public static Mesh LoadMesh(string path, bool transparent = false, bool v2 = false)
+    public static Mesh LoadMesh(string path, bool transparent = false)
     {
         var file = File.Open(path, FileMode.Open, FileAccess.Read);
         var reader = new BinaryReader(file);
@@ -18,6 +18,7 @@ public static class MeshLoader
         var header = new string(reader.ReadChars(4));
         if (header != "BS3D") throw new FileLoadException($"Invalid header in file {path}");
         var version = reader.ReadUInt32();
+        Console.WriteLine($"Mesh {path} loaded (version {version})");
         if (version < 3) throw new FileLoadException($"Version {version} unsupported in file {path}!");
 
         var matCount = 0;
@@ -36,7 +37,7 @@ public static class MeshLoader
 
         for (var u = 0; u < meshCount; u++)
         {
-            var name = reader.ReadString();
+            reader.ReadString();
             var data = new MeshData();
             data.Vertices = new Vector3D<float>[reader.ReadUInt32()];
             for (var i = 0; i < data.Vertices.Length; i++) data.Vertices[i] = reader.ReadVector3D();
@@ -44,8 +45,12 @@ public static class MeshLoader
             for (var i = 0; i < data.UVs.Length; i++) data.UVs[i] = reader.ReadVector2D();
             data.Normals = new Vector3D<float>[reader.ReadUInt32()];
             for (var i = 0; i < data.Normals.Length; i++) data.Normals[i] = reader.ReadVector3D();
-            data.Faces = new Vector3D<int>[reader.ReadUInt32()];
-            for (var i = 0; i < data.Faces.Length; i++) data.Faces[i] = reader.ReadVector3Di();
+            
+            if (version < 7 || reader.ReadBoolean())
+            {
+                data.Faces = new Vector3D<int>[reader.ReadUInt32()];
+                for (var i = 0; i < data.Faces.Length; i++) data.Faces[i] = reader.ReadVector3Di();
+            }
 
             var matName = reader.ReadString();
             if (!mesh.Materials.Contains(matName))
@@ -61,10 +66,10 @@ public static class MeshLoader
                 for (var i = 0; i < data.Weights.Length; i++) data.Weights[i] = reader.ReadVertexWeight();
             }
 
-            mesh.MeshVAO[u] = new MeshVao(data, hasBones);
+            mesh.MeshVAO[u] = new MeshVao(data);
 
             if (hasBones)
-                mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, mesh.MeshVAO[u].EBO, data.Faces.Length);
+                mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, data, mesh.MeshVAO[u].EBO);
         }
 
         var boneCount = reader.ReadUInt16();

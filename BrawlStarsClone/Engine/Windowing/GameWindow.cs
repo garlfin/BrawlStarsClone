@@ -181,7 +181,7 @@ public class GameWindow
         {
             RunAnimation = MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_run.bnk"),
             IdleAnimation = MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_idle.bnk"),
-            Speed = 150
+            Speed = 200
         });
 
         player.AddComponent(new SquareCollider(player, false));

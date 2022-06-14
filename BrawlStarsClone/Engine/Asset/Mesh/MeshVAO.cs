@@ -5,10 +5,10 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public sealed class MeshVao : VAO
 {
-    private readonly MeshData _mesh;
-    private int _ebo;
-
-    public unsafe MeshVao(MeshData mesh, bool skinned = false)
+    private int _ebo = -1;
+    public int EBO => _ebo;
+    
+    public unsafe MeshVao(MeshData mesh)
     {
         var finalData = new Vertex[mesh.Vertices.Length];
 
@@ -20,14 +20,9 @@ public sealed class MeshVao : VAO
                 Normal = mesh.Normals[i]
             };
 
-        if (skinned)
+        if (mesh.Weights is not null)
             for (var i = 0; i < mesh.Vertices.Length; i++)
-            {
-                var weight = mesh.Weights[i];
-                finalData[i].BoneID = new Vector4D<uint>(weight.Bone1, weight.Bone2, weight.Bone3, weight.Bone4);
-                finalData[i].Weight =
-                    new Vector4D<float>(weight.Weight1, weight.Weight2, weight.Weight3, weight.Weight4);
-            }
+                finalData[i].Weight = mesh.Weights[i];
 
         _mesh = mesh;
 
@@ -42,12 +37,15 @@ public sealed class MeshVao : VAO
                 BufferUsageHint.StaticDraw);
         }
 
-        _ebo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
-        fixed (void* ptr = _mesh.Faces)
+        if (_mesh.Faces is not null)
         {
-            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr)ptr,
-                BufferUsageHint.StaticRead);
+            _ebo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+            fixed (void* ptr = _mesh.Faces)
+            {
+                GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr)ptr,
+                    BufferUsageHint.StaticRead);
+            }
         }
 
         GL.EnableVertexAttribArray(0);
@@ -61,28 +59,21 @@ public sealed class MeshVao : VAO
         GL.EnableVertexAttribArray(4);
         GL.VertexAttribPointer(4, 4, VertexAttribPointerType.Float, false, sizeof(Vertex), 64);
     }
-
-    public MeshData Mesh => _mesh;
-
-    public int EBO => _ebo;
-
+    
     public override void Render()
     {
         GL.BindVertexArray(_vao);
-        GL.DrawElements(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, 0);
-    }
-
-    public override void RenderInstanced(int count)
-    {
-        GL.BindVertexArray(_vao);
-        GL.DrawElementsInstanced(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
-            IntPtr.Zero, count);
+        if (_mesh.Faces is null)
+            GL.DrawArrays(PrimitiveType.Triangles, 0, _mesh.Vertices.Length * 3);
+        else
+            GL.DrawElements(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, 0);
     }
 
     public override void Delete()
     {
         GL.DeleteVertexArray(_vao);
         GL.DeleteBuffer(_vbo);
-        GL.DeleteBuffer(_ebo);
+        if (_ebo != -1)
+            GL.DeleteBuffer(_ebo);
     }
 }

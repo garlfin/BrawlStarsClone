@@ -10,10 +10,13 @@ public static class Program
 {
     public static unsafe void Main(string[] args)
     {
+        Console.Write("Use index buffer? y/n: ");
+        bool faces = Console.ReadLine().ToUpper()[0] == 'Y';
         var context = new AssimpContext();
-        var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open),
-            PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes |
-            PostProcessSteps.LimitBoneWeights);
+        var steps = PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes |
+                    PostProcessSteps.LimitBoneWeights | PostProcessSteps.RemoveRedundantMaterials;
+        if (faces) steps |= PostProcessSteps.JoinIdenticalVertices;
+        var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open), steps);
         var fileName = Path.GetFileNameWithoutExtension(args[0]);
         var finalPath = $"{Path.GetDirectoryName(args[0])}\\{fileName}.bnk";
         if (args.Length == 2) finalPath = $"{args[1]}{fileName}.bnk";
@@ -34,7 +37,7 @@ public static class Program
             var stream = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
             var writer = new BinaryWriter(stream, Encoding.UTF8, true);
             writer.Write(new[] { 'B', 'S', '3', 'D' });
-            writer.Write((uint)6); // Version 
+            writer.Write((uint)7); // Version 
             writer.Write((ushort) scene.MaterialCount);
             for (int i = 0; i < scene.MaterialCount; i++)
             {
@@ -56,14 +59,19 @@ public static class Program
 
                 writer.Write(currentMesh.Normals.Count);
                 foreach (var vertex in currentMesh.Normals) writer.Write(vertex);
-                writer.Write(currentMesh.Faces.Count);
-                foreach (var face in currentMesh.Faces)
+                writer.Write(faces);
+                if (faces)
                 {
-                    writer.Write((ushort)face.Indices[0]);
-                    writer.Write((ushort)face.Indices[1]);
-                    writer.Write((ushort)face.Indices[2]);
+                    writer.Write(currentMesh.Faces.Count);
+                    foreach (var face in currentMesh.Faces)
+                    {
+                        writer.Write((ushort)face.Indices[0]);
+                        writer.Write((ushort)face.Indices[1]);
+                        writer.Write((ushort)face.Indices[2]);
+                    } 
+                    // "If this flag is not specified, no vertices are referenced by more than one 
+                    // face and no index buffer is required for rendering." - PostProcessSteps.JoinIdenticalVertices
                 }
-
                 writer.Write(scene.Materials[currentMesh.MaterialIndex].Name);
                 writer.Write(currentMesh.HasBones);
                 if (!currentMesh.HasBones) continue;

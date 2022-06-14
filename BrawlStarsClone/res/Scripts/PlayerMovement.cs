@@ -46,12 +46,12 @@ public class PlayerMovement : Behavior
 
         if (key[0] || key[1] || key[2] || key[3])
         {
-            _animator.SetAnimation(RunAnimation, true);
+            _animator.Animation = RunAnimation;
             rotation = 0;
         }
         else
         {
-            _animator.SetAnimation(IdleAnimation, true);
+            _animator.Animation = IdleAnimation;
         }
 
         if (key[0])
