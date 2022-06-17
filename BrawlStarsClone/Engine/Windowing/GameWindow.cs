@@ -33,8 +33,6 @@ public class GameWindow
 
     public EmptyTexture ShadowMap;
 
-    public Entity Root { get; private set; }
-
     public GameWindow(int width, int height, string name)
     {
         var nativeWindowSettings = NativeWindowSettings.Default;
@@ -60,6 +58,8 @@ public class GameWindow
 
         View.Run();
     }
+
+    public Entity Root { get; private set; }
 
     public KeyboardState Input => View.KeyboardState;
 
@@ -103,25 +103,25 @@ public class GameWindow
         GL.Enable(EnableCap.DepthTest);
         GL.ClearColor(Color.Black);
         GL.Enable(EnableCap.CullFace);
-        
+
         GL.Enable(EnableCap.ProgramPointSize);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         GL.Viewport(new Size(_width, _height));
 
         Root = new Entity(this, name: "Root");
         Root.AddComponent(new Transform(Root));
-        
+
         var camera = new Entity(this, name: "Camera");
         var transform = new Transform(camera)
         {
             Location = new Vector3D<float>(0, 0, 10),
             Rotation = new Vector3D<float>(0, -90, 0)
         };
-        
+
         camera.AddComponent(transform);
         camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f));
         camera.GetComponent<Camera>().Set();
-        
+
         var player = new Entity(this, name: "Player");
         MapLoader.LoadMap("../../../res/model/test.map", this,
             File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""), player);
@@ -150,8 +150,8 @@ public class GameWindow
         _shadowBuffer.Bind(ClearBufferMask.DepthBufferBit);
         sun.GetComponent<Sun>().Set();
 
-        TransformSystem.Update(0f);
-        CameraSystem.Update(0f);
+        TransformSystem.Update(Root);
+        CameraSystem.Render(0f);
         ProgramManager.InitFrame();
 
         _depthShader.Use();
@@ -169,23 +169,36 @@ public class GameWindow
             Location = new Vector3D<float>(8.5f, 0, 0),
             Scale = new Vector3D<float>(0.15f)
         });
-        
-        var materials = new Material?[] { new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
-            new ImageTexture("../../../res/shelly.pvr"), "DefaultMaterial") };
-        
+
+        var materials = new Material?[]
+        {
+            new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
+                new ImageTexture("../../../res/shelly.pvr"), "DefaultMaterial")
+        };
+
         player.AddComponent(new Component.Material(materials));
         var playerMesh = MeshLoader.LoadMesh("../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
         player.AddComponent(new Animator(player));
-        player.AddComponent(new PlayerMovement()
+        player.AddComponent(new PlayerMovement
         {
             RunAnimation = MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_run.bnk"),
             IdleAnimation = MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_idle.bnk"),
             Speed = 200
         });
-
         player.AddComponent(new SquareCollider(player, false));
         camera.AddComponent(new CameraMovement(player));
+        var shootingPreview = new Entity(this, player, "ShootPreview");
+        shootingPreview.AddComponent(new Transform(shootingPreview)
+        {
+            Location = new Vector3D<float>(0, 0.1f, 0),
+            Rotation = new Vector3D<float>(0, 180, 0),
+            Scale = new Vector3D<float>(2)
+        });
+        shootingPreview.AddComponent(new MeshRenderer(shootingPreview, MeshLoader.LoadMesh("../../../res/model/plane.bnk", true)));
+        shootingPreview.AddComponent(new Component.Material(materials));
+
+        player.GetComponent<PlayerMovement>().Tracer = shootingPreview;
 
         MatBuffer = new UniformBuffer(sizeof(Matrix4X4<float>) * 255, BufferUsageHint.StreamDraw);
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, MatBuffer.ID);
@@ -194,7 +207,7 @@ public class GameWindow
         BehaviorSystem.Load();
     }
 
-    private unsafe void OnRender(FrameEventArgs frameEventArgs)
+    private void OnRender(FrameEventArgs frameEventArgs)
     {
         var time = (float)frameEventArgs.Time;
         if (_isClosed) return;
@@ -202,7 +215,7 @@ public class GameWindow
         State = EngineState.Render;
         BehaviorSystem.Render(time);
         TransformSystem.Update(Root);
-        CameraSystem.Update(time);
+        CameraSystem.Render(time);
         SkinManager.Render(time);
         ProgramManager.InitFrame();
 

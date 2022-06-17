@@ -28,12 +28,11 @@ public sealed class Transform : Component
 
     public override void OnUpdate(float deltaTime)
     {
-        Model = (Owner.Parent?.GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity) *
-                (Matrix4X4.CreateScale(Scale) * 
+        Model = (Matrix4X4.CreateScale(Scale) *
                  Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
                  Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) *
                  Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
-                 Matrix4X4.CreateTranslation(Location));
+                 Matrix4X4.CreateTranslation(Location)) * (Owner.Parent?.GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity);
     }
 }
 
@@ -54,14 +53,19 @@ public struct Transformation
 }
 
 /// <summary>
-/// Describes the animation of a single node. The name specifies the bone/node which is affected by
-/// this animation chanenl. The keyframes are given in three separate seties of values,
-/// one for each position, rotation, and scaling. The transformation matrix is computed from
-/// these values and replaces the node's original transformation matrix at a specific time.
-/// <para>This means all keys are absolute and not relative to the bone default pose.
-/// The order which the transformations are to be applied is scaling, rotation, and translation (SRT).</para>
-/// <para>Keys are in chronological order and duplicate keys do not pass the validation step. There most likely will be no
-/// negative time values, but they are not forbidden.</para>
+///     Describes the animation of a single node. The name specifies the bone/node which is affected by
+///     this animation chanenl. The keyframes are given in three separate seties of values,
+///     one for each position, rotation, and scaling. The transformation matrix is computed from
+///     these values and replaces the node's original transformation matrix at a specific time.
+///     <para>
+///         This means all keys are absolute and not relative to the bone default pose.
+///         The order which the transformations are to be applied is scaling, rotation, and translation (SRT).
+///     </para>
+///     <para>
+///         Keys are in chronological order and duplicate keys do not pass the validation step. There most likely will be
+///         no
+///         negative time values, but they are not forbidden.
+///     </para>
 /// </summary>
 public struct TransformationQuaternion
 {

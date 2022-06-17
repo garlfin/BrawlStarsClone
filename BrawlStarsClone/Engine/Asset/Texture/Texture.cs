@@ -36,8 +36,8 @@ public abstract class Texture : Asset
 
     public virtual void BindToBuffer(FrameBuffer.FrameBuffer buffer, FramebufferAttachment attachmentLevel,
         TextureTarget target = TextureTarget.Texture2D, int level = 0)
-        {
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
+    {
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
         GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, attachmentLevel, target, _id, level);
     }
 

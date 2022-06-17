@@ -1,5 +1,4 @@
-﻿using System.Data;
-using BrawlStarsClone.Engine.Asset.Material;
+﻿using BrawlStarsClone.Engine.Asset.Material;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Asset.Texture;
 using BrawlStarsClone.Engine.Component;
@@ -62,8 +61,8 @@ public static class MapLoader
         };
         _tiles[1] = new[] // Tile Variations
         {
-            MeshLoader.LoadMesh("../../../res/model/grass.bnk", true),
-            MeshLoader.LoadMesh("../../../res/model/grass2.bnk", true)
+            MeshLoader.LoadMesh("../../../res/model/grass.bnk"),
+            MeshLoader.LoadMesh("../../../res/model/grass2.bnk")
         };
     }
 
@@ -89,7 +88,8 @@ public static class MapLoader
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            matCapMaterials[i] = new MatCapMaterial(window, DiffuseProgram, currentCap, textures[reader.ReadUInt32()], name);
+            matCapMaterials[i] =
+                new MatCapMaterial(window, DiffuseProgram, currentCap, textures[reader.ReadUInt32()], name);
         }
 
         var meshes = new Mesh[reader.ReadUInt32()];
@@ -108,10 +108,10 @@ public static class MapLoader
             var mesh = meshes[reader.ReadUInt32()];
             var materials = new Material?[mesh.MaterialCount];
 
-            for (int j = 0; j < mesh.MaterialCount; j++)
-                for (var index = 0; index < matCapMaterials.Length; index++)
-                    if (matCapMaterials[index].Name == mesh.Materials[j])
-                        materials[j] = matCapMaterials[index];
+            for (var j = 0; j < mesh.MaterialCount; j++)
+            for (var index = 0; index < matCapMaterials.Length; index++)
+                if (matCapMaterials[index].Name == mesh.Materials[j])
+                    materials[j] = matCapMaterials[index];
 
             entity.AddComponent(new Component.Material(materials));
             entity.AddComponent(new MeshRenderer(entity, mesh));
@@ -140,12 +140,12 @@ public static class MapLoader
                     Rotation = Vector3D<float>.Zero,
                     Scale = Vector3D<float>.One
                 });
-                Material[] materials = new Material[finalTile.MaterialCount];
-                
-                for (int j = 0; j < finalTile.MaterialCount; j++)
-                    for (var index = 0; index < matCapMaterials.Length; index++)
-                        if (matCapMaterials[index].Name == finalTile.Materials[j])
-                            materials[j] = matCapMaterials[index];
+                var materials = new Material[finalTile.MaterialCount];
+
+                for (var j = 0; j < finalTile.MaterialCount; j++)
+                for (var index = 0; index < matCapMaterials.Length; index++)
+                    if (matCapMaterials[index].Name == finalTile.Materials[j])
+                        materials[j] = matCapMaterials[index];
 
                 entity.AddComponent(new Component.Material(materials));
                 entity.AddComponent(new MeshRenderer(entity, finalTile));
@@ -164,7 +164,6 @@ public static class MapLoader
         }
     }
 }
-
 
 public enum MatCapType
 {

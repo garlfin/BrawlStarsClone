@@ -1,9 +1,17 @@
-﻿using Silk.NET.Maths;
+﻿using OpenTK.Mathematics;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Utility;
 
 public static class Mathf
 {
+    private const float KEpsilonNormalSqrt = 1e-15f;
+
+    public static float Sign(float f)
+    {
+        return f >= 0F ? 1F : -1F;
+    }
+
     public static float Repeat(float t, float length)
     {
         return Math.Clamp(t - MathF.Floor(t / length) * length, 0.0f, length);
@@ -32,5 +40,34 @@ public static class Mathf
         return new Vector3D<float>(LerpAngle(vector3D.X, vector3D2.X, t),
             LerpAngle(vector3D.Y, vector3D2.Y, t),
             LerpAngle(vector3D.Z, vector3D2.Z, t));
+    }
+
+    public static float Angle(Vector2D<float> from, Vector2D<float> to)
+    {
+        // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
+        var denominator = (float)Math.Sqrt(from.LengthSquared * to.LengthSquared);
+        if (denominator < KEpsilonNormalSqrt)
+            return 0F;
+
+        var dot = Math.Clamp(Vector2D.Dot(from, to) / denominator, -1F, 1F);
+        return MathHelper.RadiansToDegrees((float)Math.Acos(dot));
+    }
+
+    // Returns the signed angle in degrees between /from/ and /to/. Always returns the smallest possible angle
+    public static float SignedAngle(Vector2D<float> from, Vector2D<float> to)
+    {
+        var unsignedAngle = Angle(from, to);
+        var sign = Sign(from.X * to.Y - from.Y * to.X);
+        return unsignedAngle * sign;
+    }
+
+    public static bool InBounds(float min, float max, float value)
+    {
+        return !(value < min || value > max);
+    }
+
+    public static Vector2 ToTK (this Vector2D<float> value)
+    {
+        return new Vector2(value.X, value.Y);
     }
 }

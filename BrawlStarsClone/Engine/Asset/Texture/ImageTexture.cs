@@ -42,7 +42,7 @@ public class ImageTexture : Texture
         for (var mip = 0; mip < mipCount; mip++)
         {
             var currentMipSize = GetMipSize(mip);
-            var imageData = 
+            var imageData =
                 reader.ReadBytes((int)MathF.Ceiling(currentMipSize.X * currentMipSize.Y / 16f) * 16);
             fixed (void* ptr = imageData)
             {
@@ -55,11 +55,14 @@ public class ImageTexture : Texture
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-            (int)((calcMip && genMips) || mipCount > 1 // If we want to calculate mips and generate mips, or we already have mips set the filter to mip mode
-                ? TextureMinFilter.LinearMipmapLinear
-                : TextureMinFilter.Linear));
+            (int)(
+                (calcMip && genMips) ||
+                mipCount > 1 // If we want to calculate mips and generate mips, or we already have mips set the filter to mip mode
+                    ? TextureMinFilter.LinearMipmapLinear
+                    : TextureMinFilter.Linear));
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        if (calcMip && genMips && mipCount == 1) GL.GenerateMipmap(GenerateMipmapTarget.Texture2D); // If we have no mips, generate them
+        if (calcMip && genMips && mipCount == 1)
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D); // If we have no mips, generate them
         reader.Close();
         file.Close();
     }

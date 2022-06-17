@@ -30,7 +30,7 @@ public class Camera : BaseCamera
         }
     }
 
-    public override void OnUpdate(float deltaTime)
+    public override void OnRender(float deltaTime)
     {
         // Yaw Y, Roll Z, Pitch X
         _front.X = MathF.Cos(_entityTransform.Rotation.X.DegToRad()) *
@@ -45,8 +45,9 @@ public class Camera : BaseCamera
 
         _right = Vector3D.Normalize(Vector3D.Cross(_front, Vector3D<float>.UnitY));
         _up = Vector3D.Normalize(Vector3D.Cross(_right, _front));
-
-        _view = Matrix4X4.CreateLookAt(_entityTransform.Location, _entityTransform.Location + _front, _up);
+        var loc = new Vector3D<float>(_entityTransform.Model.M41, _entityTransform.Model.M42,
+            _entityTransform.Model.M43);
+        _view = Matrix4X4.CreateLookAt(loc, loc + _front, _up);
     }
 
     protected override void UpdateProjection()

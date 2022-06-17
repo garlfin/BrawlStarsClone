@@ -11,7 +11,7 @@ public static class Program
     public static unsafe void Main(string[] args)
     {
         Console.Write("Use index buffer? y/n: ");
-        bool faces = Console.ReadLine().ToUpper()[0] == 'Y';
+        var faces = Console.ReadLine().ToUpper()[0] == 'Y';
         var context = new AssimpContext();
         var steps = PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes |
                     PostProcessSteps.LimitBoneWeights | PostProcessSteps.RemoveRedundantMaterials;
@@ -23,7 +23,7 @@ public static class Program
 
         var bones = new List<Bone>();
         IterateBone(scene.RootNode, bones);
-        
+
         foreach (var bone in bones)
         foreach (var parent in bones)
         {
@@ -38,11 +38,11 @@ public static class Program
             var writer = new BinaryWriter(stream, Encoding.UTF8, true);
             writer.Write(new[] { 'B', 'S', '3', 'D' });
             writer.Write((uint)7); // Version 
-            writer.Write((ushort) scene.MaterialCount);
-            for (int i = 0; i < scene.MaterialCount; i++)
+            writer.Write((ushort)scene.MaterialCount);
+            for (var i = 0; i < scene.MaterialCount; i++)
             {
-                
             }
+
             writer.Write((ushort)scene.MeshCount);
             for (var i = 0; i < scene.MeshCount; i++)
             {
@@ -68,14 +68,15 @@ public static class Program
                         writer.Write((ushort)face.Indices[0]);
                         writer.Write((ushort)face.Indices[1]);
                         writer.Write((ushort)face.Indices[2]);
-                    } 
+                    }
                     // "If this flag is not specified, no vertices are referenced by more than one 
                     // face and no index buffer is required for rendering." - PostProcessSteps.JoinIdenticalVertices
                 }
+
                 writer.Write(scene.Materials[currentMesh.MaterialIndex].Name);
                 writer.Write(currentMesh.HasBones);
                 if (!currentMesh.HasBones) continue;
-                
+
                 var weights = new VertexWeight[currentMesh.Vertices.Count];
                 for (var index = 0; index < currentMesh.BoneCount; index++)
                 {
@@ -89,10 +90,12 @@ public static class Program
                             if (weights[weight.VertexID].Weight[j] == 0) break;
                             realIndex++;
                         }
+
                         var boneIndex = GetBoneIndexFromName(bone.Name, bones);
                         bones[boneIndex].Offset = bone.OffsetMatrix;
                         ReplaceItem(ref weights[weight.VertexID].Bone, realIndex, boneIndex);
-                        ReplaceItem(ref weights[weight.VertexID].Weight, realIndex, (ushort)(ushort.MaxValue * weight.Weight));
+                        ReplaceItem(ref weights[weight.VertexID].Weight, realIndex,
+                            (ushort)(ushort.MaxValue * weight.Weight));
                     }
                 }
 
@@ -117,12 +120,14 @@ public static class Program
                 {
                     Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
                 }
+
                 writer.Write(matrixData);
                 bone.Transform.Transpose();
                 fixed (void* ptr = &bone.Transform)
                 {
                     Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
                 }
+
                 writer.Write(matrixData);
             }
 
@@ -188,7 +193,7 @@ public static class Program
 
     private static ushort GetBoneIndexFromName(string name, List<Bone> bones)
     {
-        return (ushort) bones.IndexOf(bones.First(bone => bone.Name == name));
+        return (ushort)bones.IndexOf(bones.First(bone => bone.Name == name));
     }
 
     public static void Write(this BinaryWriter writer, Quaternion quaternion)
@@ -204,21 +209,20 @@ public static class Program
     {
         switch (index)
         {
-            case 0 :
-                vec.X = item; 
+            case 0:
+                vec.X = item;
                 break;
-            case 1 : 
+            case 1:
                 vec.Y = item;
                 break;
-            case 2 : 
+            case 2:
                 vec.Z = item;
                 break;
-            case 3 :
-                vec.W = item; 
+            case 3:
+                vec.W = item;
                 break;
-            default : throw new ArgumentOutOfRangeException(nameof(index), index, null);
+            default: throw new ArgumentOutOfRangeException(nameof(index), index, null);
         }
-    
     }
 
     private struct VertexWeight

@@ -5,19 +5,18 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public abstract class VAO : Asset
 {
-    protected int _vbo;
-    protected int _vao;
-    
     protected MeshData _mesh;
+    protected int _vao;
+    protected int _vbo;
     public MeshData Mesh => _mesh;
-    
+
     public int VBO => _vbo;
     public abstract void Render();
 
     public virtual void RenderInstanced(int count)
     {
         GL.BindVertexArray(_vao);
-        
+
         if (_mesh.Faces is null)
             GL.DrawArraysInstanced(PrimitiveType.Triangles, 0, _mesh.Vertices.Length * 3, count);
         else

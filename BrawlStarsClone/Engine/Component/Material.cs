@@ -17,11 +17,12 @@ public class Material : Component
     }
 
     public Asset.Material.Material this[int index] => _materials[index]!;
+
     public Asset.Material.Material? this[string name]
     {
         get
         {
-            for (int i = 0; i < _materials.Length; i++)
+            for (var i = 0; i < _materials.Length; i++)
                 if (_materials[i]!.Name == name)
                     return _materials[i];
             return null;

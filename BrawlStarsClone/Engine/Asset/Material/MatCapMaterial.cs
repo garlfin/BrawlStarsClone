@@ -22,8 +22,8 @@ public class MatCapMaterial : Material
     private readonly Texture.Texture _albedo;
     private readonly MatCap _matCap;
 
-    public MatCapMaterial(GameWindow window, ShaderProgram program, MatCap matCap, Texture.Texture albedo, string name) : base(
-        window, program, name)
+    public MatCapMaterial(GameWindow window, ShaderProgram program, MatCap matCap, Texture.Texture albedo,
+        string name) : base(window, program, name)
     {
         _matCap = matCap;
         _albedo = albedo;
@@ -38,7 +38,7 @@ public class MatCapMaterial : Material
         Program.SetUniform("shadowMap", Window.ShadowMap.Use(TexSlotManager.Unit));
         ProgramManager.MatCap.Influence = new Vector4D<float>(_matCap.UseDiffuse.AsInt(), _matCap.UseSpecular.AsInt(),
             _matCap.UseShadow.AsInt(), 1);
-        ProgramManager.MatCap.SpecularColor = new Vector4D<float>(_matCap.SpecColor, 1);
+        ProgramManager.MatCap.SpecularColor = new Vector4D<float>(_matCap.SpecColor, (float)Window.State);
         ProgramManager.PushMatCap();
     }
 }

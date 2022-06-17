@@ -9,14 +9,15 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public class Mesh // Id rather this be a struct...
 {
+    private readonly Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
     private int _modelBO;
-
-    public int MaterialCount { get; set; }
 
     public string[] Materials;
     public int[] MeshTransform;
     public MeshVao[] MeshVAO;
     public VAO[] SkinnedVAO;
+
+    public int MaterialCount { get; set; }
 
     public bool IsSkinned { get; set; }
 
@@ -27,13 +28,12 @@ public class Mesh // Id rather this be a struct...
     public BoneHierarchy Hierarchy { get; set; }
     public BoneHierarchy[] FlattenedHierarchy { get; set; }
 
-    private Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
-
     public Matrix4X4<float> InverseTransform
     {
         get
         {
-            if (!Matrix4X4.Invert(Hierarchy.Transform, out var dupe)) Console.WriteLine("Could not invert global transform.");
+            if (!Matrix4X4.Invert(Hierarchy.Transform, out var dupe))
+                Console.WriteLine("Could not invert global transform.");
             return dupe;
         }
     }
@@ -58,16 +58,15 @@ public class Mesh // Id rather this be a struct...
     {
         if (Transparent)
         {
-            if (window.State is EngineState.RenderTransparent)
+            switch (window.State)
             {
-                GL.Enable(EnableCap.Blend);
-            }
-            else if (window.State is EngineState.Shadow)
-            {
-            }
-            else if (window.State is EngineState.Render or EngineState.PostProcess)
-            {
-                return;
+                case EngineState.RenderTransparent:
+                    GL.Enable(EnableCap.Blend);
+                    break;
+                case EngineState.Shadow:
+                    break;
+                case EngineState.Render or EngineState.PostProcess:
+                    return;
             }
         }
         else if (window.State is EngineState.RenderTransparent)
@@ -144,5 +143,8 @@ public class BoneHierarchy
     public string Parent;
     public Matrix4X4<float> Transform;
 
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return Name;
+    }
 }

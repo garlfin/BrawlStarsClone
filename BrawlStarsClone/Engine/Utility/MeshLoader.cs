@@ -18,15 +18,13 @@ public static class MeshLoader
         var header = new string(reader.ReadChars(4));
         if (header != "BS3D") throw new FileLoadException($"Invalid header in file {path}");
         var version = reader.ReadUInt32();
-        Console.WriteLine($"Mesh {path} loaded (version {version})");
         if (version < 3) throw new FileLoadException($"Version {version} unsupported in file {path}!");
 
-        var matCount = 0;
-        if (version > 5) reader.ReadUInt16();
-        for (int i = 0; i < matCount; i++)
+        var matCount = version > 5 ? reader.ReadUInt16() : 0;
+        for (var i = 0; i < matCount; i++)
         {
-            
         }
+
         var meshCount = reader.ReadUInt16();
         var mesh = new Mesh
         {
@@ -45,7 +43,7 @@ public static class MeshLoader
             for (var i = 0; i < data.UVs.Length; i++) data.UVs[i] = reader.ReadVector2D();
             data.Normals = new Vector3D<float>[reader.ReadUInt32()];
             for (var i = 0; i < data.Normals.Length; i++) data.Normals[i] = reader.ReadVector3D();
-            
+
             if (version < 7 || reader.ReadBoolean())
             {
                 data.Faces = new Vector3D<int>[reader.ReadUInt32()];
@@ -56,8 +54,8 @@ public static class MeshLoader
             if (!mesh.Materials.Contains(matName))
                 mesh.MaterialCount++;
             mesh.Materials[u] = matName;
-            
-          
+
+
             var hasBones = reader.ReadBoolean();
             if (hasBones)
             {
@@ -84,15 +82,16 @@ public static class MeshLoader
                     Name = reader.ReadString(),
                     Parent = reader.ReadString(),
                     Children = new List<BoneHierarchy>(),
-                    Index = (ushort) i
+                    Index = (ushort)i
                 };
 
                 if (version > 3)
                 {
                     var useTransform = reader.ReadBoolean();
                     int index = reader.ReadUInt16();
-                    if (useTransform) mesh.MeshTransform[index] = i;
+                    if (useTransform && mesh.IsSkinned) mesh.MeshTransform[index] = i;
                 }
+
                 bone.Offset = reader.ReadMatrix4D();
                 if (version > 4) bone.Transform = reader.ReadMatrix4D();
                 mesh.FlattenedHierarchy[i] = bone;
@@ -101,19 +100,17 @@ public static class MeshLoader
             }
 
             for (var i = 0; i < mesh.FlattenedHierarchy.Length; i++)
+            for (var u = 0; u < mesh.FlattenedHierarchy.Length; u++)
             {
-                for (var u = 0; u < mesh.FlattenedHierarchy.Length; u++)
-                {
-                    if (mesh.FlattenedHierarchy[u].Name != mesh.FlattenedHierarchy[i].Parent) continue;
-                    mesh.FlattenedHierarchy[u].Children.Add(mesh.FlattenedHierarchy[i]);
-                    break;
-                }
+                if (mesh.FlattenedHierarchy[u].Name != mesh.FlattenedHierarchy[i].Parent) continue;
+                mesh.FlattenedHierarchy[u].Children.Add(mesh.FlattenedHierarchy[i]);
+                break;
             }
         }
 
         if (file.Position < file.Length)
             Console.WriteLine($"WARNING: {file.Length - file.Position} bytes unread in file {path}");
-        
+
         file.Close();
         reader.Close();
         mesh.Transparent = transparent;
@@ -156,7 +153,7 @@ public static class MeshLoader
 
         if (file.Length - file.Position > 0)
             throw new FileLoadException($"Extra data: {file.Length - file.Position} bytes");
-        
+
         file.Close();
         reader.Close();
         return animation;

@@ -4,11 +4,11 @@ namespace BrawlStarsClone.Engine.Component.Physics;
 
 public abstract class Collider : Component
 {
+    private readonly List<ColliderDistance> _collidersSorted = new();
+    private readonly ColliderCompare _comparer = new();
     public readonly List<Collider> Collisions = new();
     public readonly bool Static;
     protected Vector2D<float> Scale = Vector2D<float>.One;
-    private readonly List<ColliderDistance> _collidersSorted = new();
-    private readonly ColliderCompare _comparer = new();
 
     protected Collider(bool isStatic, Vector2D<float>? scale = null, bool usePhysics = false)
     {
@@ -28,7 +28,7 @@ public abstract class Collider : Component
     public override void OnUpdate(float deltaTime)
     {
         if (Static) return;
-        
+
         _collidersSorted.Clear();
 
         for (var i = 0; i < PhysicsSystem.Components.Count; i++)
@@ -40,7 +40,7 @@ public abstract class Collider : Component
             if (distance > 5) continue;
             _collidersSorted.Add(new ColliderDistance(component, distance));
         }
-        
+
         _collidersSorted.Sort(_comparer);
 
         for (var i = 0; i < _collidersSorted.Count; i++)

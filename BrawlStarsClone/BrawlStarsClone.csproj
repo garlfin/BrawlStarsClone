@@ -27,17 +27,17 @@
         <None Update="tutorial.bnk">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Remove="res\model\block.bnk" />
-        <None Remove="res\old_town.png" />
+        <None Remove="res\model\block.bnk"/>
+        <None Remove="res\old_town.png"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="OpenTK" Version="4.7.1" />
-        <PackageReference Include="Silk.NET.Maths" Version="2.15.0" />
+        <PackageReference Include="OpenTK" Version="4.7.1"/>
+        <PackageReference Include="Silk.NET.Maths" Version="2.15.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="res\shader" />
+        <Folder Include="res\shader"/>
     </ItemGroup>
 
 </Project>

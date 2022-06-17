@@ -11,7 +11,8 @@ internal static class Debug
         IntPtr message, IntPtr userparam)
     {
         if (severity is DebugSeverity.DebugSeverityNotification) return;
-        if (severity is DebugSeverity.DebugSeverityHigh) throw new System.Exception(Marshal.PtrToStringAnsi(message, length));
+        if (severity is DebugSeverity.DebugSeverityHigh)
+            throw new System.Exception(Marshal.PtrToStringAnsi(message, length));
         Console.WriteLine($"SEVERITY: {severity}; MESSAGE: {Marshal.PtrToStringAnsi(message, length)}");
     }
 

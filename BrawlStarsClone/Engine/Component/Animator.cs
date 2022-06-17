@@ -10,9 +10,11 @@ public class Animator : Component
     private readonly Matrix4X4<float>[] _matTransform;
     private readonly MeshRenderer _renderer;
 
-    private float _currentTime;
+    private Animation? _animation;
     private int _currentFrame;
-    
+
+    private float _currentTime;
+
     // Commented stuff is leftover debug stuff I can keep for later if needed.
     //private PointVAO _debugVao;
     //private Vector3D<float>[] _boneTransform;
@@ -20,14 +22,14 @@ public class Animator : Component
     public Animator(Entity owner, Animation? animation = null) : base(owner)
     {
         SkinManager.Register(this);
-        
+
         _renderer = owner.GetComponent<MeshRenderer>();
 
         if (animation is not null) _animation = animation;
-        
+
         _currentTime = 0;
         _currentFrame = 0;
-        
+
         _matTransform = new Matrix4X4<float>[_renderer.Mesh.FlattenedHierarchy.Length];
         //_debugVao = new PointVAO(_renderer.Mesh.FlattenedHierarchy.Length);
         //_boneTransform = new Vector3D<float>[_renderer.Mesh.FlattenedHierarchy.Length];
@@ -35,11 +37,10 @@ public class Animator : Component
 
     public Animation Animation
     {
-        get => (Animation) _animation;
+        get => (Animation)_animation;
         set => _animation = value;
     }
 
-    private Animation? _animation;
     public bool Paused { get; set; }
 
     public void Reset()
@@ -64,16 +65,19 @@ public class Animator : Component
 
     public override unsafe void OnRender(float deltaTime)
     {
-        if (_animation is null) return; 
+        if (_animation is null) return;
         Owner.Window.SkinningShader.Use();
 
         if (_currentTime > Animation.Time) _currentTime = 0;
         _currentFrame = (int)MathF.Floor(_currentTime * Animation!.FPS);
-        
+
         IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
 
         //fixed (void* ptr = _boneTransform) _debugVao.UpdateData(ptr);
-        fixed (void* ptr = _matTransform) Owner.Window.MatBuffer.ReplaceData(ptr, _matTransform.Length * sizeof(Matrix4X4<float>));
+        fixed (void* ptr = _matTransform)
+        {
+            Owner.Window.MatBuffer.ReplaceData(ptr, _matTransform.Length * sizeof(Matrix4X4<float>));
+        }
 
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
@@ -90,11 +94,11 @@ public class Animator : Component
     private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> parentTransform)
     {
         var frame = Animation[bone.Name]?.Frames[_currentFrame];
-        
+
         var transform = bone.Transform;
         if (frame is not null)
-            transform = Matrix4X4.CreateScale(frame.Value.Scale) * 
-                        Matrix4X4.CreateFromQuaternion(frame.Value.Rotation) * 
+            transform = Matrix4X4.CreateScale(frame.Value.Scale) *
+                        Matrix4X4.CreateFromQuaternion(frame.Value.Rotation) *
                         Matrix4X4.CreateTranslation(frame.Value.Location);
         var globalTransform = transform * parentTransform;
         //_boneTransform[bone.Index] = new Vector3D<float>(globalTransform.M41, -globalTransform.M43, globalTransform.M42); // Convert 

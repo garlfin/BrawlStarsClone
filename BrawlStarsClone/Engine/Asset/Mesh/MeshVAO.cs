@@ -1,13 +1,9 @@
 ﻿using OpenTK.Graphics.OpenGL4;
-using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public sealed class MeshVao : VAO
 {
-    private int _ebo = -1;
-    public int EBO => _ebo;
-    
     public unsafe MeshVao(MeshData mesh)
     {
         var finalData = new Vertex[mesh.Vertices.Length];
@@ -39,8 +35,8 @@ public sealed class MeshVao : VAO
 
         if (_mesh.Faces is not null)
         {
-            _ebo = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
+            EBO = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
             fixed (void* ptr = _mesh.Faces)
             {
                 GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr)ptr,
@@ -59,7 +55,9 @@ public sealed class MeshVao : VAO
         GL.EnableVertexAttribArray(4);
         GL.VertexAttribPointer(4, 4, VertexAttribPointerType.Float, false, sizeof(Vertex), 64);
     }
-    
+
+    public int EBO { get; } = -1;
+
     public override void Render()
     {
         GL.BindVertexArray(_vao);
@@ -73,7 +71,7 @@ public sealed class MeshVao : VAO
     {
         GL.DeleteVertexArray(_vao);
         GL.DeleteBuffer(_vbo);
-        if (_ebo != -1)
-            GL.DeleteBuffer(_ebo);
+        if (EBO != -1)
+            GL.DeleteBuffer(EBO);
     }
 }

@@ -25,6 +25,7 @@ public sealed class MeshRenderer : Component
         if (Mesh.Instanced && !_overrideInstance) return;
         var matrix = Owner.GetComponent<Transform>()?.Model ?? throw new InvalidOperationException();
         ProgramManager.PushModelMatrix(&matrix, 64);
+        
         ProgramManager.MatCap.OtherData[0] = Alpha;
 
         if (Alpha < 1 && Mesh.Transparent) GL.Enable(EnableCap.Blend);
@@ -33,14 +34,13 @@ public sealed class MeshRenderer : Component
         {
             if (Owner.Window.State is EngineState.Render or EngineState.RenderTransparent)
                 (Owner.GetComponent<Material>()![Mesh.Materials[i]] ?? Owner.GetComponent<Material>()![i]).Use();
-            
+
             Mesh[i].Render();
             //Owner.GetComponent<Animator>()?.RenderDebug();
             TexSlotManager.ResetUnit();
         }
 
         GL.Disable(EnableCap.Blend);
-        
     }
 }
 

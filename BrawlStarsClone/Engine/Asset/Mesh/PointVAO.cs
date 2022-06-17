@@ -5,13 +5,14 @@ namespace BrawlStarsClone.Engine.Asset.Mesh;
 
 public class PointVAO : VAO
 {
-    private readonly int _length;
     private readonly ShaderProgram _debugShader;
+    private readonly int _length;
+
     public PointVAO(int length)
     {
         _length = length;
         _debugShader = new ShaderProgram("../../../debug.frag", "../../../debug.vert");
-        
+
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
         _vbo = GL.GenBuffer();
@@ -20,13 +21,12 @@ public class PointVAO : VAO
 
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
-        
     }
 
     public unsafe void UpdateData(void* ptr)
     {
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, (IntPtr) (_length * sizeof(float) * 3), (IntPtr) ptr);
+        GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, (IntPtr)(_length * sizeof(float) * 3), (IntPtr)ptr);
     }
 
     public override void Render()

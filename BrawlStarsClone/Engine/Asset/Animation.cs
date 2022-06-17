@@ -21,7 +21,7 @@ public struct Animation
             return null;
         }
     }
-    
+
     public Channel this[int index] => ChannelFrames[index];
 }
 
@@ -30,5 +30,8 @@ public struct Channel
     public string BoneName;
     public TransformationQuaternion[] Frames;
 
-    public override string ToString() => BoneName;
+    public override string ToString()
+    {
+        return BoneName;
+    }
 }

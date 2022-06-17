@@ -6,8 +6,6 @@ public class Material
 {
     private protected readonly ShaderProgram Program;
     private protected readonly GameWindow Window;
-    
-    public string Name { get; }
 
     protected Material(GameWindow window, ShaderProgram program, string name)
     {
@@ -16,10 +14,15 @@ public class Material
         Name = name;
     }
 
+    public string Name { get; }
+
     public virtual void Use()
     {
         Program.Use();
     }
 
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return Name;
+    }
 }

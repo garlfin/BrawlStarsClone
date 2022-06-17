@@ -5,10 +5,6 @@ namespace BrawlStarsClone.Engine;
 public class Entity
 {
     private readonly List<Component.Component> _components = new();
-
-    public List<Entity> Children { get; } = new();
-    public Entity? Parent { get; set; }
-    public string Name { get; }
     public readonly GameWindow Window;
 
     public Entity(GameWindow window, Entity parent = null, string name = "Entity")
@@ -25,6 +21,18 @@ public class Entity
             Parent = parent;
             Parent.Children.Add(this);
         }
+    }
+
+    public List<Entity> Children { get; } = new();
+    public Entity? Parent { get; set; }
+    public string Name { get; }
+
+    public Entity? GetChild(string name)
+    {
+        for (int i = 0; i < Children.Count; i++)
+            if (Children[i].Name == name)
+                return Children[i];
+        return null;
     }
 
     public T? GetComponent<T>() where T : Component.Component
@@ -49,5 +57,8 @@ public class Entity
         component.Owner = this;
     }
 
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return Name;
+    }
 }
