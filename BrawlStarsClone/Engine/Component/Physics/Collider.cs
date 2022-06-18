@@ -4,7 +4,7 @@ namespace BrawlStarsClone.Engine.Component.Physics;
 
 public abstract class Collider : Component
 {
-    private readonly List<ColliderDistance> _collidersSorted = new();
+    private readonly List<Collision> _collidersSorted = new();
     private readonly ColliderCompare _comparer = new();
     public readonly List<Collider> Collisions = new();
     public readonly bool Static;
@@ -38,7 +38,7 @@ public abstract class Collider : Component
             var distance = Vector3D.Distance(Owner.GetComponent<Transform>().Location,
                 component.Owner.GetComponent<Transform>().Location);
             if (distance > 5) continue;
-            _collidersSorted.Add(new ColliderDistance(component, distance));
+            _collidersSorted.Add(new Collision(component, distance));
         }
 
         _collidersSorted.Sort(_comparer);
@@ -56,15 +56,9 @@ public abstract class Collider : Component
         }
     }
 
-    protected abstract bool Intersect(Collider other);
-}
+    public abstract bool Intersect(Collider other);
 
-public class ColliderCompare : IComparer<ColliderDistance>
-{
-    public int Compare(ColliderDistance x, ColliderDistance y)
-    {
-        return Comparer<float>.Default.Compare(x.Distance, y.Distance);
-    }
+    public abstract Collision? Intersect(Ray other);
 }
 
 internal class PhysicsSystem : ComponentSystem<Collider>
@@ -72,17 +66,5 @@ internal class PhysicsSystem : ComponentSystem<Collider>
     public static void ResetCollisions()
     {
         foreach (var component in Components) component.ResetCollisions();
-    }
-}
-
-public readonly struct ColliderDistance
-{
-    public readonly Collider Collider;
-    public readonly float Distance;
-
-    public ColliderDistance(Collider collider, float distance)
-    {
-        Collider = collider;
-        Distance = distance;
     }
 }

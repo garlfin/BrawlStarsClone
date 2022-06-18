@@ -2,7 +2,9 @@
 using BrawlStarsClone.Engine.Asset;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Component;
+using BrawlStarsClone.Engine.Component.Physics;
 using BrawlStarsClone.Engine.Utility;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Silk.NET.Maths;
@@ -22,7 +24,8 @@ public class PlayerMovement : Behavior
 
     public Animation RunAnimation { get; set; }
     public Animation IdleAnimation { get; set; }
-    
+
+    public float MaxRange = 5;
 
     public Entity Tracer
     {
@@ -30,7 +33,7 @@ public class PlayerMovement : Behavior
         set
         {
             _tracerMesh = value.GetComponent<MeshRenderer>();
-            _tracerMesh.Alpha = 0.5f;
+            _tracerMesh.Alpha = 0.6f;
             _tracerTransform = value.GetComponent<Transform>();
             _tracer = value;
         }
@@ -39,6 +42,7 @@ public class PlayerMovement : Behavior
     private Entity _tracer;
     private Transform _tracerTransform;
     private MeshRenderer _tracerMesh;
+    private Ray _ray;
         
 
     public int Speed
@@ -49,8 +53,10 @@ public class PlayerMovement : Behavior
 
     public override void OnLoad()
     {
+        _ray = new Ray(Vector2D<float>.Zero, Vector2D<float>.Zero, new List<Entity> {Owner});
         _entityTransform = Owner.GetComponent<Transform>();
         _animator = Owner.GetComponent<Animator>();
+        _tracerTransform.Scale.X = 2;
     }
 
     public override void OnUpdate(float gameTime)
@@ -61,26 +67,30 @@ public class PlayerMovement : Behavior
         key[3] = Owner.Window.Input.IsKeyDown(Keys.D);
 
         var mousePos =
-            new Vector2D<float>(Owner.Window.View.MousePosition.X,
-                Owner.Window.View.Size.Y - Owner.Window.View.MousePosition.Y) / (Vector2D<float>)Owner.Window.Size * 2 -
-            Vector2D<float>.One;
+            new Vector2D<float>(Owner.Window.CursorPos.X, Owner.Window.Size.Y - Owner.Window.CursorPos.Y) / (Vector2D<float>)Owner.Window.Size * 2 -
+            Vector2D<float>.One; // Convert to -1, 1 screen pos
         var objPos =
             Vector4D.Transform(new Vector4D<float>(_entityTransform.Location, 1f), CameraSystem.CurrentCamera.View) *
-            CameraSystem.CurrentCamera.Projection;
-        objPos /= objPos.W;
-        var finalPos = Vector2D.Normalize(mousePos - new Vector2D<float>(objPos.X, objPos.Y));
-        
+            CameraSystem.CurrentCamera.Projection; // World to screen pos -1 to 1
+        objPos /= objPos.W; // Clip Space
+
+        var finalPos =  Vector2D.Normalize(mousePos - new Vector2D<float>(objPos.X, objPos.Y)); // Get direction
+
         var mouseRot = _entityTransform.Rotation.Y;
         
         if (float.IsNaN(finalPos.X) || float.IsNaN(finalPos.Y))
             finalPos = new Vector2D<float>(0, 1);
         else
-            mouseRot = 180 - MathHelper.RadiansToDegrees(MathF.Atan2(finalPos.X, finalPos.Y));
+            mouseRot = MathHelper.RadiansToDegrees(MathF.Atan2(finalPos.X, -finalPos.Y));
 
         var mousePos3D = new Vector3D<float>(finalPos.X, 0, -finalPos.Y);
 
-        if (key[0]) _entityTransform.Location += mousePos3D * _internalSpeed * gameTime; // Forward
-        if (key[1]) _entityTransform.Location -= mousePos3D * _internalSpeed * gameTime; // Backwards
+        _tracerMesh.Alpha = Owner.Window.View.IsMouseButtonDown(MouseButton.Left) ? 0.6f : 0;
+        
+        if (key[0]) 
+            _entityTransform.Location += mousePos3D * _internalSpeed * gameTime; // Forward
+        if (key[1]) 
+            _entityTransform.Location -= mousePos3D * _internalSpeed * gameTime; // Backwards
         if (key[2])
             _entityTransform.Location +=
                 new Vector3D<float>(mousePos3D.Z, 0, -mousePos3D.X) * _internalSpeed * gameTime; // Forward
@@ -90,10 +100,25 @@ public class PlayerMovement : Behavior
 
         _entityTransform.Location = Vector3D.Clamp(_entityTransform.Location, Bounds.Item1, Bounds.Item2);
         if (float.IsNaN(mouseRot)) mouseRot = 0;
+        
         _entityTransform.Rotation.Y = Mathf.LerpAngle(_entityTransform.Rotation.Y, mouseRot, gameTime * 10);
         _tracerTransform.Rotation.Y = 180 + (mouseRot - _entityTransform.Rotation.Y); // Correct lerp
+
+        _ray.Position = new Vector2D<float>(_entityTransform.Location.X, _entityTransform.Location.Z);
+        _ray.Direction = new Vector2D<float>(finalPos.X, -finalPos.Y);
+        _ray.Length = MaxRange;
+        _ray.Collide();
+
+        if (_ray.Collisions.Count != 0)
+            _tracerTransform.Scale.Z = _ray.Collisions[0].Distance * 3.333f;
+        else                                                // 1 / 0.15 = 6.6~ 
+            _tracerTransform.Scale.Z = MaxRange * 3.333f; // Accidentally set the length of the tracer to 2 units 
+
         if (key[0] || key[1] || key[2] || key[3])
+        {
             _animator.Animation = RunAnimation;
+            Console.WriteLine($"Player: {objPos} Mouse: {mousePos}");
+        }
         else
             _animator.Animation = IdleAnimation;
     }

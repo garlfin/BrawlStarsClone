@@ -70,4 +70,10 @@ public static class Mathf
     {
         return new Vector2(value.X, value.Y);
     }
+    
+    public static Vector2D<float> ToSilk (this Vector2i value)
+    {
+        return new Vector2D<float>(value.X, value.Y);
+    }
+    
 }

@@ -18,7 +18,7 @@ public class CircleCollider : Collider
         _entityTransform = Owner.GetComponent<Transform>();
     }
 
-    protected override bool Intersect(Collider other)
+    public override bool Intersect(Collider other)
     {
         if (other.GetType() == typeof(CircleCollider))
             return Vector3D.Distance(_entityTransform.Location, other.Owner.GetComponent<Transform>().Location) <
@@ -39,5 +39,10 @@ public class CircleCollider : Collider
         }
 
         return false;
+    }
+
+    public override Collision? Intersect(Ray other)
+    {
+        return null;
     }
 }

@@ -22,9 +22,6 @@ namespace BrawlStarsClone.Engine.Windowing;
 
 public class GameWindow
 {
-    private readonly int _height;
-
-    private readonly int _width;
 
     private ShaderProgram _depthShader;
 
@@ -46,9 +43,6 @@ public class GameWindow
 
         View = new OpenTK.Windowing.Desktop.GameWindow(gameWindowSettings, nativeWindowSettings);
 
-        _width = width;
-        _height = height;
-
         View.Load += OnLoad;
         View.RenderFrame += OnRender;
         View.UpdateFrame += OnUpdate;
@@ -63,7 +57,7 @@ public class GameWindow
 
     public KeyboardState Input => View.KeyboardState;
 
-    public Vector2D<int> Size => new(_width, _height);
+    public Vector2D<int> Size => new(View.Size.X, View.Size.Y);
     public OpenTK.Windowing.Desktop.GameWindow View { get; }
 
     public EngineState State { get; private set; }
@@ -71,6 +65,12 @@ public class GameWindow
     public ShaderProgram SkinningShader { get; private set; }
 
     public UniformBuffer MatBuffer { get; private set; }
+
+    public Vector2D<float> CursorPos
+    {
+        get => new(View.MousePosition.X, View.MousePosition.Y);
+        set => View.MousePosition = new Vector2(value.X, value.Y);
+    }
 
     private void OnUpdate(FrameEventArgs obj)
     {
@@ -106,7 +106,7 @@ public class GameWindow
 
         GL.Enable(EnableCap.ProgramPointSize);
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-        GL.Viewport(new Size(_width, _height));
+        GL.Viewport(0, 0, Size.X, Size.Y);
 
         Root = new Entity(this, name: "Root");
         Root.AddComponent(new Transform(Root));
@@ -159,7 +159,7 @@ public class GameWindow
         MeshRendererSystem.Render(0f);
         ManagedMeshes.Render(this);
 
-        GL.Viewport(0, 0, _width, _height);
+        GL.Viewport(0, 0, Size.X, Size.Y);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
         camera.GetComponent<Camera>().Set();
@@ -192,11 +192,11 @@ public class GameWindow
         shootingPreview.AddComponent(new Transform(shootingPreview)
         {
             Location = new Vector3D<float>(0, 0.1f, 0),
-            Rotation = new Vector3D<float>(0, 180, 0),
-            Scale = new Vector3D<float>(2)
+            Rotation = new Vector3D<float>(0, 180, 0)
         });
         shootingPreview.AddComponent(new MeshRenderer(shootingPreview, MeshLoader.LoadMesh("../../../res/model/plane.bnk", true)));
-        shootingPreview.AddComponent(new Component.Material(materials));
+        shootingPreview.AddComponent(new Component.Material(new Material[]{ new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
+            new ImageTexture("../../../res/white.pvr"), "DefaultMaterial")}));
 
         player.GetComponent<PlayerMovement>().Tracer = shootingPreview;
 
