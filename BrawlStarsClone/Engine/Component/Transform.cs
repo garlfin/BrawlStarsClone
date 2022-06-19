@@ -9,6 +9,14 @@ public sealed class Transform : Component
     public Vector3D<float> Rotation = Vector3D<float>.Zero;
     public Vector3D<float> Scale = Vector3D<float>.One;
 
+    public Matrix4X4<float> GlobalMatrix =>
+        Matrix4X4.CreateScale(Scale) *
+        Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
+        Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) *
+        Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
+        Matrix4X4.CreateTranslation(Location) *
+        (Owner.Parent?.GetComponent<Transform>()?.GlobalMatrix ?? Matrix4X4<float>.Identity);
+
     public Transform(Entity owner) : base(owner)
     {
         OnUpdate(0f);
@@ -28,11 +36,11 @@ public sealed class Transform : Component
 
     public override void OnUpdate(float deltaTime)
     {
-        Model = (Matrix4X4.CreateScale(Scale) *
-                 Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
-                 Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) *
-                 Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
-                 Matrix4X4.CreateTranslation(Location)) * (Owner.Parent?.GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity);
+        Model = Matrix4X4.CreateScale(Scale) *
+                Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *
+                Matrix4X4.CreateRotationY(Rotation.Y.DegToRad()) *
+                Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
+                Matrix4X4.CreateTranslation(Location) * (Owner.Parent?.GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity);
     }
 }
 

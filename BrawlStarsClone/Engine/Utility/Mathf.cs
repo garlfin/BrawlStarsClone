@@ -35,45 +35,15 @@ public static class Mathf
         return degrees * MathF.PI / 180f;
     }
 
-    public static Vector3D<float> LerpAngle(Vector3D<float> vector3D, Vector3D<float> vector3D2, float t)
+    public static Vector3D<float> Transformation(this Matrix4X4<float> matrix4X4)
     {
-        return new Vector3D<float>(LerpAngle(vector3D.X, vector3D2.X, t),
-            LerpAngle(vector3D.Y, vector3D2.Y, t),
-            LerpAngle(vector3D.Z, vector3D2.Z, t));
+        return new Vector3D<float>(matrix4X4.M41, matrix4X4.M42, matrix4X4.M43);
     }
 
-    public static float Angle(Vector2D<float> from, Vector2D<float> to)
+    public static float Angle2D(float a, float b)
     {
-        // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
-        var denominator = (float)Math.Sqrt(from.LengthSquared * to.LengthSquared);
-        if (denominator < KEpsilonNormalSqrt)
-            return 0F;
-
-        var dot = Math.Clamp(Vector2D.Dot(from, to) / denominator, -1F, 1F);
-        return MathHelper.RadiansToDegrees((float)Math.Acos(dot));
+        //var c = MathF.Sqrt(MathF.Pow(a, 2) + MathF.Pow(b, 2));
+        return MathF.Atan2(a, b) * (180 / MathF.PI) ;
     }
 
-    // Returns the signed angle in degrees between /from/ and /to/. Always returns the smallest possible angle
-    public static float SignedAngle(Vector2D<float> from, Vector2D<float> to)
-    {
-        var unsignedAngle = Angle(from, to);
-        var sign = Sign(from.X * to.Y - from.Y * to.X);
-        return unsignedAngle * sign;
-    }
-
-    public static bool InBounds(float min, float max, float value)
-    {
-        return !(value < min || value > max);
-    }
-
-    public static Vector2 ToTK (this Vector2D<float> value)
-    {
-        return new Vector2(value.X, value.Y);
-    }
-    
-    public static Vector2D<float> ToSilk (this Vector2i value)
-    {
-        return new Vector2D<float>(value.X, value.Y);
-    }
-    
 }

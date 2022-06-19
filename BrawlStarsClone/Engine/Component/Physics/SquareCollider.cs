@@ -11,7 +11,7 @@ public class SquareCollider : Collider
     public Vector2D<float> MinTransformed => new(_transform.Location.X - Max.X, _transform.Location.Z - Max.Y);
     public Vector2D<float> MaxTransformed => new(_transform.Location.X + Max.X, _transform.Location.Z + Max.Y);
 
-    public SquareCollider(Entity owner, bool isStatic, Vector2D<float>? scale = null) : base(isStatic, scale)
+    public SquareCollider(Entity owner, bool isStatic, Vector2D<float>? scale = null, PhysicsLayer layer = PhysicsLayer.Zero) : base(isStatic, scale, layer)
     {
         _transform = owner.GetComponent<Transform>();
         Max = 0.5f * (scale ?? Vector2D<float>.One);
@@ -21,6 +21,7 @@ public class SquareCollider : Collider
 
     public override bool Intersect(Collider other)
     {
+        if (Layer != other.Layer) return false;
         var collider = (SquareCollider)other;
         var transform = _transform.Location;
         var otherTransform = other.Owner.GetComponent<Transform>().Location;
@@ -62,7 +63,6 @@ public class SquareCollider : Collider
     public override Collision? Intersect(Ray ray)
     {
         // Debugging - Ray is OK
-        if (ray.IgnoreList != null && ray.IgnoreList.Contains(Owner)) return null;
         if (!Static) return null;
         float t1 = (MinTransformed.X - ray.Position.X) / ray.Direction.X;
         float t2 = (MaxTransformed.X - ray.Position.X) / ray.Direction.X;

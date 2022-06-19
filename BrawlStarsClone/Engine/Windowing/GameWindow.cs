@@ -66,10 +66,16 @@ public class GameWindow
 
     public UniformBuffer MatBuffer { get; private set; }
 
-    public Vector2D<float> CursorPos
+    public Vector2D<float> MousePosition
     {
-        get => new(View.MousePosition.X, View.MousePosition.Y);
-        set => View.MousePosition = new Vector2(value.X, value.Y);
+        get => new(Math.Clamp(View.MousePosition.X, 0, View.Size.X), View.Size.Y - Math.Clamp(View.MousePosition.Y, 0, View.Size.Y));
+        set => View.MousePosition = new Vector2(value.X, View.Size.Y - value.Y);
+    }
+
+    public Vector2D<float> MousePositionNormalized
+    {
+        get => MousePosition / (Vector2D<float>)Size * 2 - Vector2D<float>.One;
+        set => MousePosition = (value * 0.5f + new Vector2D<float>(0.5f)) * (Vector2D<float>)Size;
     }
 
     private void OnUpdate(FrameEventArgs obj)

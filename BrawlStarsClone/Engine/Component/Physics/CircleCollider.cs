@@ -6,8 +6,7 @@ public class CircleCollider : Collider
 {
     private Transform _entityTransform = null!;
 
-    public CircleCollider(bool isStatic, Vector2D<float>? scale = null, bool usePhysics = false) : base(isStatic, scale,
-        usePhysics)
+    public CircleCollider(bool isStatic, Vector2D<float>? scale = null) : base(isStatic, scale)
     {
     }
 
