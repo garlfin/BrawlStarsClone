@@ -6,6 +6,7 @@ namespace BrawlStarsClone.Engine.Utility;
 public static class Mathf
 {
     private const float KEpsilonNormalSqrt = 1e-15f;
+    public const float Deg2Rad = MathF.PI * 2 / 360;
 
     public static float Sign(float f)
     {
@@ -35,9 +36,9 @@ public static class Mathf
         return degrees * MathF.PI / 180f;
     }
 
-    public static Vector3D<float> Transformation(this Matrix4X4<float> matrix4X4)
+    public static Vector3D<T> Transformation<T>(this Matrix4X4<T> matrix4X4) where T : unmanaged, IFormattable, IEquatable<T>, IComparable<T>
     {
-        return new Vector3D<float>(matrix4X4.M41, matrix4X4.M42, matrix4X4.M43);
+        return new Vector3D<T>(matrix4X4.M41, matrix4X4.M42, matrix4X4.M43);
     }
 
     public static float Angle2D(float a, float b)
@@ -46,4 +47,5 @@ public static class Mathf
         return MathF.Atan2(a, b) * (180 / MathF.PI) ;
     }
 
+    public static Vector3D<float> Vec3(this Vector4D<float> vec) => new Vector3D<float>(vec.X, vec.Y, vec.Z);
 }

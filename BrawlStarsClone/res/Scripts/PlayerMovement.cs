@@ -50,7 +50,7 @@ public class PlayerMovement : Behavior
 
     public override void OnLoad()
     {
-        _ray = new Ray(Vector2D<float>.Zero, Vector2D<float>.Zero, PhysicsLayer.Zero,new List<Entity> {Owner});
+        _ray = new Ray(Vector3D<float>.Zero, Vector3D<float>.Zero, PhysicsLayer.Zero,new List<Entity> {Owner});
         _entityTransform = Owner.GetComponent<Transform>();
         _animator = Owner.GetComponent<Animator>();
         _tracerTransform.Scale.X = 2;
@@ -63,32 +63,34 @@ public class PlayerMovement : Behavior
         key[2] = Owner.Window.Input.IsKeyDown(Keys.A);
         key[3] = Owner.Window.Input.IsKeyDown(Keys.D);
 
+        RayData data = CameraSystem.CurrentCamera.ScreenToRay(Owner.Window.MousePositionNormalized); // Get Camera Ray
+        var mouseWorldPos = data.Direction * (Vector3D.Dot(-data.Position, Vector3D<float>.UnitY) /
+                                              Vector3D.Dot(data.Direction, Vector3D<float>.UnitY)) + data.Position; // Intersect camera ray with ground plane
+
         var transform = _entityTransform.GlobalMatrix.Transformation();
-        var objPos = new Vector4D<float>(transform, 1f) * CameraSystem.CurrentCamera.View * CameraSystem.CurrentCamera.Projection; // World to screen pos -1 to 1
-        objPos /= objPos.W; // Clip Space
 
-        var finalPos = Vector2D.Normalize(Owner.Window.MousePositionNormalized - new Vector2D<float>(objPos.X, objPos.Y)); // Get direction
-
+        var finalPos = Vector3D.Normalize(mouseWorldPos - _entityTransform.Location); // Get direction
+        finalPos.Y = 0;
+        
         var mouseRot = _entityTransform.Rotation.Y;
         
-        if (float.IsNaN(finalPos.X) || float.IsNaN(finalPos.Y))
-            finalPos = new Vector2D<float>(0, 1);
+        if (float.IsNaN(finalPos.X) || float.IsNaN(finalPos.Z))
+            finalPos = new Vector3D<float>(0,0,1);
         else
-            mouseRot = Mathf.Angle2D(finalPos.X, -finalPos.Y);
-
-        var mousePos3D = new Vector3D<float>(finalPos.X, 0, -finalPos.Y);
+            mouseRot = Mathf.Angle2D(finalPos.X, finalPos.Z);
+        
         _tracerMesh.Alpha = Owner.Window.View.IsMouseButtonDown(MouseButton.Left) ? 0.6f : 0;
         
         if (key[0]) 
-            _entityTransform.Location += mousePos3D * _internalSpeed * gameTime; // Forward
+            _entityTransform.Location += finalPos * _internalSpeed * gameTime; // Forward
         if (key[1]) 
-            _entityTransform.Location -= mousePos3D * _internalSpeed * gameTime; // Backwards
+            _entityTransform.Location -= finalPos * _internalSpeed * gameTime; // Backwards
         if (key[2])
             _entityTransform.Location +=
-                new Vector3D<float>(mousePos3D.Z, 0, -mousePos3D.X) * _internalSpeed * gameTime; // Forward
+                new Vector3D<float>(finalPos.Z, 0, -finalPos.X) * _internalSpeed * gameTime; // Forward
         if (key[3])
             _entityTransform.Location -=
-                new Vector3D<float>(mousePos3D.Z, 0, -mousePos3D.X) * _internalSpeed * gameTime; // Backwards
+                new Vector3D<float>(finalPos.Z, 0, -finalPos.X) * _internalSpeed * gameTime; // Backwards
 
         _entityTransform.Location = Vector3D.Clamp(_entityTransform.Location, Bounds.Item1, Bounds.Item2);
         if (float.IsNaN(mouseRot)) mouseRot = 0;
@@ -96,8 +98,8 @@ public class PlayerMovement : Behavior
         _entityTransform.Rotation.Y = Mathf.LerpAngle(_entityTransform.Rotation.Y, mouseRot, gameTime * 10);
         _tracerTransform.Rotation.Y = 180 + (mouseRot - _entityTransform.Rotation.Y); // Correct lerp
 
-        _ray.Position = new Vector2D<float>(transform.X, transform.Z);
-        _ray.Direction = new Vector2D<float>(finalPos.X, -finalPos.Y);
+        _ray.Position = transform;
+        _ray.Direction = finalPos;
         _ray.Length = MaxRange;
         _ray.Collide();
 

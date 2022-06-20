@@ -5,15 +5,24 @@ namespace BrawlStarsClone.Engine.Component.Physics;
 public class Ray
 {
     public List<Collision> Collisions { get; } = new();
-    public Vector2D<float> Position { get; set; }
-    public Vector2D<float> Direction { get; set; }
+    public Vector3D<float> Position { get; set; }
+    public Vector3D<float> Direction { get; set; }
     public List<Entity>? IgnoreList { get; set; }
     public PhysicsLayer Layer { get; set; }
     public float Length { get; set; }
-    
+
+    public RayData Data
+    {
+        set
+        {
+            Position = value.Position;
+            Direction = value.Direction;
+        }
+    }
+
     private ColliderCompare _comparer = new();
 
-    public Ray(Vector2D<float> position, Vector2D<float> direction, PhysicsLayer layer = PhysicsLayer.Zero, List<Entity>? ignoreList = null, float length = Single.PositiveInfinity)
+    public Ray(Vector3D<float> position, Vector3D<float> direction, PhysicsLayer layer = PhysicsLayer.Zero, List<Entity>? ignoreList = null, float length = Single.PositiveInfinity)
     {
         Position = position;
         Direction = direction;
@@ -22,6 +31,15 @@ public class Ray
         Length = length;
     }
 
+    public Ray(RayData ray, PhysicsLayer layer = PhysicsLayer.Zero, List<Entity>? ignoreList = null, float length = Single.PositiveInfinity)
+    {
+        Position = ray.Position;
+        Direction = ray.Direction;
+        Layer = layer;
+        IgnoreList = ignoreList;
+        Length = length;
+    }
+    
     public void Collide()
     {
         Collisions.Clear();
@@ -40,5 +58,24 @@ public class Ray
         Collisions.Sort(_comparer);
         
     }
+}
 
+public struct RayData
+{
+    public Vector3D<float> Position;
+    public Vector3D<float> Direction;
+
+    public Vector3D<float> M => Direction;
+    public Vector3D<float> B => Position;
+
+    public RayData(Vector3D<float> position, Vector3D<float> direction)
+    {
+        Position = position;
+        Direction = direction;
+    }
+
+    public override string ToString()
+    {
+        return $"Pos: {Position} Dir: {Direction}";
+    }
 }

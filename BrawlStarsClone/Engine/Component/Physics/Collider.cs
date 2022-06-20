@@ -41,7 +41,7 @@ public abstract class Collider : Component
             if (Collisions.Contains(component)) continue;
             var distance = Vector3D.Distance(Owner.GetComponent<Transform>().Location,
                 component.Owner.GetComponent<Transform>().Location);
-            _collidersSorted.Add(new Collision(component, distance));
+            _collidersSorted.Add(new Collision(component, distance, Vector3D<float>.Zero));
         }
 
         _collidersSorted.Sort(_comparer);

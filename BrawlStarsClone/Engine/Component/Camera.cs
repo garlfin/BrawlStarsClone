@@ -1,4 +1,6 @@
-﻿using BrawlStarsClone.Engine.Utility;
+﻿using BrawlStarsClone.Engine.Component.Physics;
+using BrawlStarsClone.Engine.Utility;
+using OpenTK.Mathematics;
 using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component;
@@ -8,21 +10,16 @@ public class Camera : BaseCamera
     private readonly Transform _entityTransform;
     private float _fov;
 
-    public float ClipNear, ClipEnd;
-
-    public Camera(Entity owner, float fov, float clipNear, float clipEnd) : base(owner)
+    public Camera(Entity owner, float fov, float clipNear, float clipEnd) : base(owner, clipNear, clipEnd)
     {
-        ClipNear = clipNear;
-        ClipEnd = clipEnd;
         Fov = fov;
-
         _entityTransform = owner.GetComponent<Transform>();
         UpdateProjection();
     }
 
     public float Fov
     {
-        get => _fov;
+        get => MathHelper.RadiansToDegrees(_fov);
         set
         {
             _fov = value.DegToRad();
@@ -53,11 +50,43 @@ public class Camera : BaseCamera
     protected override void UpdateProjection()
     {
         _projection = Matrix4X4.CreatePerspectiveFieldOfView(_fov, (float)Owner.Window.Size.X / Owner.Window.Size.Y,
-            ClipNear, ClipEnd);
+            ClipNear, ClipFar);
     }
 
-    public override void Set()
+    public override Vector3D<float> WorldToScreen(Vector3D<float> point)
     {
-        CameraSystem.CurrentCamera = this;
+        var objPos = new Vector4D<float>(point, 1f) * CameraSystem.CurrentCamera.View * CameraSystem.CurrentCamera.Projection; // World to screen pos -1 to 1
+        if (objPos.W == 0) return Vector3D<float>.Zero;
+        objPos /= objPos.W; // Clip Space
+        return new Vector3D<float>(objPos.X, objPos.Y, objPos.Z);
+    }
+
+    public override Vector3D<float> ScreenToWorld2D(Vector3D<float> point)
+    {
+        var result = Matrix4X4.Invert(_view * _projection, out var screen2World);
+        if (!result) Console.WriteLine($"{Owner.Name}: Screen to world matrix inversion failure!");
+        var pos = new Vector4D<float>(point.X, point.Y, ClipNear, 1f) * screen2World;
+        pos.W = 1.0f / pos.W;
+        
+        pos.X *= pos.W;
+        pos.Y *= pos.W; // Split up for debugging purposes..
+        pos.Z *= pos.W;
+        
+        return new Vector3D<float>(pos.X, pos.Y, pos.Z);
+    }
+    
+    // Expects normalized coordinates
+    public override RayData ScreenToRay(Vector2D<float> point)
+    {
+        Matrix4X4.Invert(_projection, out var inverse);
+        var rayEye = new Vector4D<float>(point, -1, 1) * inverse;
+        
+        rayEye.Z = -1;
+        rayEye.W = 0;
+        
+        Matrix4X4.Invert(_view, out inverse);
+        var result = rayEye * inverse;
+        
+        return new RayData(_entityTransform.Location, Vector3D.Normalize(new Vector3D<float>(result.X, result.Y, result.Z)));
     }
 }

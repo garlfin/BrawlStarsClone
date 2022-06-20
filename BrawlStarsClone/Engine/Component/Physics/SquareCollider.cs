@@ -66,14 +66,16 @@ public class SquareCollider : Collider
         if (!Static) return null;
         float t1 = (MinTransformed.X - ray.Position.X) / ray.Direction.X;
         float t2 = (MaxTransformed.X - ray.Position.X) / ray.Direction.X;
-        float t3 = (MinTransformed.Y - ray.Position.Y) / ray.Direction.Y;
-        float t4 = (MaxTransformed.Y - ray.Position.Y) / ray.Direction.Y;
+        float t3 = (MinTransformed.Y - ray.Position.Z) / ray.Direction.Z;
+        float t4 = (MaxTransformed.Y - ray.Position.Z) / ray.Direction.Z;
+    
         float tmin = MathF.Max(MathF.Min(t1, t2), MathF.Min(t3, t4));
         float tmax = MathF.Min(MathF.Max(t1, t2), MathF.Max(t3, t4));
         
         if (tmax < 0 || tmin > tmax)
             return null;
-        
-        return new Collision(this, tmin < 0 ? tmax : tmin);
+
+        float dist = tmin < 0 ? tmax : tmin;
+        return new Collision(this, dist, ray.Direction * dist + ray.Position);
     }
 }

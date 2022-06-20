@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using BrawlStarsClone.Engine.Component.Physics;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component;
 
@@ -10,8 +11,13 @@ public abstract class BaseCamera : Component
     protected Vector3D<float> _up;
     protected Matrix4X4<float> _view = Matrix4X4<float>.Identity;
 
-    protected BaseCamera(Entity owner) : base(owner)
+    public float ClipNear { get; set; }
+    public float ClipFar { get; set; }
+
+    protected BaseCamera(Entity owner, float clipNear, float clipFar) : base(owner)
     {
+        ClipNear = clipNear;
+        ClipFar = clipFar;
         CameraSystem.Register(this);
     }
 
@@ -20,10 +26,11 @@ public abstract class BaseCamera : Component
     public Vector3D<float> Right => _right;
     public Vector3D<float> Up => _up;
     public Matrix4X4<float> Projection => _projection;
+    protected abstract void UpdateProjection();
+    public abstract Vector3D<float> WorldToScreen(Vector3D<float> point);
+    public abstract Vector3D<float> ScreenToWorld2D(Vector3D<float> point);
+    public abstract RayData ScreenToRay(Vector2D<float> point);
 
-    protected virtual void UpdateProjection()
-    {
-    }
 
     public virtual void Set()
     {

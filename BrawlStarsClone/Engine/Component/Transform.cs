@@ -9,6 +9,7 @@ public sealed class Transform : Component
     public Vector3D<float> Rotation = Vector3D<float>.Zero;
     public Vector3D<float> Scale = Vector3D<float>.One;
 
+    // More expensive per-object - is not saved
     public Matrix4X4<float> GlobalMatrix =>
         Matrix4X4.CreateScale(Scale) *
         Matrix4X4.CreateRotationX(Rotation.X.DegToRad()) *

@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using BrawlStarsClone.Engine.Component.Physics;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component;
 
@@ -9,19 +10,17 @@ public class Sun : BaseCamera
 
     public Vector3D<float> Offset = Vector3D<float>.Zero;
 
-    public Sun(Entity owner, int size) : base(owner)
+    public Sun(Entity owner, int size, float clipNear = 0.1f, float clipFar = 300f) : base(owner, clipNear, clipFar)
     {
         _size = size;
         UpdateProjection();
-        _entityTransform = owner.GetComponent<Transform>();
+        _entityTransform = owner.GetComponent<Transform>() ?? throw new InvalidOperationException($"No transform on sun object {Owner.Name}!");
     }
-
     public override void Set()
     {
         CameraSystem.Sun = this;
         CameraSystem.CurrentCamera = this;
     }
-
     public override void OnRender(float deltaTime)
     {
         _view = Matrix4X4.CreateLookAt(
@@ -32,6 +31,19 @@ public class Sun : BaseCamera
 
     protected sealed override void UpdateProjection()
     {
-        _projection = Matrix4X4.CreateOrthographic(_size, _size, 0.1f, 300f);
+        _projection = Matrix4X4.CreateOrthographic(_size, _size, ClipNear, ClipFar);
+    }
+
+    public override Vector3D<float> WorldToScreen(Vector3D<float> point)
+    {
+        throw new NotImplementedException();
+    }
+    public override Vector3D<float> ScreenToWorld2D(Vector3D<float> point)
+    {
+        throw new NotImplementedException();
+    }
+    public override RayData ScreenToRay(Vector2D<float> point)
+    {
+        throw new NotImplementedException();
     }
 }
