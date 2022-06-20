@@ -71,7 +71,8 @@ public class Animator : Component
         if (_currentTime > Animation.Time) _currentTime = 0;
         _currentFrame = (int)MathF.Floor(_currentTime * Animation!.FPS);
 
-        IterateMatrix(_renderer.Mesh.Hierarchy, Matrix4X4<float>.Identity);
+        var ident = Matrix4X4<float>.Identity;
+        IterateMatrix(_renderer.Mesh.Hierarchy, ref ident);
 
         //fixed (void* ptr = _boneTransform) _debugVao.UpdateData(ptr);
         fixed (void* ptr = _matTransform)
@@ -91,7 +92,7 @@ public class Animator : Component
         if (!Paused) _currentTime += deltaTime;
     }
 
-    private void IterateMatrix(BoneHierarchy bone, Matrix4X4<float> parentTransform)
+    private void IterateMatrix(BoneHierarchy bone, ref Matrix4X4<float> parentTransform)
     {
         var frame = Animation[bone.Name]?.Frames[_currentFrame];
 
@@ -104,7 +105,7 @@ public class Animator : Component
         //_boneTransform[bone.Index] = new Vector3D<float>(globalTransform.M41, -globalTransform.M43, globalTransform.M42); // Convert 
         _matTransform[bone.Index] = bone.Offset * globalTransform * _renderer.Mesh.InverseTransform;
 
-        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], globalTransform);
+        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], ref globalTransform);
     }
 
     public void RenderDebug()

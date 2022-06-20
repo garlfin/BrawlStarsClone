@@ -29,20 +29,20 @@ public class Sun : BaseCamera
             Vector3D<float>.UnitY);
     }
 
-    protected sealed override void UpdateProjection()
+    public sealed override void UpdateProjection()
     {
         _projection = Matrix4X4.CreateOrthographic(_size, _size, ClipNear, ClipFar);
     }
 
-    public override Vector3D<float> WorldToScreen(Vector3D<float> point)
+    public override Vector3D<float> WorldToScreen(ref Vector3D<float> vector3D)
     {
         throw new NotImplementedException();
     }
-    public override Vector3D<float> ScreenToWorld2D(Vector3D<float> point)
+    public override Vector3D<float> ScreenToWorld2D(ref Vector3D<float> vector3D)
     {
         throw new NotImplementedException();
     }
-    public override RayData ScreenToRay(Vector2D<float> point)
+    public override RayData ScreenToRay(ref Vector2D<float> vector2D)
     {
         throw new NotImplementedException();
     }

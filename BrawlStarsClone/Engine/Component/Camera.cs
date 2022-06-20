@@ -26,6 +26,8 @@ public class Camera : BaseCamera
             UpdateProjection();
         }
     }
+    
+    
 
     public override void OnRender(float deltaTime)
     {
@@ -47,13 +49,13 @@ public class Camera : BaseCamera
         _view = Matrix4X4.CreateLookAt(loc, loc + _front, _up);
     }
 
-    protected override void UpdateProjection()
+    public override void UpdateProjection()
     {
         _projection = Matrix4X4.CreatePerspectiveFieldOfView(_fov, (float)Owner.Window.Size.X / Owner.Window.Size.Y,
             ClipNear, ClipFar);
     }
 
-    public override Vector3D<float> WorldToScreen(Vector3D<float> point)
+    public override Vector3D<float> WorldToScreen(ref Vector3D<float> point)
     {
         var objPos = new Vector4D<float>(point, 1f) * CameraSystem.CurrentCamera.View * CameraSystem.CurrentCamera.Projection; // World to screen pos -1 to 1
         if (objPos.W == 0) return Vector3D<float>.Zero;
@@ -61,22 +63,18 @@ public class Camera : BaseCamera
         return new Vector3D<float>(objPos.X, objPos.Y, objPos.Z);
     }
 
-    public override Vector3D<float> ScreenToWorld2D(Vector3D<float> point)
+    public override Vector3D<float> ScreenToWorld2D(ref Vector3D<float> point)
     {
         var result = Matrix4X4.Invert(_view * _projection, out var screen2World);
         if (!result) Console.WriteLine($"{Owner.Name}: Screen to world matrix inversion failure!");
         var pos = new Vector4D<float>(point.X, point.Y, ClipNear, 1f) * screen2World;
-        pos.W = 1.0f / pos.W;
-        
-        pos.X *= pos.W;
-        pos.Y *= pos.W; // Split up for debugging purposes..
-        pos.Z *= pos.W;
+        pos /= pos.W;
         
         return new Vector3D<float>(pos.X, pos.Y, pos.Z);
     }
     
     // Expects normalized coordinates
-    public override RayData ScreenToRay(Vector2D<float> point)
+    public override RayData ScreenToRay(ref Vector2D<float> point)
     {
         Matrix4X4.Invert(_projection, out var inverse);
         var rayEye = new Vector4D<float>(point, -1, 1) * inverse;

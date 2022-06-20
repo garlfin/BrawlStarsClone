@@ -63,7 +63,8 @@ public class PlayerMovement : Behavior
         key[2] = Owner.Window.Input.IsKeyDown(Keys.A);
         key[3] = Owner.Window.Input.IsKeyDown(Keys.D);
 
-        RayData data = CameraSystem.CurrentCamera.ScreenToRay(Owner.Window.MousePositionNormalized); // Get Camera Ray
+        var mouse = Owner.Window.MousePositionNormalized; // Too lazy to add overrides
+        RayData data = CameraSystem.CurrentCamera.ScreenToRay(ref mouse); // Get Camera Ray
         var mouseWorldPos = data.Direction * (Vector3D.Dot(-data.Position, Vector3D<float>.UnitY) /
                                               Vector3D.Dot(data.Direction, Vector3D<float>.UnitY)) + data.Position; // Intersect camera ray with ground plane
 

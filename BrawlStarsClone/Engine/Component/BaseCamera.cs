@@ -10,26 +10,23 @@ public abstract class BaseCamera : Component
     protected Vector3D<float> _right;
     protected Vector3D<float> _up;
     protected Matrix4X4<float> _view = Matrix4X4<float>.Identity;
-
-    public float ClipNear { get; set; }
-    public float ClipFar { get; set; }
-
     protected BaseCamera(Entity owner, float clipNear, float clipFar) : base(owner)
     {
         ClipNear = clipNear;
         ClipFar = clipFar;
         CameraSystem.Register(this);
     }
-
+    public float ClipNear { get; set; }
+    public float ClipFar { get; set; }
     public Matrix4X4<float> View => _view;
     public Vector3D<float> Front => _front;
     public Vector3D<float> Right => _right;
     public Vector3D<float> Up => _up;
     public Matrix4X4<float> Projection => _projection;
-    protected abstract void UpdateProjection();
-    public abstract Vector3D<float> WorldToScreen(Vector3D<float> point);
-    public abstract Vector3D<float> ScreenToWorld2D(Vector3D<float> point);
-    public abstract RayData ScreenToRay(Vector2D<float> point);
+    public abstract void UpdateProjection();
+    public abstract Vector3D<float> WorldToScreen(ref Vector3D<float> point);
+    public abstract Vector3D<float> ScreenToWorld2D(ref Vector3D<float> point);
+    public abstract RayData ScreenToRay(ref Vector2D<float> point);
 
 
     public virtual void Set()

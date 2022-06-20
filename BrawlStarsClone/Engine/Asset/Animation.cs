@@ -22,6 +22,12 @@ public struct Animation
         }
     }
 
+    public override bool Equals(object? obj)
+    {
+        if (obj == null) return false;
+        return obj.GetHashCode() == GetHashCode();
+    }
+
     public Channel this[int index] => ChannelFrames[index];
 }
 

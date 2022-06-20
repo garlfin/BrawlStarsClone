@@ -24,7 +24,7 @@ public sealed class Transform : Component
         TransformSystem.Register(this);
     }
 
-    public Transform(Entity owner, Transformation transform) : base(owner)
+    public Transform(Entity owner, ref Transformation transform) : base(owner)
     {
         Location = transform.Location;
         Rotation = transform.Rotation;
