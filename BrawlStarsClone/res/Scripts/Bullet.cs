@@ -21,9 +21,9 @@ public class Bullet : Behavior
 
     public override void OnUpdate(float deltaTime)
     {
-        _entityTransform.Location += _rotation * deltaTime * 5;
-        //_mesh.Alpha = Mathf.Lerp(1, 0, _time);
-        if (_time >= 1) Owner.Delete(true);
+        _entityTransform.Location += _rotation * deltaTime * 10;
+        _mesh.Alpha = Mathf.Lerp(1, 0, (_time - 0.4f) * 10);
+        if (_time >= 0.5f) Owner.Delete(true);
         _time += deltaTime;
     }
 }

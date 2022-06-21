@@ -12,13 +12,10 @@ public abstract class Component
 
     protected Component(Entity? owner)
     {
-        ComponentSystem<Component>.Register(this);
         Owner = owner;
     }
-
     protected Component()
     {
-        ComponentSystem<Component>.Register(this);
     }
 
     public virtual void OnUpdate(float deltaTime)
