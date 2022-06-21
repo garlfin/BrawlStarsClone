@@ -66,7 +66,7 @@ public static class MapLoader
         };
     }
 
-    public static void LoadMap(string path, GameWindow window, string mapData, Entity player)
+    public static void LoadMap(string path, GameWindow window, string mapData, Entity? player)
     {
         Stream fileStream = File.Open(path, FileMode.Open);
         var reader = new BinaryReader(fileStream);

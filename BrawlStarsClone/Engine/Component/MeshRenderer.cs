@@ -12,7 +12,7 @@ public sealed class MeshRenderer : Component
     public readonly Mesh Mesh;
     public float Alpha = 1f;
 
-    public MeshRenderer(Entity owner, Mesh mesh, bool overrideInstance = false) : base(owner)
+    public MeshRenderer(Entity? owner, Mesh mesh, bool overrideInstance = false) : base(owner)
     {
         MeshRendererSystem.Register(this);
         Mesh = mesh;
@@ -46,7 +46,7 @@ public sealed class MeshRenderer : Component
     public override void Dispose()
     {
         MeshRendererSystem.Remove(this);
-        if (!_overrideInstance) Mesh.Remove(Parent);
+        if (!_overrideInstance) Mesh.Remove(Owner);
     }
 }
 

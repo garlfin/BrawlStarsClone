@@ -30,6 +30,8 @@ public class GameWindow
 
     public EmptyTexture ShadowMap;
 
+    private bool _updateFinished;
+
     public GameWindow(int width, int height, string name)
     {
         var nativeWindowSettings = NativeWindowSettings.Default;
@@ -53,7 +55,7 @@ public class GameWindow
         View.Run();
     }
 
-    public Entity Root { get; set; }
+    public Entity? Root { get; set; }
 
     public KeyboardState Input => View.KeyboardState;
 
@@ -80,13 +82,15 @@ public class GameWindow
 
     private void OnUpdate(FrameEventArgs obj)
     {
+        _updateFinished = false;
         var time = (float)obj.Time;
         if (Input.IsKeyDown(Keys.Escape)) View.Close();
         BehaviorSystem.InitializeQueue();
         PhysicsSystem.ResetCollisions();
         BehaviorSystem.Update(time);
         PhysicsSystem.Update(time);
-        AssetManager.StartRemoval(this);
+        AssetManager.StartRemoval();
+        _updateFinished = true;
     }
 
     private void OnMouseMove(MouseMoveEventArgs obj)
@@ -222,7 +226,7 @@ public class GameWindow
     private void OnRender(FrameEventArgs frameEventArgs)
     {
         var time = (float)frameEventArgs.Time;
-        if (_isClosed) return;
+        if (_isClosed || !_updateFinished) return;
         // Main Render Pass
         State = EngineState.Render;
         BehaviorSystem.Render(time);

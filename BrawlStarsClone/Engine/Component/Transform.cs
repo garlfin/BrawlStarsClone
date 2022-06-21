@@ -18,13 +18,13 @@ public sealed class Transform : Component
         Matrix4X4.CreateTranslation(Location) *
         (Owner.Parent?.GetComponent<Transform>()?.GlobalMatrix ?? Matrix4X4<float>.Identity);
 
-    public Transform(Entity owner) : base(owner)
+    public Transform(Entity? owner) : base(owner)
     {
         OnUpdate(0f);
         TransformSystem.Register(this);
     }
 
-    public Transform(Entity owner, ref Transformation transform) : base(owner)
+    public Transform(Entity? owner, ref Transformation transform) : base(owner)
     {
         Location = transform.Location;
         Rotation = transform.Rotation;
@@ -52,7 +52,7 @@ public sealed class Transform : Component
 
 internal class TransformSystem : ComponentSystem<Transform>
 {
-    public static void Update(Entity root)
+    public static void Update(Entity? root)
     {
         root.GetComponent<Transform>()?.OnUpdate(0f);
         for (var i = 0; i < root.Children.Count; i++) Update(root.Children[i]);

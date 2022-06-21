@@ -24,7 +24,7 @@ public class PlayerMovement : Behavior
 
     public float MaxRange = 5;
 
-    public Entity Tracer
+    public Entity? Tracer
     {
         get => _tracer;
         set
@@ -36,7 +36,7 @@ public class PlayerMovement : Behavior
         }
     }
 
-    private Entity _tracer;
+    private Entity? _tracer;
     private Transform _tracerTransform;
     private MeshRenderer _tracerMesh;
     private Ray _ray;
@@ -50,7 +50,7 @@ public class PlayerMovement : Behavior
 
     public override void OnLoad()
     {
-        _ray = new Ray(Vector3D<float>.Zero, Vector3D<float>.Zero, PhysicsLayer.Zero,new List<Entity> {Owner});
+        _ray = new Ray(Vector3D<float>.Zero, Vector3D<float>.Zero, PhysicsLayer.Zero,new List<Entity?> {Owner});
         _entityTransform = Owner.GetComponent<Transform>();
         _animator = Owner.GetComponent<Animator>();
         _tracerTransform.Scale.X = 2;

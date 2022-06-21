@@ -26,7 +26,7 @@ public class Entity
         Parent.Children.Add(this);
         
     }
-    public List<Entity> Children { get; } = new();
+    public List<Entity?> Children { get; } = new();
     public Entity? Parent { get; set; }
     public string Name { get; }
 
@@ -67,12 +67,6 @@ public class Entity
 
     public void Delete(bool freeChildren)
     {
-        AssetManager.QueueRemoval(this);
-        if (freeChildren)
-            for (var i = 0; i < Children.Count; i++)
-                Children[i].Delete(true);
-        else
-            for (var i = 0; i < Children.Count; i++)
-                Children[i].Parent = Parent;
+        AssetManager.QueueRemoval(this, freeChildren);
     }
 }

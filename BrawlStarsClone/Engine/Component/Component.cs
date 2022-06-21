@@ -5,12 +5,12 @@ namespace BrawlStarsClone.Engine.Component;
 
 public abstract class Component
 {
-    public Entity Owner;
+    public Entity? Owner;
     protected GameWindow Window => Owner.Window;
     protected OpenTK.Windowing.Desktop.GameWindow View => Owner.Window.View;
     protected Entity? Parent => Owner.Parent;
 
-    protected Component(Entity owner)
+    protected Component(Entity? owner)
     {
         ComponentSystem<Component>.Register(this);
         Owner = owner;

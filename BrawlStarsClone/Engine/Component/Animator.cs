@@ -19,7 +19,7 @@ public class Animator : Component
     //private PointVAO _debugVao;
     //private Vector3D<float>[] _boneTransform;
 
-    public Animator(Entity owner, Animation? animation = null) : base(owner)
+    public Animator(Entity? owner, Animation? animation = null) : base(owner)
     {
         SkinManager.Register(this);
 

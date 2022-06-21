@@ -7,7 +7,7 @@ public abstract class Behavior : Component
         BehaviorSystem.RegisterForInit(this);
     }
 
-    private Behavior(Entity owner) : base(owner)
+    private Behavior(Entity? owner) : base(owner)
     {
         BehaviorSystem.RegisterForInit(this);
     }

@@ -14,7 +14,7 @@ public class CameraMovement : Behavior
     private readonly Transform _player;
     private Transform _entityTransform = null!;
 
-    public CameraMovement(Entity player)
+    public CameraMovement(Entity? player)
     {
         _player = player.GetComponent<Transform>() ?? throw new ComponentException("Transform component not found.");
     }

@@ -15,7 +15,7 @@ public class Bullet : Behavior
     public override void OnUpdate(float deltaTime)
     {
         _mesh.Alpha = Mathf.Lerp(1, 0, _time);
-        if (_time > 5)
+        if (_time > 1)
         {
             Owner.Delete(true);
             return;

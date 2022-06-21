@@ -32,7 +32,7 @@ public class SingleFire : Behavior
 
         _mesh.Alpha =  0;
         if (!View.IsMouseButtonReleased(MouseButton.Left)) return;
-        Entity entity = new Entity(Window ,Window.Root, "Bullet");
+        Entity? entity = new Entity(Window ,Window.Root, "Bullet");
         entity.AddComponent(new Transform(entity)
         {
             Location = Parent.GetComponent<Transform>().Location + new Vector3D<float>(0, 0.5f, 0),

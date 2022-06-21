@@ -7,11 +7,11 @@ namespace BrawlStarsClone.res.Scripts;
 
 public class GrassScript : Behavior
 {
-    private readonly Entity _player;
+    private readonly Entity? _player;
     private MeshRenderer _mesh = null!;
     private Transform _transform = null!;
 
-    public GrassScript(Entity player)
+    public GrassScript(Entity? player)
     {
         _player = player;
     }

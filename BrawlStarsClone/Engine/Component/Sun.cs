@@ -10,7 +10,7 @@ public class Sun : BaseCamera
 
     public Vector3D<float> Offset = Vector3D<float>.Zero;
 
-    public Sun(Entity owner, int size, float clipNear = 0.1f, float clipFar = 300f) : base(owner, clipNear, clipFar)
+    public Sun(Entity? owner, int size, float clipNear = 0.1f, float clipFar = 300f) : base(owner, clipNear, clipFar)
     {
         _size = size;
         UpdateProjection();

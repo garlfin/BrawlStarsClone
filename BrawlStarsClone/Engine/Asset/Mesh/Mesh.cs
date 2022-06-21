@@ -71,7 +71,7 @@ public struct Mesh
 
     public void Remove(Entity entity)
     {
-        Users.Remove(entity);
+        if (!Users.Remove(entity)) Console.WriteLine("Could not remove entity from users.");
         if (Users.Count == 1)
         {
             Instanced = false;
@@ -131,8 +131,7 @@ public struct Mesh
         MeshTransform = new int[MeshVAO.Length];
     }
 }
-
-internal static class ManagedMeshes
+static class ManagedMeshes
 {
     public static List<Mesh> Meshes = new();
 

@@ -11,7 +11,7 @@ public class SquareCollider : Collider
     public Vector2D<float> MinTransformed => new(_transform.Location.X - Max.X, _transform.Location.Z - Max.Y);
     public Vector2D<float> MaxTransformed => new(_transform.Location.X + Max.X, _transform.Location.Z + Max.Y);
 
-    public SquareCollider(Entity owner, bool isStatic, Vector2D<float>? scale = null, PhysicsLayer layer = PhysicsLayer.Zero) : base(isStatic, scale, layer)
+    public SquareCollider(Entity? owner, bool isStatic, Vector2D<float>? scale = null, PhysicsLayer layer = PhysicsLayer.Zero) : base(isStatic, scale, layer)
     {
         _transform = owner.GetComponent<Transform>();
         Max = 0.5f * (scale ?? Vector2D<float>.One);

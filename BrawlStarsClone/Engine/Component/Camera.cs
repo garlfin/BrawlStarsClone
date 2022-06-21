@@ -10,7 +10,7 @@ public class Camera : BaseCamera
     private readonly Transform _entityTransform;
     private float _fov;
 
-    public Camera(Entity owner, float fov, float clipNear, float clipEnd) : base(owner, clipNear, clipEnd)
+    public Camera(Entity? owner, float fov, float clipNear, float clipEnd) : base(owner, clipNear, clipEnd)
     {
         Fov = fov;
         _entityTransform = owner.GetComponent<Transform>();
