@@ -7,7 +7,7 @@ using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
 
-public struct Mesh 
+public class Mesh 
 {
     private readonly Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
     private int _modelBO;
@@ -16,21 +16,6 @@ public struct Mesh
     public int[] MeshTransform;
     public MeshVao[] MeshVAO;
     public VAO[] SkinnedVAO;
-
-    public Mesh()
-    {
-        _modelBO = 0;
-        Materials = Array.Empty<string>();
-        MeshTransform = Array.Empty<int>();
-        MeshVAO = Array.Empty<MeshVao>();
-        SkinnedVAO = Array.Empty<VAO>();
-        MaterialCount = 0;
-        IsSkinned = false;
-        Instanced = false;
-        Hierarchy = null;
-        FlattenedHierarchy = Array.Empty<BoneHierarchy>();
-        UseBlending = false;
-    }
 
     public int MaterialCount { get; set; }
 
@@ -60,24 +45,18 @@ public struct Mesh
 
     public void Register(Entity entity)
     {
-        if (Users.Count > 1 && !Instanced)
-        {
-            Instanced = true;
-            ManagedMeshes.Register(this);
-        }
-
         Users.Add(entity);
+        if (Users.Count <= 1 || Instanced) return;
+        Instanced = true;
+        ManagedMeshes.Register(this);
     }
 
     public void Remove(Entity entity)
     {
-        if (!Users.Remove(entity)) Console.WriteLine("Could not remove entity from users.");
-        if (Users.Count == 1)
-        {
-            Instanced = false;
-            ManagedMeshes.Remove(this);
-        }
-        
+        Users.Remove(entity);
+        if (Users.Count > 1 || !Instanced) return;
+        Instanced = false;
+        ManagedMeshes.Remove(this);
     }
 
     public unsafe void ManagedRender(GameWindow window)
@@ -142,16 +121,12 @@ static class ManagedMeshes
 
     public static void Render(GameWindow window)
     {
-        for (var i = 0; i < Meshes.Count; i++)
-        {
-            var mesh = Meshes[i];
-            mesh.ManagedRender(window);
-        }
+        for (var i = 0; i < Meshes.Count; i++) Meshes[i].ManagedRender(window);
     }
 
     public static void Remove(Mesh mesh)
     {
-        Meshes.Remove(mesh);
+        if (!Meshes.Remove(mesh)) Console.WriteLine("Failed to remove managed mesh.");
     }
 }
 

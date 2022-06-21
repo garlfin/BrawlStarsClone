@@ -81,6 +81,7 @@ public static class AssetManager
             entity.Parent?.Children.Remove(entity);
             entity.Parent = null;
         }
+
         if (RemovalQueue.Count > 0) RemovalQueue.Clear();
     }
 }
