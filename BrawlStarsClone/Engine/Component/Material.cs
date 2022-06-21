@@ -28,4 +28,8 @@ public class Material : Component
             return null;
         }
     }
+
+    public override void Dispose()
+    {
+    }
 }

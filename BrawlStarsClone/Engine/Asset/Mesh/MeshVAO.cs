@@ -69,8 +69,7 @@ public sealed class MeshVao : VAO
 
     public override void Delete()
     {
-        GL.DeleteVertexArray(_vao);
-        GL.DeleteBuffer(_vbo);
+        base.Delete();
         if (EBO != -1)
             GL.DeleteBuffer(EBO);
     }

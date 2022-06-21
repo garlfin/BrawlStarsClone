@@ -53,7 +53,7 @@ public class GameWindow
         View.Run();
     }
 
-    public Entity Root { get; private set; }
+    public Entity Root { get; set; }
 
     public KeyboardState Input => View.KeyboardState;
 
@@ -82,9 +82,11 @@ public class GameWindow
     {
         var time = (float)obj.Time;
         if (Input.IsKeyDown(Keys.Escape)) View.Close();
+        BehaviorSystem.InitializeQueue();
         PhysicsSystem.ResetCollisions();
         BehaviorSystem.Update(time);
         PhysicsSystem.Update(time);
+        AssetManager.StartRemoval(this);
     }
 
     private void OnMouseMove(MouseMoveEventArgs obj)
@@ -176,13 +178,11 @@ public class GameWindow
             Scale = new Vector3D<float>(0.15f)
         });
 
-        var materials = new Material?[]
+        player.AddComponent(new Component.Material(new Material?[]
         {
             new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
                 new ImageTexture("../../../res/shelly.pvr"), "DefaultMaterial")
-        };
-
-        player.AddComponent(new Component.Material(materials));
+        }));
         var playerMesh = MeshLoader.LoadMesh("../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
         player.AddComponent(new Animator(player));
@@ -194,23 +194,29 @@ public class GameWindow
         });
         player.AddComponent(new SquareCollider(player, false));
         camera.AddComponent(new CameraMovement(player));
-        var shootingPreview = new Entity(this, player, "ShootPreview");
-        shootingPreview.AddComponent(new Transform(shootingPreview)
+        var tracer = new Entity(this, player, "Tracer");
+        tracer.AddComponent(new Transform(tracer)
         {
             Location = new Vector3D<float>(0, 0.1f, 0),
             Rotation = new Vector3D<float>(0, 180, 0)
         });
-        shootingPreview.AddComponent(new MeshRenderer(shootingPreview, MeshLoader.LoadMesh("../../../res/model/plane.bnk", true)));
-        shootingPreview.AddComponent(new Component.Material(new Material[]{ new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
-            new ImageTexture("../../../res/white.pvr"), "DefaultMaterial")}));
+        tracer.AddComponent(new MeshRenderer(tracer, MeshLoader.LoadMesh("../../../res/model/plane.bnk", true)));
+        
+        var materials = new Material[]{ new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
+            new ImageTexture("../../../res/white.pvr"), "DefaultMaterial")};
+        
+        tracer.AddComponent(new Component.Material(materials));
+        tracer.AddComponent(new SingleFire()
+        {
+            MatCap = materials[0]
+        });
 
-        player.GetComponent<PlayerMovement>().Tracer = shootingPreview;
+        player.GetComponent<PlayerMovement>().Tracer = tracer;
 
         MatBuffer = new UniformBuffer(sizeof(Matrix4X4<float>) * 255, BufferUsageHint.StreamDraw);
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, MatBuffer.ID);
 
         PhysicsSystem.Load();
-        BehaviorSystem.Load();
     }
 
     private void OnRender(FrameEventArgs frameEventArgs)

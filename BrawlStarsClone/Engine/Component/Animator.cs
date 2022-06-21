@@ -66,7 +66,7 @@ public class Animator : Component
     public override unsafe void OnRender(float deltaTime)
     {
         if (_animation is null) return;
-        Owner.Window.SkinningShader.Use();
+        Window.SkinningShader.Use();
 
         if (_currentTime > Animation.Time) _currentTime = 0;
         _currentFrame = (int)MathF.Floor(_currentTime * Animation!.FPS);
@@ -77,12 +77,12 @@ public class Animator : Component
         //fixed (void* ptr = _boneTransform) _debugVao.UpdateData(ptr);
         fixed (void* ptr = _matTransform)
         {
-            Owner.Window.MatBuffer.ReplaceData(ptr, _matTransform.Length * sizeof(Matrix4X4<float>));
+            Window.MatBuffer.ReplaceData(ptr, _matTransform.Length * sizeof(Matrix4X4<float>));
         }
 
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
-            Owner.Window.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransform[i]);
+            Window.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransform[i]);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
             GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
             GL.DispatchCompute((uint)Math.Ceiling((double)_renderer.Mesh.MeshVAO[i].Mesh.Vertices.Length / 32), 1, 1);
@@ -90,6 +90,11 @@ public class Animator : Component
         }
 
         if (!Paused) _currentTime += deltaTime;
+    }
+
+    public override void Dispose()
+    {
+        SkinManager.Remove(this);
     }
 
     private void IterateMatrix(BoneHierarchy bone, ref Matrix4X4<float> parentTransform)

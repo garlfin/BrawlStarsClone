@@ -55,6 +55,11 @@ public abstract class Collider : Component
         }
     }
 
+    public override void Dispose()
+    {
+        PhysicsSystem.Remove(this);
+    }
+
     public abstract bool Intersect(Collider other);
 
     public abstract Collision? Intersect(Ray other);

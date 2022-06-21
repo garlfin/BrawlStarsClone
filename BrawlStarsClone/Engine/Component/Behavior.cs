@@ -1,18 +1,38 @@
 ﻿namespace BrawlStarsClone.Engine.Component;
 
-public class Behavior : Component
+public abstract class Behavior : Component
 {
     protected Behavior()
     {
-        BehaviorSystem.Register(this);
+        BehaviorSystem.RegisterForInit(this);
     }
 
     private Behavior(Entity owner) : base(owner)
     {
-        BehaviorSystem.Register(this);
+        BehaviorSystem.RegisterForInit(this);
+    }
+
+    public override void Dispose()
+    {
+        BehaviorSystem.Remove(this);
     }
 }
 
-internal class BehaviorSystem : ComponentSystem<Behavior>
+class BehaviorSystem : ComponentSystem<Behavior>
 {
+    private static List<Behavior> InitializationQueue = new();
+
+    public static void RegisterForInit(Behavior behavior)
+    {
+        InitializationQueue.Add(behavior);
+    }
+    public static void InitializeQueue()
+    {
+        for (var i = 0; i < InitializationQueue.Count; i++)
+        {
+            InitializationQueue[i].OnLoad();
+            Register(InitializationQueue[i]);
+        }
+        InitializationQueue.Clear();
+    }
 }

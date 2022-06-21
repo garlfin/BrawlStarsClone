@@ -23,6 +23,12 @@ public abstract class VAO : Asset
             GL.DrawElementsInstanced(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
                 IntPtr.Zero, count);
     }
+    
+    public override void Delete()
+    {
+        GL.DeleteVertexArray(_vao);
+        GL.DeleteBuffer(_vbo);
+    }
 }
 
 public struct Vertex

@@ -7,7 +7,7 @@ using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Asset.Mesh;
 
-public class Mesh // Id rather this be a struct...
+public struct Mesh 
 {
     private readonly Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
     private int _modelBO;
@@ -16,6 +16,21 @@ public class Mesh // Id rather this be a struct...
     public int[] MeshTransform;
     public MeshVao[] MeshVAO;
     public VAO[] SkinnedVAO;
+
+    public Mesh()
+    {
+        _modelBO = 0;
+        Materials = Array.Empty<string>();
+        MeshTransform = Array.Empty<int>();
+        MeshVAO = Array.Empty<MeshVao>();
+        SkinnedVAO = Array.Empty<VAO>();
+        MaterialCount = 0;
+        IsSkinned = false;
+        Instanced = false;
+        Hierarchy = null;
+        FlattenedHierarchy = Array.Empty<BoneHierarchy>();
+        UseBlending = false;
+    }
 
     public int MaterialCount { get; set; }
 
@@ -39,7 +54,7 @@ public class Mesh // Id rather this be a struct...
     }
 
 
-    public bool Transparent { get; set; }
+    public bool UseBlending { get; set; }
 
     public VAO this[int index] => IsSkinned ? SkinnedVAO[index] : MeshVAO[index];
 
@@ -54,9 +69,20 @@ public class Mesh // Id rather this be a struct...
         Users.Add(entity);
     }
 
+    public void Remove(Entity entity)
+    {
+        Users.Remove(entity);
+        if (Users.Count == 1)
+        {
+            Instanced = false;
+            ManagedMeshes.Remove(this);
+        }
+        
+    }
+
     public unsafe void ManagedRender(GameWindow window)
     {
-        if (Transparent)
+        if (UseBlending)
         {
             switch (window.State)
             {
@@ -94,7 +120,7 @@ public class Mesh // Id rather this be a struct...
             TexSlotManager.ResetUnit();
         }
 
-        if (Transparent) GL.Disable(EnableCap.Blend);
+        if (UseBlending) GL.Disable(EnableCap.Blend);
     }
 
     public void SetSkinned()
@@ -117,7 +143,16 @@ internal static class ManagedMeshes
 
     public static void Render(GameWindow window)
     {
-        foreach (var mesh in Meshes) mesh.ManagedRender(window);
+        for (var i = 0; i < Meshes.Count; i++)
+        {
+            var mesh = Meshes[i];
+            mesh.ManagedRender(window);
+        }
+    }
+
+    public static void Remove(Mesh mesh)
+    {
+        Meshes.Remove(mesh);
     }
 }
 

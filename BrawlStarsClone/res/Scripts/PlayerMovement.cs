@@ -63,7 +63,7 @@ public class PlayerMovement : Behavior
         key[2] = Owner.Window.Input.IsKeyDown(Keys.A);
         key[3] = Owner.Window.Input.IsKeyDown(Keys.D);
 
-        var mouse = Owner.Window.MousePositionNormalized; // Too lazy to add overrides
+        var mouse = Window.MousePositionNormalized; // Too lazy to add overrides
         RayData data = CameraSystem.CurrentCamera.ScreenToRay(ref mouse); // Get Camera Ray
         var mouseWorldPos = data.Direction * (Vector3D.Dot(-data.Position, Vector3D<float>.UnitY) /
                                               Vector3D.Dot(data.Direction, Vector3D<float>.UnitY)) + data.Position; // Intersect camera ray with ground plane
@@ -80,8 +80,6 @@ public class PlayerMovement : Behavior
         else
             mouseRot = Mathf.Angle2D(finalPos.X, finalPos.Z);
         
-        _tracerMesh.Alpha = Owner.Window.View.IsMouseButtonDown(MouseButton.Left) ? 0.6f : 0;
-        
         if (key[0]) 
             _entityTransform.Location += finalPos * _internalSpeed * gameTime; // Forward
         if (key[1]) 
@@ -94,6 +92,7 @@ public class PlayerMovement : Behavior
                 new Vector3D<float>(finalPos.Z, 0, -finalPos.X) * _internalSpeed * gameTime; // Backwards
 
         _entityTransform.Location = Vector3D.Clamp(_entityTransform.Location, Bounds.Item1, Bounds.Item2);
+        
         if (float.IsNaN(mouseRot)) mouseRot = 0;
         
         _entityTransform.Rotation.Y = Mathf.LerpAngle(_entityTransform.Rotation.Y, mouseRot, gameTime * 10);

@@ -113,7 +113,7 @@ public static class MeshLoader
 
         file.Close();
         reader.Close();
-        mesh.Transparent = transparent;
+        mesh.UseBlending = transparent;
         return mesh;
     }
 

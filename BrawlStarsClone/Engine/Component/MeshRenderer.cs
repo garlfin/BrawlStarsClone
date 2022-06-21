@@ -28,7 +28,7 @@ public sealed class MeshRenderer : Component
         
         ProgramManager.MatCap.OtherData[0] = Alpha;
 
-        if (Alpha < 1 && Mesh.Transparent) GL.Enable(EnableCap.Blend);
+        if (Alpha < 1 && Mesh.UseBlending) GL.Enable(EnableCap.Blend);
 
         for (var i = 0; i < Mesh.MeshVAO.Length; i++)
         {
@@ -41,6 +41,12 @@ public sealed class MeshRenderer : Component
         }
 
         GL.Disable(EnableCap.Blend);
+    }
+
+    public override void Dispose()
+    {
+        MeshRendererSystem.Remove(this);
+        if (!_overrideInstance) Mesh.Remove(Parent);
     }
 }
 

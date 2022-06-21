@@ -43,6 +43,11 @@ public sealed class Transform : Component
                 Matrix4X4.CreateRotationZ(Rotation.Z.DegToRad()) *
                 Matrix4X4.CreateTranslation(Location) * (Owner.Parent?.GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity);
     }
+
+    public override void Dispose()
+    {
+        TransformSystem.Remove(this);
+    }
 }
 
 internal class TransformSystem : ComponentSystem<Transform>

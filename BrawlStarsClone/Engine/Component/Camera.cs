@@ -49,6 +49,11 @@ public class Camera : BaseCamera
         _view = Matrix4X4.CreateLookAt(loc, loc + _front, _up);
     }
 
+    public override void Dispose()
+    {
+        CameraSystem.Remove(this);
+    }
+
     public override void UpdateProjection()
     {
         _projection = Matrix4X4.CreatePerspectiveFieldOfView(_fov, (float)Owner.Window.Size.X / Owner.Window.Size.Y,

@@ -29,6 +29,11 @@ public class Sun : BaseCamera
             Vector3D<float>.UnitY);
     }
 
+    public override void Dispose()
+    {
+        CameraSystem.Remove(this);
+    }
+
     public sealed override void UpdateProjection()
     {
         _projection = Matrix4X4.CreateOrthographic(_size, _size, ClipNear, ClipFar);

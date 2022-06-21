@@ -1,10 +1,14 @@
-﻿using OpenTK.Windowing.Common;
+﻿using BrawlStarsClone.Engine.Windowing;
+using OpenTK.Windowing.Common;
 
 namespace BrawlStarsClone.Engine.Component;
 
 public abstract class Component
 {
     public Entity Owner;
+    protected GameWindow Window => Owner.Window;
+    protected OpenTK.Windowing.Desktop.GameWindow View => Owner.Window.View;
+    protected Entity? Parent => Owner.Parent;
 
     protected Component(Entity owner)
     {
@@ -32,6 +36,8 @@ public abstract class Component
     public virtual void OnMouseMove(MouseMoveEventArgs args)
     {
     }
+
+    public abstract void Dispose();
 }
 
 internal abstract class ComponentSystem<T> where T : Component
@@ -50,21 +56,33 @@ internal abstract class ComponentSystem<T> where T : Component
 
     public static void Update(float deltaTime)
     {
-        foreach (var component in Components) component.OnUpdate(deltaTime);
+        for (var i = 0; i < Components.Count; i++)
+        {
+            Components[i].OnUpdate(deltaTime);
+        }
     }
 
     public static void Load()
     {
-        foreach (var component in Components) component.OnLoad();
+        for (var i = 0; i < Components.Count; i++)
+        {
+            Components[i].OnLoad();
+        }
     }
 
     public static void Render(float deltaTime)
     {
-        foreach (var component in Components) component.OnRender(deltaTime);
+        for (var i = 0; i < Components.Count; i++)
+        {
+            Components[i].OnRender(deltaTime);
+        }
     }
 
     public static void MouseMove(MouseMoveEventArgs args)
     {
-        foreach (var component in Components) component.OnMouseMove(args);
+        for (var i = 0; i < Components.Count; i++)
+        {
+            Components[i].OnMouseMove(args);
+        }
     }
 }
