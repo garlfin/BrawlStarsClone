@@ -206,13 +206,14 @@ public class GameWindow
         });
         tracer.AddComponent(new MeshRenderer(tracer, MeshLoader.LoadMesh("../../../res/model/plane.bnk", true)));
         
-        var materials = new Material[]{ new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
+        var materials = new Material[]{ new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit,
             new ImageTexture("../../../res/white.pvr"), "DefaultMaterial")};
         
         tracer.AddComponent(new Component.Material(materials));
         tracer.AddComponent(new SingleFire()
         {
-            MatCap = materials[0]
+            MatCap = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit,
+                new ImageTexture("../../../res/pellet.pvr"), "DefaultMaterial")
         });
 
         player.GetComponent<PlayerMovement>().Tracer = tracer;

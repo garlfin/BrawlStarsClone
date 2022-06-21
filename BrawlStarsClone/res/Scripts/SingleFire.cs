@@ -13,7 +13,7 @@ public class SingleFire : Behavior
     private MeshRenderer _mesh;
 
     private Mesh _bulletMesh;
-    
+
     public Engine.Asset.Material.Material MatCap { get; set; }
     
     public override void OnLoad()
@@ -32,11 +32,12 @@ public class SingleFire : Behavior
 
         _mesh.Alpha =  0;
         if (!View.IsMouseButtonReleased(MouseButton.Left)) return;
-        Entity? entity = new Entity(Window ,Window.Root, "Bullet");
+        Entity entity = new Entity(Window ,Window.Root, "Bullet");
         entity.AddComponent(new Transform(entity)
         {
             Location = Parent.GetComponent<Transform>().Location + new Vector3D<float>(0, 0.5f, 0),
-            Rotation = new Vector3D<float>(-90, 0, 0)
+            Rotation = new Vector3D<float>(-90, Owner.Parent.GetComponent<Transform>().Rotation.Y + Owner.GetComponent<Transform>().Rotation.Y + 90, 0),
+            Scale = new Vector3D<float>(0.25f)
         });
         entity.AddComponent(new MeshRenderer(entity, _bulletMesh));
         entity.AddComponent(new Material(new[] { MatCap }));

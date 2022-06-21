@@ -17,8 +17,10 @@ public class ImageTexture : Texture
         var internalFormat = pvrFormat switch
         {
             Format.BC1 => InternalFormat.CompressedRgbS3tcDxt1Ext,
-            Format.BC3 => InternalFormat.CompressedRgbaS3tcDxt3Ext,
-            Format.BC5 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
+            Format.BC2 => InternalFormat.CompressedRgbaS3tcDxt3Ext, 
+            Format.BC3 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
+            Format.BC4 => InternalFormat.CompressedRedRgtc1,
+            Format.BC5 => InternalFormat.CompressedRgRgtc2,
             _ => throw new ArgumentOutOfRangeException($"Unsupported format {pvrFormat} in file {path}")
         };
         // The read UInt32 is the color space - 0 being linear; 1 sRGB
@@ -65,6 +67,7 @@ public class ImageTexture : Texture
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D); // If we have no mips, generate them
         reader.Close();
         file.Close();
+        
     }
 }
 
@@ -74,5 +77,7 @@ public enum Format
     BC2 = 9,
     BC3 = 11,
     BC4 = 12,
-    BC5 = 13
+    BC5 = 13,
+    BC6 = 14,
+    BC7 = 15,
 }

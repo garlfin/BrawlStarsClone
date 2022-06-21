@@ -1,4 +1,5 @@
-﻿using BrawlStarsClone.Engine.Asset.Mesh;
+﻿using BrawlStarsClone.Engine.Asset.Material;
+using BrawlStarsClone.Engine.Asset.Mesh;
 
 namespace BrawlStarsClone.Engine.Component;
 
