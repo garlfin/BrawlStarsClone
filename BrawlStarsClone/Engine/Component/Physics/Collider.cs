@@ -4,22 +4,32 @@ namespace BrawlStarsClone.Engine.Component.Physics;
 
 public abstract class Collider : Component
 {
+    protected static ColliderCompare Comparer = new();
+    public List<Collision> Collisions => _collidersSorted;
     private readonly List<Collision> _collidersSorted = new();
-    private readonly ColliderCompare _comparer = new();
-    public readonly List<Collider> Collisions = new();
-    public readonly bool Static;
-    public List<Entity> IgnoreList { get; private set; }
-    protected Vector2D<float> Scale;
-    
-    public PhysicsLayer Layer { get; set; }
 
-    protected Collider(bool isStatic, List<Entity>? ignoreList, Vector2D<float>? scale = null,
-        PhysicsLayer layer = PhysicsLayer.Zero)
+    public bool Static { get; set; }
+    public bool UsePhysics { get; set; }
+    
+    protected Vector2D<float> Scale;
+    public List<Entity> IgnoreList { get; private set; }
+    public PhysicsLayer Layer { get; set; }
+    public Vector2D<float> HalfLength { get; set; }
+
+    protected readonly Transform Transform;
+
+    protected Collider(Entity owner, bool isStatic = true, List<Entity>? ignoreList = null, Vector2D<float>? scale = null,
+        PhysicsLayer layer = PhysicsLayer.Zero, bool usePhysics = false)
     {
+        Owner = owner;
         Static = isStatic;
+        UsePhysics = usePhysics;
         Layer = layer;
-        PhysicsSystem.Register(this);
         IgnoreList = ignoreList ?? new List<Entity>();
+        Transform = Owner.GetComponent<Transform>();
+
+        HalfLength = 0.5f * (scale ?? Vector2D<float>.One);
+        PhysicsSystem.Register(this);
         if (scale is not null) Scale = (Vector2D<float>)scale; // Cant set scale to one by default 💀
     }
 
@@ -28,33 +38,27 @@ public abstract class Collider : Component
         Collisions.Clear();
     }
 
-    public override void OnUpdate(float deltaTime)
+    public sealed override void OnUpdate(float deltaTime)
     {
         if (Static) return;
-
         _collidersSorted.Clear();
-
         for (var i = 0; i < PhysicsSystem.Components.Count; i++)
         {
-            var component = PhysicsSystem.Components[i];
-            if (component == this || component.Layer != Layer) continue;
-            if (component == this) continue;
-            if (Static && component.Static) continue;
-            if (Collisions.Contains(component)) continue;
-            var distance = Vector3D.Distance(Owner.GetComponent<Transform>().Location,
-                component.Owner.GetComponent<Transform>().Location);
-            _collidersSorted.Add(new Collision(component, distance, Vector3D<float>.Zero));
+            var collider = PhysicsSystem.Components[i];
+            if (collider == this || collider.Layer != Layer) continue;
+            if (IgnoreList.Contains(collider.Owner) || collider.IgnoreList.Contains(Owner)) continue;
+
+            var collision = Intersect((SquareCollider)collider);
+            if (collision is not null) _collidersSorted.Add((Collision)collision);
         }
 
-        _collidersSorted.Sort(_comparer);
+        _collidersSorted.Sort(Comparer);
 
-        for (var i = 0; i < _collidersSorted.Count; i++)
-        {
-            var collider = _collidersSorted[i].Collider;
-            if (!Intersect(collider)) continue;
-            Collisions.Add(collider);
-            collider.Collisions.Add(this);
-        }
+        if (_collidersSorted.Count > 0 && UsePhysics)
+            if (_collidersSorted[0].ResolveX)
+                ResolveX(_collidersSorted[0]);
+            else
+                ResolveY(_collidersSorted[0]);
     }
 
     public override void Dispose()
@@ -62,9 +66,13 @@ public abstract class Collider : Component
         PhysicsSystem.Remove(this);
     }
 
-    public abstract bool Intersect(Collider other);
+    public abstract Collision? Intersect(SquareCollider other);
+    // public abstract Collision? Intersect(CircleCollider other); // For when I re-implement circle colliders
 
     public abstract Collision? Intersect(RayInfo other);
+
+    protected abstract void ResolveX(Collision collision);
+    protected abstract void ResolveY(Collision collision);
 }
 
 internal class PhysicsSystem : ComponentSystem<Collider>

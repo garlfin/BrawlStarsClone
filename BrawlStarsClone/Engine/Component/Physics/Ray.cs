@@ -38,23 +38,24 @@ public readonly struct RayInfo
 
 public static class Raycast
 {
-    private static ColliderCompare _comparer;
+    private static readonly ColliderCompare Comparer = new();
     public static RayResult Cast(Vector3D<float> position, Vector3D<float> direction, PhysicsLayer layer = PhysicsLayer.Zero, Entity[]? ignoreList = null, float length = Single.PositiveInfinity)
     {
         RayResult _result = new RayResult(new RayInfo(position, direction, length));
 
         for (int i = 0; i < PhysicsSystem.Components.Count; i++)
         {
-            if (PhysicsSystem.Components[i].Layer != layer) continue;
-            if (ignoreList is not null && ignoreList.Contains(PhysicsSystem.Components[i].Owner)) continue;
+            var collider = PhysicsSystem.Components[i];
             
-            var collision = PhysicsSystem.Components[i].Intersect(_result.Ray);
+            if (collider.Layer != layer) continue;
+            if (ignoreList is not null && ignoreList.Contains(collider.Owner)) continue;
+            
+            var collision = collider.Intersect(_result.Ray);
             if (collision is null) continue;
-            if (collision.Value.Distance > length) continue;
             _result.Collisions.Add((Collision) collision);
         }
         
-        _result.Collisions.Sort(_comparer);
+        _result.Collisions.Sort(Comparer);
 
         return _result;
     }

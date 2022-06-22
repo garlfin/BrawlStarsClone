@@ -6,64 +6,58 @@ namespace BrawlStarsClone.Engine.Component.Physics;
 
 public class SquareCollider : Collider
 {
-    private readonly Transform _transform;
+    public Vector2D<float> MinTransformed => new(Transform.Location.X - HalfLength.X, Transform.Location.Z - HalfLength.Y);
+    public Vector2D<float> MaxTransformed => new(Transform.Location.X + HalfLength.X, Transform.Location.Z + HalfLength.Y);
 
-    public Vector2D<float> MinTransformed => new(_transform.Location.X - Max.X, _transform.Location.Z - Max.Y);
-    public Vector2D<float> MaxTransformed => new(_transform.Location.X + Max.X, _transform.Location.Z + Max.Y);
-
-    public SquareCollider(Entity? owner, bool isStatic, List<Entity>? ignoreList = null, Vector2D<float>? scale = null, PhysicsLayer layer = PhysicsLayer.Zero) : base(isStatic, ignoreList, scale, layer)
+    public SquareCollider(Entity owner, bool isStatic = true, List<Entity>? ignoreList = null, Vector2D<float>? scale = null, PhysicsLayer layer = PhysicsLayer.Zero, bool usePhysics = false) : base(owner, isStatic, ignoreList, scale, layer, usePhysics)
     {
-        _transform = owner.GetComponent<Transform>();
-        Max = 0.5f * (scale ?? Vector2D<float>.One);
     }
 
-    public Vector2D<float> Max { get; }
-
-    public override bool Intersect(Collider other)
+    public override Collision? Intersect(SquareCollider other)
     {
-        if (Layer != other.Layer) return false;
-        var collider = (SquareCollider)other;
-        var transform = _transform.Location;
+        var transform = Transform.Location;
         var otherTransform = other.Owner.GetComponent<Transform>().Location;
         
-        var result = MinTransformed.X < otherTransform.X + collider.Max.X &&
-                     MaxTransformed.X > otherTransform.X - collider.Max.X &&
-                     MinTransformed.Y < otherTransform.Z + collider.Max.Y &&
-                     MaxTransformed.Y > otherTransform.Z - collider.Max.Y;
+        var result = MinTransformed.X < otherTransform.X + other.HalfLength.X &&
+                     MaxTransformed.X > otherTransform.X - other.HalfLength.X &&
+                     MinTransformed.Y < otherTransform.Z + other.HalfLength.Y &&
+                     MaxTransformed.Y > otherTransform.Z - other.HalfLength.Y;
 
-        if (!result || Static) return false;
-
+        if (!result) return null;
+        
         // This is positively awful
-        var x = MathF.Min(MathF.Abs(transform.X + Max.X - (otherTransform.X - Max.X)),
-            MathF.Abs(transform.X - Max.X - (otherTransform.X + Max.X)));
-        var y = MathF.Min(MathF.Abs(transform.Z + Max.Y - (otherTransform.Z - Max.Y)),
-            MathF.Abs(transform.Z - Max.Y - (otherTransform.Z + Max.Y)));
-        if (x < y) PushX(transform, otherTransform);
-        else PushY(transform, otherTransform);
+        var x = MathF.Min(MathF.Abs(transform.X + HalfLength.X - (otherTransform.X - HalfLength.X)),
+            MathF.Abs(transform.X - HalfLength.X - (otherTransform.X + HalfLength.X)));
+        var y = MathF.Min(MathF.Abs(transform.Z + HalfLength.Y - (otherTransform.Z - HalfLength.Y)),
+            MathF.Abs(transform.Z - HalfLength.Y - (otherTransform.Z + HalfLength.Y)));
 
-        return true;
+        return new Collision(other, Vector3D.Distance(transform, otherTransform), Vector3D<float>.Zero, x < y);
     }
 
-    private void PushX(Vector3D<float> transform, Vector3D<float> otherTransform)
+    protected override void ResolveX(Collision collision)
     {
-        if (transform.X + Max.X > otherTransform.X - Max.X && transform.X + Max.X < otherTransform.X + Max.X)
-            _transform.Location.X -= transform.X + Max.X - (otherTransform.X - Max.X);
+        var transform = Transform.Location;
+        var otherTransform = collision.Collider.Owner.GetComponent<Transform>().Location;
+        
+        if (transform.X + HalfLength.X > otherTransform.X - HalfLength.X && transform.X + HalfLength.X < otherTransform.X + HalfLength.X)
+            Transform.Location.X -= transform.X + HalfLength.X - (otherTransform.X - HalfLength.X);
         else
-            _transform.Location.X -= transform.X - Max.X - (otherTransform.X + Max.X);
+            Transform.Location.X -= transform.X - HalfLength.X - (otherTransform.X + HalfLength.X);
     }
 
-    private void PushY(Vector3D<float> transform, Vector3D<float> otherTransform)
+    protected override void ResolveY(Collision collision)
     {
-        if (transform.Z + Max.Y > otherTransform.Z - Max.Y && transform.Z + Max.Y < otherTransform.Z + Max.Y)
-            _transform.Location.Z -= transform.Z + Max.Y - (otherTransform.Z - Max.Y);
+        var transform = Transform.Location;
+        var otherTransform = collision.Collider.Owner.GetComponent<Transform>().Location;
+        
+        if (transform.Z + HalfLength.Y > otherTransform.Z - HalfLength.Y && transform.Z + HalfLength.Y < otherTransform.Z + HalfLength.Y)
+            Transform.Location.Z -= transform.Z + HalfLength.Y - (otherTransform.Z - HalfLength.Y);
         else 
-            _transform.Location.Z -= transform.Z - Max.Y - (otherTransform.Z + Max.Y);
+            Transform.Location.Z -= transform.Z - HalfLength.Y - (otherTransform.Z + HalfLength.Y);
     }
 
     public override Collision? Intersect(RayInfo ray)
     {
-        // Debugging - Ray is OK
-        if (!Static) return null;
         float t1 = (MinTransformed.X - ray.Position.X) / ray.Direction.X;
         float t2 = (MaxTransformed.X - ray.Position.X) / ray.Direction.X;
         float t3 = (MinTransformed.Y - ray.Position.Z) / ray.Direction.Z;
@@ -71,11 +65,10 @@ public class SquareCollider : Collider
     
         float tmin = MathF.Max(MathF.Min(t1, t2), MathF.Min(t3, t4));
         float tmax = MathF.Min(MathF.Max(t1, t2), MathF.Max(t3, t4));
-        
-        if (tmax < 0 || tmin > tmax)
-            return null;
-
         float dist = tmin < 0 ? tmax : tmin;
-        return new Collision(this, dist, ray.Direction * dist + ray.Position);
+         
+        if (tmax < 0 || tmin > tmax || dist > ray.Length) return null;
+        
+        return new Collision(this, dist, ray.Direction * dist + ray.Position, false);
     }
 }

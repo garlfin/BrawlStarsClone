@@ -196,7 +196,7 @@ public class GameWindow
             IdleAnimation = MeshLoader.LoadAnimation("../../../../bsModel/bin/Release/net6.0/shelly_idle.bnk"),
             Speed = 200
         });
-        player.AddComponent(new SquareCollider(player, false));
+        player.AddComponent(new SquareCollider(player, false, null, null, PhysicsLayer.Zero, true));
         camera.AddComponent(new CameraMovement(player));
         var tracer = new Entity(this, player, "Tracer");
         tracer.AddComponent(new Transform(tracer)
