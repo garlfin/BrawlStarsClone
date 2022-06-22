@@ -60,7 +60,7 @@ public class SquareCollider : Collider
             _transform.Location.Z -= transform.Z - Max.Y - (otherTransform.Z + Max.Y);
     }
 
-    public override Collision? Intersect(Ray ray)
+    public override Collision? Intersect(RayInfo ray)
     {
         // Debugging - Ray is OK
         if (!Static) return null;

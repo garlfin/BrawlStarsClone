@@ -39,8 +39,7 @@ public class PlayerMovement : Behavior
     private Entity? _tracer;
     private Transform _tracerTransform;
     private MeshRenderer _tracerMesh;
-    private Ray _ray;
-        
+
 
     public int Speed
     {
@@ -50,7 +49,6 @@ public class PlayerMovement : Behavior
 
     public override void OnLoad()
     {
-        _ray = new Ray(Vector3D<float>.Zero, Vector3D<float>.Zero, PhysicsLayer.Zero,new List<Entity?> {Owner});
         _entityTransform = Owner.GetComponent<Transform>();
         _animator = Owner.GetComponent<Animator>();
         _tracerTransform.Scale.X = 2;
@@ -64,9 +62,9 @@ public class PlayerMovement : Behavior
         key[3] = Owner.Window.Input.IsKeyDown(Keys.D);
 
         var mouse = Window.MousePositionNormalized; // Too lazy to add overrides
-        RayData data = CameraSystem.CurrentCamera.ScreenToRay(ref mouse); // Get Camera Ray
-        var mouseWorldPos = data.Direction * (Vector3D.Dot(-data.Position, Vector3D<float>.UnitY) /
-                                              Vector3D.Dot(data.Direction, Vector3D<float>.UnitY)) + data.Position; // Intersect camera ray with ground plane
+        RayInfo info = CameraSystem.CurrentCamera.ScreenToRay(ref mouse); // Get Camera Ray
+        var mouseWorldPos = info.Direction * (Vector3D.Dot(-info.Position, Vector3D<float>.UnitY) /
+                                              Vector3D.Dot(info.Direction, Vector3D<float>.UnitY)) + info.Position; // Intersect camera ray with ground plane
 
         var transform = _entityTransform.GlobalMatrix.Transformation();
 
@@ -98,15 +96,12 @@ public class PlayerMovement : Behavior
         _entityTransform.Rotation.Y = Mathf.LerpAngle(_entityTransform.Rotation.Y, mouseRot, gameTime * 10);
         _tracerTransform.Rotation.Y = 180 + (mouseRot - _entityTransform.Rotation.Y); // Correct lerp
 
-        _ray.Position = transform;
-        _ray.Direction = finalPos;
-        _ray.Length = MaxRange;
-        _ray.Cast();
+        var ray = Raycast.Cast(transform, finalPos, PhysicsLayer.Zero, new[] { Owner }, MaxRange);
 
-        if (_ray.Collisions.Count == 0)
+        if (ray.Collisions.Count == 0)
             _tracerTransform.Scale.Z = MaxRange * 3.333f; // Accidentally set the length of the tracer to 2 units 
         else
-            _tracerTransform.Scale.Z = _ray.Collisions[0].Distance * 3.333f;
+            _tracerTransform.Scale.Z = ray.Collisions[0].Distance * 3.333f;
 
         if (key[0] || key[1] || key[2] || key[3])
             _animator.Animation = RunAnimation;

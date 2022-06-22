@@ -64,7 +64,7 @@ public abstract class Collider : Component
 
     public abstract bool Intersect(Collider other);
 
-    public abstract Collision? Intersect(Ray other);
+    public abstract Collision? Intersect(RayInfo other);
 }
 
 internal class PhysicsSystem : ComponentSystem<Collider>

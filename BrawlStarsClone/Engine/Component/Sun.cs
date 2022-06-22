@@ -47,7 +47,7 @@ public class Sun : BaseCamera
     {
         throw new NotImplementedException();
     }
-    public override RayData ScreenToRay(ref Vector2D<float> vector2D)
+    public override RayInfo ScreenToRay(ref Vector2D<float> vector2D)
     {
         throw new NotImplementedException();
     }

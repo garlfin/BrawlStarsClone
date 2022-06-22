@@ -79,7 +79,7 @@ public class Camera : BaseCamera
     }
     
     // Expects normalized coordinates
-    public override RayData ScreenToRay(ref Vector2D<float> point)
+    public override RayInfo ScreenToRay(ref Vector2D<float> point)
     {
         Matrix4X4.Invert(_projection, out var inverse);
         var rayEye = new Vector4D<float>(point, -1, 1) * inverse;
@@ -90,6 +90,6 @@ public class Camera : BaseCamera
         Matrix4X4.Invert(_view, out inverse);
         var result = rayEye * inverse;
         
-        return new RayData(_entityTransform.Location, Vector3D.Normalize(new Vector3D<float>(result.X, result.Y, result.Z)));
+        return new RayInfo(_entityTransform.Location, Vector3D.Normalize(new Vector3D<float>(result.X, result.Y, result.Z)));
     }
 }
