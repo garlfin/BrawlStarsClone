@@ -101,7 +101,7 @@ public class PlayerMovement : Behavior
         _ray.Position = transform;
         _ray.Direction = finalPos;
         _ray.Length = MaxRange;
-        _ray.Collide();
+        _ray.Cast();
 
         if (_ray.Collisions.Count == 0)
             _tracerTransform.Scale.Z = MaxRange * 3.333f; // Accidentally set the length of the tracer to 2 units 

@@ -210,7 +210,7 @@ public class GameWindow
             new ImageTexture("../../../res/white.pvr"), "DefaultMaterial")};
         
         tracer.AddComponent(new Component.Material(materials));
-        tracer.AddComponent(new SingleFire()
+        tracer.AddComponent(new SingleFire
         {
             MatCap = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit,
                 new ImageTexture("../../../res/pellet.pvr"), "DefaultMaterial")

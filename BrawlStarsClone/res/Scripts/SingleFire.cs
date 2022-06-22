@@ -1,6 +1,7 @@
 ﻿using BrawlStarsClone.Engine;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Component;
+using BrawlStarsClone.Engine.Component.Physics;
 using BrawlStarsClone.Engine.Utility;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Silk.NET.Maths;
@@ -41,6 +42,9 @@ public class SingleFire : Behavior
         });
         entity.AddComponent(new MeshRenderer(entity, _bulletMesh));
         entity.AddComponent(new Material(new[] { MatCap }));
-        entity.AddComponent(new Bullet());
+        entity.AddComponent(new Bullet
+        {
+            Spawner = Owner
+        });
     }
 }

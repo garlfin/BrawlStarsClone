@@ -151,7 +151,7 @@ public static class MapLoader
                 entity.AddComponent(new MeshRenderer(entity, finalTile));
                 if (tile != 'g')
                 {
-                    entity.AddComponent(new SquareCollider(entity, true));
+                    entity.AddComponent(new SquareCollider(entity, true, new List<Entity>()));
                     entity.GetComponent<Transform>()!.Rotation.Y = rng.Next(0, 5) * 90;
                 }
                 else if (tile == 'g')

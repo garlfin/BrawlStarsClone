@@ -8,16 +8,18 @@ public abstract class Collider : Component
     private readonly ColliderCompare _comparer = new();
     public readonly List<Collider> Collisions = new();
     public readonly bool Static;
+    public List<Entity> IgnoreList { get; private set; }
     protected Vector2D<float> Scale;
     
     public PhysicsLayer Layer { get; set; }
 
-    protected Collider(bool isStatic, Vector2D<float>? scale = null,
+    protected Collider(bool isStatic, List<Entity>? ignoreList, Vector2D<float>? scale = null,
         PhysicsLayer layer = PhysicsLayer.Zero)
     {
         Static = isStatic;
         Layer = layer;
         PhysicsSystem.Register(this);
+        IgnoreList = ignoreList ?? new List<Entity>();
         if (scale is not null) Scale = (Vector2D<float>)scale; // Cant set scale to one by default 💀
     }
 

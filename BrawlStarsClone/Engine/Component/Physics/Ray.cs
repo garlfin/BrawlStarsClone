@@ -7,7 +7,7 @@ public class Ray
     public List<Collision> Collisions { get; } = new();
     public Vector3D<float> Position { get; set; }
     public Vector3D<float> Direction { get; set; }
-    public List<Entity>? IgnoreList { get; set; }
+    public List<Entity> IgnoreList { get; set; }
     public PhysicsLayer Layer { get; set; }
     public float Length { get; set; }
 
@@ -27,7 +27,7 @@ public class Ray
         Position = position;
         Direction = direction;
         Layer = layer;
-        IgnoreList = ignoreList;
+        IgnoreList = ignoreList ?? new List<Entity>();
         Length = length;
     }
 
@@ -40,7 +40,7 @@ public class Ray
         Length = length;
     }
     
-    public void Collide()
+    public void Cast()
     {
         Collisions.Clear();
         
