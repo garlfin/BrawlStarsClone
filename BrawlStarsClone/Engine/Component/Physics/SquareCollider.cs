@@ -34,6 +34,11 @@ public class SquareCollider : Collider
         return new Collision(other, Vector3D.Distance(transform, otherTransform), Vector3D<float>.Zero, x < y);
     }
 
+    public override Collision? Intersect(CircleCollider other)
+    {
+        return other.Intersect(this);
+    }
+
     protected override void ResolveX(Collision collision)
     {
         var transform = Transform.Location;

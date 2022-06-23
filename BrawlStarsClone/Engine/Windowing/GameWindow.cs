@@ -37,7 +37,7 @@ public class GameWindow
         var nativeWindowSettings = NativeWindowSettings.Default;
         nativeWindowSettings.Size = new Vector2i(width, height);
         nativeWindowSettings.Title = name;
-        nativeWindowSettings.Flags = ContextFlags.Debug;
+        //nativeWindowSettings.Flags = ContextFlags.Debug;
 
         var gameWindowSettings = GameWindowSettings.Default;
         gameWindowSettings.RenderFrequency = 144;
@@ -85,10 +85,10 @@ public class GameWindow
         _updateFinished = false;
         var time = (float)obj.Time;
         if (Input.IsKeyDown(Keys.Escape)) View.Close();
-        BehaviorSystem.InitializeQueue();
-        PhysicsSystem.ResetCollisions();
-        BehaviorSystem.Update(time);
         PhysicsSystem.Update(time);
+        BehaviorSystem.InitializeQueue();
+        BehaviorSystem.Update(time);
+        PhysicsSystem.ResetCollisions();
         AssetManager.StartRemoval();
         _updateFinished = true;
     }

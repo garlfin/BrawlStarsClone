@@ -26,7 +26,7 @@ public abstract class Collider : Component
         UsePhysics = usePhysics;
         Layer = layer;
         IgnoreList = ignoreList ?? new List<Entity>();
-        Transform = Owner.GetComponent<Transform>();
+        Transform = owner.GetComponent<Transform>();
 
         HalfLength = 0.5f * (scale ?? Vector2D<float>.One);
         PhysicsSystem.Register(this);
@@ -41,24 +41,27 @@ public abstract class Collider : Component
     public sealed override void OnUpdate(float deltaTime)
     {
         if (Static) return;
-        _collidersSorted.Clear();
         for (var i = 0; i < PhysicsSystem.Components.Count; i++)
         {
             var collider = PhysicsSystem.Components[i];
             if (collider == this || collider.Layer != Layer) continue;
             if (IgnoreList.Contains(collider.Owner) || collider.IgnoreList.Contains(Owner)) continue;
 
-            var collision = Intersect((SquareCollider)collider);
+            var collision = collider.GetType() == typeof(CircleCollider) ? Intersect((CircleCollider) collider) : Intersect((SquareCollider) collider);
             if (collision is not null) _collidersSorted.Add((Collision)collision);
         }
 
         _collidersSorted.Sort(Comparer);
+        
+        if (_collidersSorted.Count > 0) Console.WriteLine(_collidersSorted[0].Distance);
 
-        if (_collidersSorted.Count > 0 && UsePhysics)
-            if (_collidersSorted[0].ResolveX)
-                ResolveX(_collidersSorted[0]);
-            else
-                ResolveY(_collidersSorted[0]);
+        if (_collidersSorted.Count <= 0 || !UsePhysics) return;
+        
+        if (_collidersSorted[0].ResolveX)
+            ResolveX(_collidersSorted[0]);
+        else
+            ResolveY(_collidersSorted[0]);
+        
     }
 
     public override void Dispose()
@@ -67,8 +70,7 @@ public abstract class Collider : Component
     }
 
     public abstract Collision? Intersect(SquareCollider other);
-    // public abstract Collision? Intersect(CircleCollider other); // For when I re-implement circle colliders
-
+    public abstract Collision? Intersect(CircleCollider other); // For when I re-implement circle colliders
     public abstract Collision? Intersect(RayInfo other);
 
     protected abstract void ResolveX(Collision collision);

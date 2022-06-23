@@ -42,9 +42,10 @@ public class SingleFire : Behavior
         });
         entity.AddComponent(new MeshRenderer(entity, _bulletMesh));
         entity.AddComponent(new Material(new[] { MatCap }));
+        entity.AddComponent(new CircleCollider(entity, false, new List<Entity>{Parent}, new Vector2D<float>(0.5f)));
         entity.AddComponent(new Bullet
         {
-            Spawner = Owner
+            Spawner = Parent
         });
     }
 }
