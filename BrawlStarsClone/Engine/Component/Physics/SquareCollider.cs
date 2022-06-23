@@ -36,7 +36,25 @@ public class SquareCollider : Collider
 
     public override Collision? Intersect(CircleCollider other)
     {
-        return other.Intersect(this);
+        var collision = other.Intersect(this);
+        return collision is null
+            ? null
+            : new Collision(other, collision.Value.Distance, collision.Value.HitPoint, collision.Value.ResolveX);
+    }
+
+    public override Collision? Intersect(PointCollider other)
+    {
+        var transform = Transform.Location;
+        var otherTransform = other.Owner.GetComponent<Transform>().Location;
+
+        var inside = otherTransform.X > MinTransformed.X && otherTransform.X < MaxTransformed.X &&
+                     otherTransform.Z > MinTransformed.Y && otherTransform.Z < MaxTransformed.Y;
+
+        var dx = transform.X - otherTransform.X;
+        var dy = transform.Z - otherTransform.Z;
+        
+        if (!inside) return null;
+        return new Collision(other, 0, otherTransform, MathF.Abs(dx) > MathF.Abs(dy));
     }
 
     protected override void ResolveX(Collision collision)

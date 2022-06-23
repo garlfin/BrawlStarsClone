@@ -39,6 +39,7 @@ public class PlayerMovement : Behavior
     private Entity? _tracer;
     private Transform _tracerTransform;
     private MeshRenderer _tracerMesh;
+    private Entity[] _ignoreList;
 
 
     public int Speed
@@ -52,6 +53,7 @@ public class PlayerMovement : Behavior
         _entityTransform = Owner.GetComponent<Transform>();
         _animator = Owner.GetComponent<Animator>();
         _tracerTransform.Scale.X = 2;
+        _ignoreList = new[] { Owner };
     }
 
     public override void OnUpdate(float gameTime)
@@ -95,8 +97,8 @@ public class PlayerMovement : Behavior
         
         _entityTransform.Rotation.Y = Mathf.LerpAngle(_entityTransform.Rotation.Y, mouseRot, gameTime * 10);
         _tracerTransform.Rotation.Y = 180 + (mouseRot - _entityTransform.Rotation.Y); // Correct lerp
-
-        var ray = Raycast.Cast(transform, finalPos, PhysicsLayer.Zero, new[] { Owner }, MaxRange);
+        
+        var ray = Raycast.Cast(transform, finalPos, PhysicsLayer.Zero, _ignoreList, MaxRange);
 
         if (ray.Collisions.Count == 0)
             _tracerTransform.Scale.Z = MaxRange * 3.333f; // Accidentally set the length of the tracer to 2 units 

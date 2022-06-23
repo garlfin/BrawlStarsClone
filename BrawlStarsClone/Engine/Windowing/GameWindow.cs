@@ -85,10 +85,10 @@ public class GameWindow
         _updateFinished = false;
         var time = (float)obj.Time;
         if (Input.IsKeyDown(Keys.Escape)) View.Close();
-        PhysicsSystem.Update(time);
         BehaviorSystem.InitializeQueue();
         BehaviorSystem.Update(time);
         PhysicsSystem.ResetCollisions();
+        PhysicsSystem.Update(time);
         AssetManager.StartRemoval();
         _updateFinished = true;
     }

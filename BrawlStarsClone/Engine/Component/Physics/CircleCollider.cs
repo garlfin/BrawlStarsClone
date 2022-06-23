@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using BrawlStarsClone.Engine.Utility;
+using Silk.NET.Maths;
 
 namespace BrawlStarsClone.Engine.Component.Physics;
 
@@ -15,13 +16,13 @@ public class CircleCollider : Collider
         var nearestX = MathF.Max(other.MinTransformed.X ,MathF.Min(transform.X, other.MaxTransformed.X));
         var nearestY = MathF.Max(other.MinTransformed.Y ,MathF.Min(transform.Z, other.MaxTransformed.Y));
 
-        var deltaX = transform.X - nearestX;
-        var deltaY = transform.Z - nearestY;
+        var dx = transform.X - nearestX;
+        var dy = transform.Z - nearestY;
 
-        var distance = MathF.Sqrt(deltaX * deltaX + deltaY * deltaY);
+        var distance = MathF.Sqrt(dx * dx + dy * dy);
 
         if (distance > HalfLength.X ) return null;
-        return new Collision(other, distance, new Vector3D<float>(nearestX, 0, nearestY), deltaX > deltaY);
+        return new Collision(other, distance, new Vector3D<float>(nearestX, 0, nearestY), MathF.Abs(dx) > MathF.Abs(dy));
     }
 
     public override Collision? Intersect(CircleCollider other)
@@ -34,7 +35,21 @@ public class CircleCollider : Collider
         var distance = MathF.Sqrt(dx * dx + dy * dy);
 
         if (distance > HalfLength.X + other.HalfLength.X) return null;
-        return new Collision(other, distance, Vector3D<float>.Zero, dx > dy);
+        return new Collision(other, distance, Vector3D<float>.Zero, MathF.Abs(dx) > MathF.Abs(dy));
+    }
+
+    public override Collision? Intersect(PointCollider other)
+    {
+        var transform = Transform.Location;
+        var otherTransform = other.Owner.GetComponent<Transform>().Location;
+
+        var dx = transform.X - otherTransform.X;
+        var dy = transform.Z - otherTransform.Z;
+
+        var distance = MathF.Sqrt(dx * dx + dy * dy);
+
+        if (distance > HalfLength.X) return null;
+        return new Collision(other, distance, otherTransform, MathF.Abs(dx) > MathF.Abs(dy));
     }
 
     public override Collision? Intersect(RayInfo other)

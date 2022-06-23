@@ -47,15 +47,18 @@ public abstract class Collider : Component
             if (collider == this || collider.Layer != Layer) continue;
             if (IgnoreList.Contains(collider.Owner) || collider.IgnoreList.Contains(Owner)) continue;
 
-            var collision = collider.GetType() == typeof(CircleCollider) ? Intersect((CircleCollider) collider) : Intersect((SquareCollider) collider);
+            Collision? collision = null;
+            
+            if (collider.GetType() == typeof(CircleCollider)) collision = Intersect((CircleCollider)collider);
+            else if (collider.GetType() == typeof(PointCollider)) collision = Intersect((PointCollider)collider);
+            else if (collider.GetType() == typeof(SquareCollider)) collision = Intersect((SquareCollider)collider);
+            
             if (collision is not null) _collidersSorted.Add((Collision)collision);
         }
 
         _collidersSorted.Sort(Comparer);
         
-        if (_collidersSorted.Count > 0) Console.WriteLine(_collidersSorted[0].Distance);
-
-        if (_collidersSorted.Count <= 0 || !UsePhysics) return;
+        if (_collidersSorted.Count == 0 || !UsePhysics) return;
         
         if (_collidersSorted[0].ResolveX)
             ResolveX(_collidersSorted[0]);
@@ -70,7 +73,8 @@ public abstract class Collider : Component
     }
 
     public abstract Collision? Intersect(SquareCollider other);
-    public abstract Collision? Intersect(CircleCollider other); // For when I re-implement circle colliders
+    public abstract Collision? Intersect(CircleCollider other);
+    public abstract Collision? Intersect(PointCollider other);
     public abstract Collision? Intersect(RayInfo other);
 
     protected abstract void ResolveX(Collision collision);

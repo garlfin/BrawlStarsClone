@@ -1,4 +1,5 @@
 ﻿using BrawlStarsClone.Engine;
+using BrawlStarsClone.Engine.Asset.Material;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Component;
 using BrawlStarsClone.Engine.Component.Physics;
@@ -15,7 +16,7 @@ public class SingleFire : Behavior
 
     private Mesh _bulletMesh;
 
-    public Engine.Asset.Material.Material MatCap { get; set; }
+    public MatCapMaterial MatCap { get; set; }
     
     public override void OnLoad()
     {
@@ -42,7 +43,7 @@ public class SingleFire : Behavior
         });
         entity.AddComponent(new MeshRenderer(entity, _bulletMesh));
         entity.AddComponent(new Material(new[] { MatCap }));
-        entity.AddComponent(new CircleCollider(entity, false, new List<Entity>{Parent}, new Vector2D<float>(0.5f)));
+        entity.AddComponent(new PointCollider(entity, false, new List<Entity>{Parent}));
         entity.AddComponent(new Bullet
         {
             Spawner = Parent
