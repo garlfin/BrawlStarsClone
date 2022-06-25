@@ -237,7 +237,8 @@ public class GameWindow
         {
             MatCap = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit,
                 new ImageTexture("../../../res/pellet.pvr"), "DefaultMaterial"),
-            ShootSound = _system.GetEvent(_system.Banks[0], "event:/Characters/Shelly/Shoot").CreateInstance()
+            ShootSound = _system.GetEvent(_system.Banks[0], "event:/Characters/Shelly/Shoot").CreateInstance(),
+            ReloadSound = _system.GetEvent(_system.Banks[0], "event:/Characters/Shelly/Reload").CreateInstance()
             
         });
 
@@ -252,6 +253,7 @@ public class GameWindow
     private void OnRender(FrameEventArgs frameEventArgs)
     {
         var time = (float)frameEventArgs.Time;
+        View.Title = $"gE2 - FPS: {1f / time}";
         if (_isClosed || !_updateFinished) return;
         // Main Render Pass
         State = EngineState.Render;
