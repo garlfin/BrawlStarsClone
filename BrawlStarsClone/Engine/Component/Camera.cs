@@ -1,5 +1,7 @@
-﻿using BrawlStarsClone.Engine.Component.Physics;
+﻿using BrawlStarsClone.Engine.Asset.Audio;
+using BrawlStarsClone.Engine.Component.Physics;
 using BrawlStarsClone.Engine.Utility;
+using FMOD;
 using OpenTK.Mathematics;
 using Silk.NET.Maths;
 
@@ -9,10 +11,14 @@ public class Camera : BaseCamera
 {
     private readonly Transform _entityTransform;
     private float _fov;
+    private PinnedObject<Attributes3D> _attributes = new(new Attributes3D());
 
-    public Camera(Entity? owner, float fov, float clipNear, float clipEnd) : base(owner, clipNear, clipEnd)
+    public AudioSystem System { get; }
+
+    public Camera(Entity? owner, float fov, float clipNear, float clipEnd, AudioSystem system) : base(owner, clipNear, clipEnd)
     {
         Fov = fov;
+        System = system;
         _entityTransform = owner.GetComponent<Transform>();
         UpdateProjection();
     }
@@ -26,8 +32,6 @@ public class Camera : BaseCamera
             UpdateProjection();
         }
     }
-    
-    
 
     public override void OnRender(float deltaTime)
     {
@@ -47,6 +51,15 @@ public class Camera : BaseCamera
         var loc = new Vector3D<float>(_entityTransform.Model.M41, _entityTransform.Model.M42,
             _entityTransform.Model.M43);
         _view = Matrix4X4.CreateLookAt(loc, loc + _front, _up);
+    }
+
+    public unsafe override void OnUpdate(float deltaTime)
+    {
+        _attributes.Pointer->position = _entityTransform.GlobalMatrix.Transformation();
+        _attributes.Pointer->forward = _front;
+        _attributes.Pointer->up = _up;
+
+        System.Studio->SetListenerAttributes(0, *_attributes.Pointer);
     }
 
     public override void Dispose()

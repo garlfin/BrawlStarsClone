@@ -101,6 +101,7 @@ public class GameWindow
         BehaviorSystem.Update(time);
         PhysicsSystem.ResetCollisions();
         PhysicsSystem.Update(time);
+        CameraSystem.Update(time);
         AssetManager.StartRemoval();
         _system.Update();
         _updateFinished = true;
@@ -153,7 +154,7 @@ public class GameWindow
         };
 
         camera.AddComponent(transform);
-        camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f));
+        camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f, _system));
         camera.GetComponent<Camera>().Set();
 
         var player = new Entity(this, name: "Player");

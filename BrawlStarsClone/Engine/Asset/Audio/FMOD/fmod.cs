@@ -10,6 +10,7 @@ using System;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using Silk.NET.Maths;
 
 namespace FMOD
 {
@@ -140,10 +141,10 @@ namespace FMOD
     [StructLayout(LayoutKind.Sequential)]
     public struct Attributes3D
     {
-        public Vector position;
-        public Vector velocity;
-        public Vector forward;
-        public Vector up;
+        public Vector3D<float> position;
+        public Vector3D<float> velocity;
+        public Vector3D<float> forward;
+        public Vector3D<float> up;
     }
 
     [StructLayout(LayoutKind.Sequential)]
