@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 using BrawlStarsClone.Engine.Asset;
+using BrawlStarsClone.Engine.Asset.Audio;
 using BrawlStarsClone.Engine.Asset.FrameBuffer;
 using BrawlStarsClone.Engine.Asset.Material;
 using BrawlStarsClone.Engine.Asset.Mesh;
@@ -23,6 +24,8 @@ namespace BrawlStarsClone.Engine.Windowing;
 public class GameWindow
 {
 
+    private static Random _rnd = new();
+
     private ShaderProgram _depthShader;
 
     private bool _isClosed;
@@ -31,6 +34,8 @@ public class GameWindow
     public EmptyTexture ShadowMap;
 
     private bool _updateFinished;
+
+    private AudioSystem _system;
 
     public GameWindow(int width, int height, string name)
     {
@@ -50,9 +55,16 @@ public class GameWindow
         View.UpdateFrame += OnUpdate;
         View.Closing += OnClose;
         View.MouseMove += OnMouseMove;
+        View.Resize += OnResize;
         //_view.CursorGrabbed = true;
 
         View.Run();
+    }
+
+    private void OnResize(ResizeEventArgs obj)
+    {
+        GL.Viewport(0, 0, obj.Width, obj.Height);
+        CameraSystem.CurrentCamera.UpdateProjection();
     }
 
     public Entity? Root { get; set; }
@@ -90,6 +102,7 @@ public class GameWindow
         PhysicsSystem.ResetCollisions();
         PhysicsSystem.Update(time);
         AssetManager.StartRemoval();
+        _system.Update();
         _updateFinished = true;
     }
 
@@ -106,14 +119,23 @@ public class GameWindow
 
     private unsafe void OnLoad()
     {
-        GL.Enable(EnableCap.DebugOutput);
+        var baseAudioPath = @"C:\Users\scion\OneDrive\Documents\FMOD Studio\BSClone\Build\Desktop";
+        _system = new AudioSystem(out _);
+        foreach (var path in Directory.GetFiles(baseAudioPath, "*.bank"))
+           _system.LoadBank(path);
 
-        Debug.Init();
+        var musicEvent = _system.GetEvent(_system.Banks[0],"event:/Music/Slugfest").CreateInstance();
+        musicEvent.SetParameter("TrackID", _rnd.Next(0, 3));
+        musicEvent.Play();
+        
+        //GL.Enable(EnableCap.DebugOutput);
+        //Debug.Init();
+        
         MapLoader.Init();
         ProgramManager.Init();
 
         GL.Enable(EnableCap.DepthTest);
-        GL.ClearColor(Color.Black);
+        GL.ClearColor(Color.Black);  
         GL.Enable(EnableCap.CullFace);
 
         GL.Enable(EnableCap.ProgramPointSize);
@@ -138,7 +160,7 @@ public class GameWindow
         MapLoader.LoadMap("../../../res/model/test.map", this,
             File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""), player);
 
-        _depthShader = new ShaderProgram("../../../depth.frag", "../../../default.vert");
+        _depthShader = new ShaderProgram("../../../res/shader/depth.frag", "../../../res/shader/default.vert");
 
         SkinningShader = new ShaderProgram("../../../Engine/Internal/skinning.comp");
 
@@ -169,7 +191,7 @@ public class GameWindow
         _depthShader.Use();
 
         MeshRendererSystem.Render(0f);
-        ManagedMeshes.Render(this);
+        MeshManager.Render(this);
 
         GL.Viewport(0, 0, Size.X, Size.Y);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
@@ -213,7 +235,9 @@ public class GameWindow
         tracer.AddComponent(new SingleFire
         {
             MatCap = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit,
-                new ImageTexture("../../../res/pellet.pvr"), "DefaultMaterial")
+                new ImageTexture("../../../res/pellet.pvr"), "DefaultMaterial"),
+            ShootSound = _system.GetEvent(_system.Banks[0], "event:/Characters/Shelly/Shoot").CreateInstance()
+            
         });
 
         player.GetComponent<PlayerMovement>().Tracer = tracer;
@@ -230,6 +254,7 @@ public class GameWindow
         if (_isClosed || !_updateFinished) return;
         // Main Render Pass
         State = EngineState.Render;
+        MeshManager.VerifyUsers();
         BehaviorSystem.Render(time);
         TransformSystem.Update(Root);
         CameraSystem.Render(time);
@@ -239,9 +264,9 @@ public class GameWindow
         GL.Clear(ClearBufferMask.DepthBufferBit);
 
         MeshRendererSystem.Render(0f);
-        ManagedMeshes.Render(this);
+        MeshManager.Render(this);
         State = EngineState.RenderTransparent;
-        ManagedMeshes.Render(this);
+        MeshManager.Render(this);
         View.SwapBuffers();
     }
 }

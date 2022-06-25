@@ -52,7 +52,7 @@ public static class MapLoader
             UseSpecular = true,
             UseShadow = true
         };
-        DiffuseProgram = new ShaderProgram("default.frag", "default.vert");
+        DiffuseProgram = new ShaderProgram("../../../res/shader/default.frag", "../../../res/shader/default.vert");
 
         _tiles = new Mesh[2][];
         _tiles[0] = new[]

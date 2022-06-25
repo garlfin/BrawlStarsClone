@@ -26,8 +26,8 @@ public class PointCollider : Collider
 
     public override Collision? Intersect(PointCollider other)
     {
-        if (Transform.Location.Equals(other.Owner.GetComponent<Transform>().Location))
-            return new Collision(other, 0, Transform.Location, false);
+        //if (Transform.Location.Equals(other.Owner.GetComponent<Transform>().Location))
+        //    return new Collision(other, 0, Transform.Location, false);
         return null;
     }
 

@@ -8,6 +8,14 @@ namespace BrawlStarsClone.res.Scripts;
 
 public class Bullet : Behavior
 {
+    private const float TravelTime = 0.333333f;
+    private const float TravelDistance = 5f;
+    
+    private const float TravelSpeed = TravelDistance / TravelTime;
+    private const float TransparencyOffset = 0.25f;
+    private const float TransparencySpeed = 1 / (TravelTime - TransparencyOffset);
+    
+    
     private float _time;
     
     private MeshRenderer _mesh;
@@ -16,7 +24,7 @@ public class Bullet : Behavior
     public Vector3D<float> _rotation;
 
     public Entity Spawner { get; set; }
-    
+
     public override void OnLoad()
     {
         _mesh = Owner.GetComponent<MeshRenderer>();
@@ -28,9 +36,9 @@ public class Bullet : Behavior
 
     public override void OnUpdate(float deltaTime)
     {
-        _entityTransform.Location += _rotation * deltaTime * 10;
-        _mesh.Alpha = Mathf.Lerp(1, 0, (_time - 0.4f) * 10);
-        if (_time >= 0.5f || _collider.Collisions.Count > 0) Owner!.Delete(true);
+        _entityTransform.Location += _rotation * deltaTime * TravelSpeed;
+        _mesh.Alpha = Mathf.Lerp(1, 0, (_time - TransparencyOffset) * TransparencySpeed);
+        if (_time >= TravelTime || _collider.Collisions.Count > 0) Owner!.Delete(true);
         _time += deltaTime;
     }
 }

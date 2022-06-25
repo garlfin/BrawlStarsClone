@@ -18,16 +18,13 @@ public class Mesh
     public VAO[] SkinnedVAO;
 
     public int MaterialCount { get; set; }
-
     public bool IsSkinned { get; set; }
-
-    public bool Instanced { get; private set; }
-
+    public bool Instanced { get; set; }
     public List<Entity> Users { get; } = new();
-
     public BoneHierarchy Hierarchy { get; set; }
     public BoneHierarchy[] FlattenedHierarchy { get; set; }
-
+    public bool UseBlending { get; set; }
+    public VAO this[int index] => IsSkinned ? SkinnedVAO[index] : MeshVAO[index];
     public Matrix4X4<float> InverseTransform
     {
         get
@@ -38,27 +35,18 @@ public class Mesh
         }
     }
 
-
-    public bool UseBlending { get; set; }
-
-    public VAO this[int index] => IsSkinned ? SkinnedVAO[index] : MeshVAO[index];
-
+    public Mesh()
+    {
+        MeshManager.Register(this);
+    }
     public void Register(Entity entity)
     {
         Users.Add(entity);
-        if (Users.Count <= 1 || Instanced) return;
-        Instanced = true;
-        ManagedMeshes.Register(this);
     }
-
     public void Remove(Entity entity)
     {
         Users.Remove(entity);
-        if (Users.Count > 1 || !Instanced) return;
-        Instanced = false;
-        ManagedMeshes.Remove(this);
     }
-
     public unsafe void ManagedRender(GameWindow window)
     {
         if (UseBlending)
@@ -98,10 +86,8 @@ public class Mesh
             this[i].RenderInstanced(Users.Count);
             TexSlotManager.ResetUnit();
         }
-
         if (UseBlending) GL.Disable(EnableCap.Blend);
     }
-
     public void SetSkinned()
     {
         if (IsSkinned) return;
@@ -110,23 +96,39 @@ public class Mesh
         MeshTransform = new int[MeshVAO.Length];
     }
 }
-static class ManagedMeshes
+
+public static class MeshManager
 {
-    public static List<Mesh> Meshes = new();
+    public static readonly List<Mesh> Meshes = new();
+    public static readonly List<Mesh> ManagedMeshes = new();
 
     public static void Register(Mesh mesh)
     {
         Meshes.Add(mesh);
     }
-
+    
     public static void Render(GameWindow window)
     {
-        for (var i = 0; i < Meshes.Count; i++) Meshes[i].ManagedRender(window);
+        for (var i = 0; i < ManagedMeshes.Count; i++) ManagedMeshes[i].ManagedRender(window);
     }
 
-    public static void Remove(Mesh mesh)
+    public static void VerifyUsers()
     {
-        if (!Meshes.Remove(mesh)) Console.WriteLine("Failed to remove managed mesh.");
+        for (int i = 0; i < Meshes.Count; i++)
+        {
+            var mesh = Meshes[i];
+
+            if (mesh.Users.Count < 2 && mesh.Instanced)
+            {
+                ManagedMeshes.Remove(mesh);
+                mesh.Instanced = false;
+            } 
+            else if (mesh.Users.Count > 1 && !mesh.Instanced)
+            {
+                ManagedMeshes.Add(mesh);
+                mesh.Instanced = true;
+            }
+        }
     }
 }
 

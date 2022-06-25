@@ -30,7 +30,7 @@ public abstract class Collider : Component
 
         HalfLength = 0.5f * (scale ?? Vector2D<float>.One);
         PhysicsSystem.Register(this);
-        if (scale is not null) Scale = (Vector2D<float>)scale; // Cant set scale to one by default 💀
+        Scale = scale ?? Vector2D<float>.One; // Cant set scale to one by default 💀
     }
 
     public void ResetCollisions()
@@ -64,7 +64,6 @@ public abstract class Collider : Component
             ResolveX(_collidersSorted[0]);
         else
             ResolveY(_collidersSorted[0]);
-        
     }
 
     public override void Dispose()
@@ -76,15 +75,14 @@ public abstract class Collider : Component
     public abstract Collision? Intersect(CircleCollider other);
     public abstract Collision? Intersect(PointCollider other);
     public abstract Collision? Intersect(RayInfo other);
-
     protected abstract void ResolveX(Collision collision);
     protected abstract void ResolveY(Collision collision);
 }
 
-internal class PhysicsSystem : ComponentSystem<Collider>
+class PhysicsSystem : ComponentSystem<Collider>
 {
     public static void ResetCollisions()
     {
-        foreach (var component in Components) component.ResetCollisions();
+        for (var i = 0; i < Components.Count; i++) Components[i].ResetCollisions();
     }
 }

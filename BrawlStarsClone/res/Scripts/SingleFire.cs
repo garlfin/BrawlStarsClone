@@ -1,4 +1,5 @@
 ﻿using BrawlStarsClone.Engine;
+using BrawlStarsClone.Engine.Asset.Audio;
 using BrawlStarsClone.Engine.Asset.Material;
 using BrawlStarsClone.Engine.Asset.Mesh;
 using BrawlStarsClone.Engine.Component;
@@ -12,11 +13,15 @@ namespace BrawlStarsClone.res.Scripts;
 
 public class SingleFire : Behavior
 {
+    private const float Spread = 40f;
+    private const int Bullets = 8;
+    private const float Offset = Spread / Bullets;
     private MeshRenderer _mesh;
-
     private Mesh _bulletMesh;
 
     public MatCapMaterial MatCap { get; set; }
+    public SoundEventInstance ShootSound { get; set; }
+    public SoundEventInstance ReloadSound { get; set; }
     
     public override void OnLoad()
     {
@@ -34,19 +39,28 @@ public class SingleFire : Behavior
 
         _mesh.Alpha =  0;
         if (!View.IsMouseButtonReleased(MouseButton.Left)) return;
-        Entity entity = new Entity(Window ,Window.Root, "Bullet");
-        entity.AddComponent(new Transform(entity)
+
+        float correctedRotation = Owner.Parent.GetComponent<Transform>().Rotation.Y +
+                                  Owner.GetComponent<Transform>().Rotation.Y + 90;
+        
+        ShootSound.Play();
+
+        for (int i = 0; i < Bullets; i++)
         {
-            Location = Parent.GetComponent<Transform>().Location + new Vector3D<float>(0, 0.5f, 0),
-            Rotation = new Vector3D<float>(-90, Owner.Parent.GetComponent<Transform>().Rotation.Y + Owner.GetComponent<Transform>().Rotation.Y + 90, 0),
-            Scale = new Vector3D<float>(0.25f)
-        });
-        entity.AddComponent(new MeshRenderer(entity, _bulletMesh));
-        entity.AddComponent(new Material(new[] { MatCap }));
-        entity.AddComponent(new PointCollider(entity, false, new List<Entity>{Parent}));
-        entity.AddComponent(new Bullet
-        {
-            Spawner = Parent
-        });
+            Entity entity = new Entity(Window, Window.Root, $"Bullet{i}");
+            entity.AddComponent(new Transform(entity)
+            {
+                Location = Parent.GetComponent<Transform>().Location + new Vector3D<float>(0, 0.5f, 0),
+                Rotation = new Vector3D<float>(-90, correctedRotation + (Offset * i - Spread / 2), 0),
+                Scale = new Vector3D<float>(0.15f)
+            });
+            entity.AddComponent(new MeshRenderer(entity, _bulletMesh));
+            entity.AddComponent(new Material(new[] { MatCap }));
+            entity.AddComponent(new PointCollider(entity, false, new List<Entity>{Parent}));
+            entity.AddComponent(new Bullet
+            {
+                Spawner = Parent
+            }); 
+        }
     }
 }

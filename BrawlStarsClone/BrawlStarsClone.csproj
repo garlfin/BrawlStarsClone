@@ -8,13 +8,16 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <Optimize>true</Optimize>
+      <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
+
     <ItemGroup>
-        <None Update="default.vert">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="default.frag">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
         <None Update="cube.bnk">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
@@ -29,6 +32,12 @@
         </None>
         <None Remove="res\model\block.bnk" />
         <None Remove="res\old_town.png" />
+        <None Update="res\shader\default.frag">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="res\shader\default.vert">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
@@ -38,7 +47,25 @@
 
     <ItemGroup>
         <Folder Include="res\Prefabs" />
-        <Folder Include="res\shader" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="fmodstudio.dll" />
+      <AdditionalFiles Include="fmodstudio.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AdditionalFiles>
+      <None Remove="fmodstudioL.dll" />
+      <AdditionalFiles Include="fmodstudioL.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AdditionalFiles>
+      <None Remove="fmod.dll" />
+      <AdditionalFiles Include="fmod.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AdditionalFiles>
+      <None Remove="fmodL.dll" />
+      <AdditionalFiles Include="fmodL.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AdditionalFiles>
     </ItemGroup>
 
 </Project>

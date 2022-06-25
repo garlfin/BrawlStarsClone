@@ -40,7 +40,7 @@ public static class AssetManager
 
     public static void DeleteAllAssets()
     {
-        foreach (var asset in Assets) asset.Dispose();
+        for (var i = 0; i < Assets.Count; i++) Assets[i].Dispose();
     }
 
     public static void Register(Asset asset)
