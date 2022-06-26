@@ -1,8 +1,7 @@
 ﻿#version 420 core
 
-in vec2 TexCoord;
+in vec4 TexCoord;
 in vec4 FragPosLightSpace;
-in vec2 normal;
 
 layout (std140, binding = 3) uniform MatCapData {
     vec4 influence;
@@ -46,11 +45,11 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 }
 
 void main(){
-    vec4 color = texture(albedoTex, TexCoord);
+    vec4 color = texture(albedoTex, TexCoord.xy);
     FragColor = vec4(color.rgb, 1);
-    FragColor *= vec4(mix(vec3(1.0), texture(diffCap, normal).rgb, influence.x), 1.0);
+    FragColor *= vec4(mix(vec3(1.0), texture(diffCap, TexCoord.zw).rgb, influence.x), 1.0);
     FragColor *= mix(1.0, mix(0.75, 1.0, ShadowCalculation(FragPosLightSpace)), influence.z);
-    FragColor += vec4(texture(specCap, normal).rgb * specularColor.rgb * influence.y, 0.0);
+    FragColor += vec4(texture(specCap, TexCoord.zw).rgb * specularColor.rgb * influence.y, 0.0);
     FragColor *= otherData[index].r;
     if(otherData[index].r * color.a < thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4] && int(specularColor.a) != 3) {discard;}
     FragColor = vec4(pow(FragColor.rgb, vec3(0.4545)), 1.0);

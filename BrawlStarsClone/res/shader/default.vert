@@ -13,16 +13,17 @@ layout (std140, binding = 2) uniform Matrices {
     mat4 light;
 };
 
-out vec2 TexCoord;
+out vec4 TexCoord;
 out vec2 normal;
 out vec4 FragPosLightSpace;
 flat out int index;
 
 void main(){
     gl_Position = projection * view * model[gl_InstanceID] * vec4(aPos, 1.0);
-    TexCoord = aTexCoord;
     vec3 FragPos = vec3(model[gl_InstanceID] * vec4(aPos, 1.0));
     FragPosLightSpace = light * vec4(FragPos, 1.0);
     index = gl_InstanceID;
-    normal = normalize(mat3(transpose(inverse(view*model[gl_InstanceID])))*aNormal).xy * 0.5 + 0.5;
+    vec3 normal = normalize(vec3((view * (model[gl_InstanceID] * vec4(aNormal, 0.0))).xyz));
+    vec2 matcapUV = ((normal.xy * vec2(0.5, -0.5)) + vec2(0.5, 0.5));
+    TexCoord = vec4(aTexCoord, matcapUV.x, matcapUV.y);
 }

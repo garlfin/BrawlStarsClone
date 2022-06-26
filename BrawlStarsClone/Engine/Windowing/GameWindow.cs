@@ -248,6 +248,21 @@ public class GameWindow
         GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 4, MatBuffer.ID);
 
         PhysicsSystem.Load();
+        
+        Entity robot = new Entity(this, name: "Robot");
+        robot.AddComponent(new Transform(robot)
+        {
+            Location = new Vector3D<float>(8.5f, 0, 2),
+            Scale = new Vector3D<float>(0.15f)
+        });
+        robot.AddComponent(new Component.Material(new Material?[]
+        {
+            new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Metal,
+                new ImageTexture("../../../res/ranged_bot.pvr"), "Metal")
+        }));
+        var robotMesh = MeshLoader.LoadMesh("../../../res/model/roborange.bnk");
+        robot.AddComponent(new MeshRenderer(robot, robotMesh));
+        robot.AddComponent(new Animator(robot));
     }
 
     private void OnRender(FrameEventArgs frameEventArgs)

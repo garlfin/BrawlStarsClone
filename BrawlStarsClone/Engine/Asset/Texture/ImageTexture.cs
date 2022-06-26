@@ -35,7 +35,28 @@ public class ImageTexture : Texture
 
         var mipCount = reader.ReadUInt32();
         var metaDataSize = reader.ReadUInt32();
-        file.Position += metaDataSize; // Ignoring MetaData...
+       
+        int passedMetaDataSize = 0;
+
+        bool flipImage = false;
+        
+        while (passedMetaDataSize < metaDataSize)
+        {
+            reader.ReadBytes(4); // FourCC
+            var key = reader.ReadUInt32();
+            var DataSize = reader.ReadUInt32();
+            if (key == 3)
+            {
+                reader.ReadByte();
+                flipImage = reader.ReadByte() == 1;
+                if (flipImage) Console.WriteLine($"Flipped {path}");
+                reader.ReadByte();
+            } else
+                reader.ReadBytes((int)DataSize);
+
+            passedMetaDataSize += (int) DataSize + 12;
+        }
+
         var calcMip = !(mipCount > 1);
 
         _id = GL.GenTexture();
@@ -46,6 +67,7 @@ public class ImageTexture : Texture
             var currentMipSize = GetMipSize(mip);
             var imageData =
                 reader.ReadBytes((int)MathF.Ceiling(currentMipSize.X * currentMipSize.Y / 16f) * 16);
+            if (flipImage) Array.Reverse(imageData);
             fixed (void* ptr = imageData)
             {
                 GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, internalFormat, currentMipSize.X,

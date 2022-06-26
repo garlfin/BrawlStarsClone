@@ -35,9 +35,9 @@ public class Animator : Component
         //_boneTransform = new Vector3D<float>[_renderer.Mesh.FlattenedHierarchy.Length];
     }
 
-    public Animation Animation
+    public Animation? Animation
     {
-        get => (Animation)_animation;
+        get => _animation;
         set => _animation = value;
     }
 
@@ -65,11 +65,10 @@ public class Animator : Component
 
     public override unsafe void OnRender(float deltaTime)
     {
-        if (_animation is null) return;
         Window.SkinningShader.Use();
 
-        if (_currentTime > Animation.Time) _currentTime = 0;
-        _currentFrame = (int)MathF.Floor(_currentTime * Animation!.FPS);
+        if (_currentTime > (_animation?.Time ?? 0)) _currentTime = 0;
+        _currentFrame = (int)MathF.Floor(_currentTime * (_animation?.FPS ?? 1));
 
         var ident = Matrix4X4<float>.Identity;
         IterateMatrix(_renderer.Mesh.Hierarchy, ref ident);
@@ -99,7 +98,7 @@ public class Animator : Component
 
     private void IterateMatrix(BoneHierarchy bone, ref Matrix4X4<float> parentTransform)
     {
-        var frame = Animation[bone.Name]?.Frames[_currentFrame];
+        var frame = Animation?[bone.Name]?.Frames[_currentFrame];
 
         var transform = bone.Transform;
         if (frame is not null)

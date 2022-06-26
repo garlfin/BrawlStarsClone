@@ -30,8 +30,8 @@ public static class MapLoader
         };
         Metal = new MatCap
         {
-            Diffuse = new ImageTexture("../../../res/metal_spec.pvr"),
-            Specular = new ImageTexture("../../../res/metal_diff.pvr"),
+            Diffuse = new ImageTexture("../../../res/metal_diff.pvr"),
+            Specular = new ImageTexture("../../../res/metal_spec.pvr"),
             UseSpecular = true,
             UseShadow = true,
             SpecColor = new Vector3D<float>(0.56078f, 0.54902f, 0.54902f)
