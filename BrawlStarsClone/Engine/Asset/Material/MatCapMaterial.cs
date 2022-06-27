@@ -37,7 +37,7 @@ public class MatCapMaterial : Material
         Program.SetUniform("specCap", _matCap.UseSpecular ? _matCap.Specular.Use(TexSlotManager.Unit) : 0);
         Program.SetUniform("shadowMap", Window.ShadowMap.Use(TexSlotManager.Unit));
         ProgramManager.MatCap.Influence = new Vector4D<float>(_matCap.UseDiffuse.AsInt(), _matCap.UseSpecular.AsInt(),
-            _matCap.UseShadow.AsInt(), 1);
+            _matCap.UseShadow.AsInt(), _matCap.MultiplySpec.AsInt());
         ProgramManager.MatCap.SpecularColor = new Vector4D<float>(_matCap.SpecColor, (float)Window.State);
         ProgramManager.PushMatCap();
     }

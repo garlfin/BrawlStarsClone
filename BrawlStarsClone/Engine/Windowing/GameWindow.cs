@@ -257,7 +257,10 @@ public class GameWindow
         });
         robot.AddComponent(new Component.Material(new Material?[]
         {
-            new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Metal,
+            new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Metal with
+                {
+                    MultiplySpec = true // Marvelous thinking Supercell
+                },
                 new ImageTexture("../../../res/ranged_bot.pvr"), "Metal")
         }));
         var robotMesh = MeshLoader.LoadMesh("../../../res/model/roborange.bnk");

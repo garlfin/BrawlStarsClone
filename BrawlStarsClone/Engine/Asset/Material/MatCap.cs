@@ -10,6 +10,7 @@ public struct MatCap
     public bool UseDiffuse = true;
     public bool UseSpecular = false;
     public bool UseShadow = true;
+    public bool MultiplySpec = false;
     public Vector3D<float> SpecColor = Vector3D<float>.One;
 
     public MatCap()

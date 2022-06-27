@@ -45,12 +45,17 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 }
 
 void main(){
-    vec4 color = texture(albedoTex, TexCoord.xy);
-    FragColor = vec4(color.rgb, 1);
+    vec4 diffuseColor = texture(albedoTex, TexCoord.xy);
+    FragColor = vec4(diffuseColor.rgb, 1);
     FragColor *= vec4(mix(vec3(1.0), texture(diffCap, TexCoord.zw).rgb, influence.x), 1.0);
+    
+    if (influence.a < 0.5) 
+        FragColor += vec4(texture(specCap, TexCoord.zw).rgb * specularColor.rgb * influence.y, 0.0);
+    else
+        FragColor += vec4(texture(specCap, TexCoord.zw).rgb * diffuseColor.rgb * influence.y, 0.0);
+    
     FragColor *= mix(1.0, mix(0.75, 1.0, ShadowCalculation(FragPosLightSpace)), influence.z);
-    FragColor += vec4(texture(specCap, TexCoord.zw).rgb * specularColor.rgb * influence.y, 0.0);
     FragColor *= otherData[index].r;
-    if(otherData[index].r * color.a < thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4] && int(specularColor.a) != 3) {discard;}
+    if(otherData[index].r * diffuseColor.a < thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4] && int(specularColor.a) != 3) discard;
     FragColor = vec4(pow(FragColor.rgb, vec3(0.4545)), 1.0);
 }
