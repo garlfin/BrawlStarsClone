@@ -1,0 +1,170 @@
+﻿using OpenTK.Graphics.OpenGL4;
+
+namespace gE3.Engine.Utility;
+
+public static class PvrLoader
+{
+    // Loads a PVR file from a stream.
+    public static PVRHeader LoadPVR(BinaryReader reader)
+    {
+        return new PVRHeader
+        {
+            Version = reader.ReadUInt32(), // Version
+            Flags = (Flags)reader.ReadUInt32(),
+            Format = (PvrPixelFormat)reader.ReadUInt64(),
+            ColorSpace = (ColorSpace)reader.ReadUInt32(),
+            ChannelType = (ChannelType)reader.ReadUInt32(),
+            Width = reader.ReadUInt32(),
+            Height = reader.ReadUInt32(),
+            Depth = reader.ReadUInt32(),
+            NumSurfaces = reader.ReadUInt32(),
+            NumFaces = reader.ReadUInt32(),
+            MipMapCount = reader.ReadUInt32(),
+            MetaDataSize = reader.ReadUInt32()
+        };
+    }
+
+    public static InternalFormat ToInternalFormat(this PvrPixelFormat format)
+    {
+        return format switch
+        {
+            PvrPixelFormat.Dxt1 => InternalFormat.CompressedRgbS3tcDxt1Ext,
+            PvrPixelFormat.Dxt3 => InternalFormat.CompressedRgbaS3tcDxt3Ext,
+            PvrPixelFormat.Dxt5 => InternalFormat.CompressedRgbaS3tcDxt5Ext,
+            PvrPixelFormat.Bc4 => InternalFormat.CompressedRedRgtc1,
+            PvrPixelFormat.Bc5 => InternalFormat.CompressedRgRgtc2,
+            PvrPixelFormat.Etc2Rgb => InternalFormat.CompressedRgb8Etc2,
+            PvrPixelFormat.Etc2Rgba => InternalFormat.CompressedRgba8Etc2Eac,
+            PvrPixelFormat.Etc2RgbA1 => InternalFormat.CompressedRgb8PunchthroughAlpha1Etc2,
+            PvrPixelFormat.EacR11 => InternalFormat.CompressedR11Eac,
+            PvrPixelFormat.EacRg11 => InternalFormat.CompressedRg11Eac,
+            /*PvrPixelFormat.Astc4X4 => InternalFormat.compressed,
+            PvrPixelFormat.Astc5X4 => expr,
+            PvrPixelFormat.Astc5X5 => expr,
+            PvrPixelFormat.Astc6X5 => expr,
+            PvrPixelFormat.Astc6X6 => expr,
+            PvrPixelFormat.Astc8X5 => expr,
+            PvrPixelFormat.Astc8X6 => expr,
+            PvrPixelFormat.Astc8X8 => expr,
+            PvrPixelFormat.Astc10X5 => expr,
+            PvrPixelFormat.Astc10X6 => expr,
+            PvrPixelFormat.Astc10X8 => expr,
+            PvrPixelFormat.Astc10X10 => expr,
+            PvrPixelFormat.Astc12X10 => expr,
+            PvrPixelFormat.Astc12X12 => expr,
+            PvrPixelFormat.Astc3X3X3 => expr,
+            PvrPixelFormat.Astc4X3X3 => expr,
+            PvrPixelFormat.Astc4X4X3 => expr,
+            PvrPixelFormat.Astc4X4X4 => expr,
+            PvrPixelFormat.Astc5X4X4 => expr,
+            PvrPixelFormat.Astc5X5X4 => expr,
+            PvrPixelFormat.Astc5X5X5 => expr,
+            PvrPixelFormat.Astc6X5X5 => expr,
+            PvrPixelFormat.Astc6X6X5 => expr,
+            PvrPixelFormat.Astc6X6X6 => expr,*/
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
+        };
+    }
+}
+
+public struct PVRHeader
+{
+    public uint Version;
+    public Flags Flags;
+    public PvrPixelFormat Format;
+    public ColorSpace ColorSpace;
+    public ChannelType ChannelType;
+    public uint Width;
+    public uint Height;
+    public uint Depth;
+    public uint NumSurfaces;
+    public uint NumFaces;
+    public uint MipMapCount;
+    public uint MetaDataSize;
+}
+
+public enum ColorSpace
+{
+    Linear = 0,
+    sRGB = 1
+}
+public enum Flags
+{
+    None = 0,
+    PreMultipled = 2
+}
+public enum PvrPixelFormat
+{
+    Pvrtc2BppRgb = 0,
+    Pvrtc2BppRgba = 1,
+    Pvrtc4BppRgb = 2,
+    Pvrtc4BppRgba = 3,
+    PvrtcIi2Bpp = 4,
+    PvrtcIi4Bpp = 5,
+    Etc1 = 6,
+    Dxt1 = 7,
+    Dxt2 = 8,
+    Dxt3 = 9,
+    Dxt4 = 10,
+    Dxt5 = 11,
+    Bc1 = 7,
+    Bc2 = 9,
+    Bc3 = 11,
+    Bc4 = 12,
+    Bc5 = 13,
+    Bc6 = 14,
+    Bc7 = 15,
+    Uyvy = 16,
+    Yuy2 = 17,
+    Bw1Bpp = 18,
+    R9G9B9E5SharedExponent = 19,
+    Rgbg8888 = 20,
+    Grgb8888 = 21,
+    Etc2Rgb = 22,
+    Etc2Rgba = 23,
+    Etc2RgbA1 = 24,
+    EacR11 = 25,
+    EacRg11 = 26,
+    Astc4X4 = 27,
+    Astc5X4 = 28,
+    Astc5X5 = 29,
+    Astc6X5 = 30,
+    Astc6X6 = 31,
+    Astc8X5 = 32,
+    Astc8X6 = 33,
+    Astc8X8 = 34,
+    Astc10X5 = 35,
+    Astc10X6 = 36,
+    Astc10X8 = 37,
+    Astc10X10 = 38,
+    Astc12X10 = 39,
+    Astc12X12 = 40,
+    Astc3X3X3 = 41,
+    Astc4X3X3 = 42,
+    Astc4X4X3 = 43,
+    Astc4X4X4 = 44,
+    Astc5X4X4 = 45,
+    Astc5X5X4 = 46,
+    Astc5X5X5 = 47,
+    Astc6X5X5 = 48,
+    Astc6X6X5 = 49,
+    Astc6X6X6 = 50
+}
+
+public enum ChannelType
+{
+    UnsignedByteNormalised = 0,
+    SignedByteNormalised = 1,
+    UnsignedByte = 2,
+    DataTypeValue = 3,
+    SignedByte = 4,
+    UnsignedShortNormalised = 5,
+    SignedShortNormalised = 6,
+    UnsignedShort = 7,
+    SignedShort = 8,
+    UnsignedIntegerNormalised = 9,
+    SignedIntegerNormalised = 10,
+    UnsignedInteger = 11,
+    SignedInteger = 12,
+    Float = 13
+}

@@ -5,15 +5,24 @@ namespace gE3.Engine.Asset.Texture;
 
 public abstract class Texture : Asset
 {
-    protected int _height;
-
-    // Properties
     protected int _id;
+    
     protected int _width;
-
-    // Exposers
+    protected int _height;
+    
     public Vector2D<int> Size => new(_width, _height);
     public int ID => _id;
+    
+    public Texture(int width, int height)
+    {
+        _width = width;
+        _height = height;
+    }
+
+    public Texture()
+    {
+        
+    }
 
     public override int Use(int slot)
     {
