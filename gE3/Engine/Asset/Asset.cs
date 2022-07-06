@@ -1,9 +1,19 @@
 ﻿using gE3.Engine.Windowing;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset;
 
 public abstract class Asset : IDisposable
 {
+    protected GameWindow _window;
+    // ReSharper disable once InconsistentNaming
+    protected GL GL => _window.GL;
+    protected Asset(GameWindow window)
+    {
+        _window = window;
+        AssetManager.Register(this);
+    }
+
     protected Asset()
     {
         AssetManager.Register(this);

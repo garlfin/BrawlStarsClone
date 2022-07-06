@@ -1,15 +1,15 @@
-﻿using gE3.Engine.Asset;
-using gE3.Engine.Map;
+﻿using gE3.Engine.Map;
 using gE3.Engine.Asset.Bounds;
 using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Component;
+using gE3.Engine.Windowing;
 using Silk.NET.Maths;
 
 namespace gE3.Engine.Utility;
 
 public static class MeshLoader
 {
-    public static Mesh LoadMesh(string path, bool transparent = false)
+    public static Mesh LoadMesh(GameWindow window, string path, bool transparent = false)
     {
         var file = File.Open(path, FileMode.Open, FileAccess.Read);
         var reader = new BinaryReader(file);
@@ -25,7 +25,7 @@ public static class MeshLoader
         }
 
         var meshCount = reader.ReadUInt16();
-        var mesh = new Mesh
+        var mesh = new Mesh(window)
         {
             Materials = new string[meshCount],
             MeshVAO = new MeshVao[meshCount],
@@ -77,10 +77,10 @@ public static class MeshLoader
                 for (var i = 0; i < data.Weights.Length; i++) data.Weights[i] = reader.ReadVertexWeight();
             }
 
-            mesh.MeshVAO[u] = new MeshVao(data);
+            mesh.MeshVAO[u] = new MeshVao(window, data);
 
             if (hasBones)
-                mesh.SkinnedVAO[u] = new SkinnedVAO(data.Vertices.Length, data, mesh.MeshVAO[u].EBO);
+                mesh.SkinnedVAO[u] = new SkinnedVAO(window, data.Vertices.Length, data, mesh.MeshVAO[u].EBO);
         }
 
         var boneCount = reader.ReadUInt16();

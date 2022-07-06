@@ -1,33 +1,38 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using gE3.Engine.Windowing;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
 
 public abstract class VAO : Asset
 {
     protected MeshData _mesh;
-    protected int _vao;
-    protected int _vbo;
+    protected uint _vao;
+    protected uint _vbo;
     public MeshData Mesh => _mesh;
 
-    public int VBO => _vbo;
+    public uint VBO => _vbo;
     public abstract void Render();
 
-    public virtual void RenderInstanced(int count)
+    public virtual unsafe void RenderInstanced(uint count)
     {
         GL.BindVertexArray(_vao);
 
         if (_mesh.Faces is null)
-            GL.DrawArraysInstanced(PrimitiveType.Triangles, 0, _mesh.Vertices.Length * 3, count);
+            GL.DrawArraysInstanced(PrimitiveType.Triangles, 0, (uint) _mesh.Vertices.Length * 3, count);
         else
-            GL.DrawElementsInstanced(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
-                IntPtr.Zero, count);
+            GL.DrawElementsInstanced(PrimitiveType.Triangles, (uint) _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt,
+                (void*) 0, count);
     }
 
     public override void Delete()
     {
         GL.DeleteVertexArray(_vao);
         GL.DeleteBuffer(_vbo);
+    }
+
+    protected VAO(GameWindow window) : base(window)
+    {
     }
 }
 

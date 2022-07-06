@@ -17,3 +17,4 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\obj\Release\net6.0\ref\gE3.dll
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\skinning.comp
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\default.vert
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\depth.frag
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\brdf.comp

@@ -1,5 +1,4 @@
-﻿using gE3.Engine.Utility;
-using Silk.NET.Maths;
+﻿using Silk.NET.Maths;
 
 namespace gE3.Engine.Component.Physics;
 

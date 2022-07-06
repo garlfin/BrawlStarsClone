@@ -10,8 +10,6 @@
 /* https://fmod.com/resources/documentation-api?version=2.0&page=plugin-api-dsp.html        */
 /* =========================================================================================*/
 
-using System;
-using System.Text;
 using System.Runtime.InteropServices;
 
 namespace FMOD;

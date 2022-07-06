@@ -1,10 +1,11 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using gE3.Engine.Windowing;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
 
 public sealed class MeshVao : VAO
 {
-    public unsafe MeshVao(MeshData mesh)
+    public unsafe MeshVao(GameWindow window, MeshData mesh) : base(window)
     {
         var finalData = new Vertex[mesh.Vertices.Length];
 
@@ -26,51 +27,47 @@ public sealed class MeshVao : VAO
         GL.BindVertexArray(_vao);
 
         _vbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+        GL.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
         fixed (void* ptr = finalData)
         {
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(Vertex) * finalData.Length, (IntPtr)ptr,
-                BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTargetARB.ArrayBuffer, (nuint) (sizeof(Vertex) * finalData.Length), ptr,
+                BufferUsageARB.StaticDraw);
         }
 
         if (_mesh.Faces is not null)
         {
-            EBO = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
+            EBO = (int) GL.GenBuffer();
+            GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, (uint) EBO);
             fixed (void* ptr = _mesh.Faces)
             {
-                GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * 3 * _mesh.Faces.Length, (IntPtr)ptr,
-                    BufferUsageHint.StaticRead);
+                GL.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint) (sizeof(int) * 3 * _mesh.Faces.Length), ptr,
+                    BufferUsageARB.StaticRead);
             }
         }
 
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, sizeof(Vertex), 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint) sizeof(Vertex), (nuint*) 0);
         GL.EnableVertexAttribArray(1);
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, sizeof(Vertex), 16);
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (uint) sizeof(Vertex), (nuint*) 16);
         GL.EnableVertexAttribArray(2);
-        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, sizeof(Vertex), 32);
-        GL.EnableVertexAttribArray(3);
-        GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, sizeof(Vertex), 48);
-        GL.EnableVertexAttribArray(4);
-        GL.VertexAttribPointer(4, 4, VertexAttribPointerType.Float, false, sizeof(Vertex), 64);
+        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (uint) sizeof(Vertex), (nuint*) 32);
     }
 
     public int EBO { get; } = -1;
 
-    public override void Render()
+    public override unsafe void Render()
     {
         GL.BindVertexArray(_vao);
         if (_mesh.Faces is null)
-            GL.DrawArrays(PrimitiveType.Triangles, 0, _mesh.Vertices.Length * 3);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, (uint) _mesh.Vertices.Length * 3);
         else
-            GL.DrawElements(PrimitiveType.Triangles, _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(PrimitiveType.Triangles, (uint) _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, (void*) 0);
     }
 
     public override void Delete()
     {
         base.Delete();
         if (EBO != -1)
-            GL.DeleteBuffer(EBO);
+            GL.DeleteBuffer((uint) EBO);
     }
 }

@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Silk.NET.Maths;
+﻿using Silk.NET.Maths;
 
 namespace gE3.Engine.Utility;
 

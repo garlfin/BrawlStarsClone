@@ -1,11 +1,12 @@
 ﻿using gE3.Engine.Utility;
-using OpenTK.Graphics.OpenGL4;
+using gE3.Engine.Windowing;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Texture;
 
 public class ImageTexture : Texture
 {
-    public unsafe ImageTexture(string path, bool genMips = true)
+    public unsafe ImageTexture(GameWindow window, string path, bool genMips = true) : base(window)
     {
         if (!File.Exists(path)) throw new FileNotFoundException(path);
         var file = File.Open(path, FileMode.Open);
@@ -13,8 +14,8 @@ public class ImageTexture : Texture
 
         var header = PvrLoader.LoadPVR(reader);
 
-        _width = (int)header.Width;
-        _height = (int)header.Height;
+        _width = header.Width;
+        _height = header.Height;
 
         if (header.NumSurfaces + header.Depth + header.NumFaces > 3) throw new System.Exception("Invalid file");
 
@@ -40,23 +41,23 @@ public class ImageTexture : Texture
             passedMetaDataSize += (int) dataSize + 12;
         }
         
-        var internalFormat = header.Format.ToInternalFormat();
-        if (header.ColorSpace is ColorSpace.sRGB) internalFormat += 2140;
+        _format = header.Format.ToInternalFormat();
+        if (header.ColorSpace is ColorSpace.sRGB) _format += 2140;
 
         _id = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, _id);
 
 
-        for (var mip = 0; mip < header.MipMapCount; mip++)
+        for (byte mip = 0; mip < header.MipMapCount; mip++)
         {
             var currentMipSize = GetMipSize(mip);
             var imageData =
-                reader.ReadBytes((int)MathF.Ceiling(currentMipSize.X * currentMipSize.Y / 16f) * 16);
+                reader.ReadBytes((int)MathF.Ceiling((float)currentMipSize.X * currentMipSize.Y / 16) * 16);
             if (flipImage) Array.Reverse(imageData);
             fixed (void* ptr = imageData)
             {
-                GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, internalFormat, currentMipSize.X,
-                    currentMipSize.Y, 0, imageData.Length, (IntPtr)ptr);
+                GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, _format, currentMipSize.X,
+                    currentMipSize.Y, 0, (uint) imageData.Length, ptr);
             }
         }
 
@@ -64,14 +65,12 @@ public class ImageTexture : Texture
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-            (int)(
-                (calcMip && genMips) ||
-                header.MipMapCount > 1 // If we want to calculate mips and generate mips, or we already have mips set the filter to mip mode
+            (int)((calcMip && genMips) || header.MipMapCount > 1 // If we want to calculate mips and generate mips, or we already have mips set the filter to mip mode
                     ? TextureMinFilter.LinearMipmapLinear
                     : TextureMinFilter.Linear));
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
         if (calcMip && genMips && header.MipMapCount == 1)
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D); // If we have no mips, generate them
+            GL.GenerateMipmap(TextureTarget.Texture2D); // If we have no mips, generate them
         
         reader.Close();
         file.Close();

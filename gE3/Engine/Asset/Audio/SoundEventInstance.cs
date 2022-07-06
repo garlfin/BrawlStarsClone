@@ -9,10 +9,13 @@ public unsafe class SoundEventInstance : Asset
     private PinnedObject<EventInstance> _instance;
     public EventInstance* Instance => _instance.Pointer;
 
+    private SoundEvent _soundEvent;
+
     public SoundEventInstance(SoundEvent soundEvent)
     {
+        _soundEvent = soundEvent;
         soundEvent.EventDescription->CreateInstance(out var instance);
-        _instance = new PinnedObject<EventInstance>(instance);
+        _instance = new PinnedObject<EventInstance>(ref instance);
     }
 
     public void Play()
@@ -57,6 +60,7 @@ public unsafe class SoundEventInstance : Asset
 
     public override void Delete()
     {
+        _soundEvent.Instances.Remove(this);
         Instance->Release();
         _instance.Dispose();
     }

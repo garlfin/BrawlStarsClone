@@ -10,14 +10,14 @@ namespace gE3.Engine.Asset.Audio;
 
 public unsafe class AudioSystem : Asset
 {
-    // ReSharper disable twice InconsistentNaming
-    private readonly PinnedObject<global::FMOD.Studio.System> _studio; // What in tarnation is ::
-    private readonly PinnedObject<global::FMOD.System> _core; // I like the consistent naming of the variables
+    private readonly PinnedObject<global::FMOD.Studio.System> _studio;
+    private readonly PinnedObject<global::FMOD.System> _core;
 
     public global::FMOD.Studio.System* Studio => _studio.Pointer; // Alias for Studio
     public global::FMOD.System* Core => _core.Pointer; // Alias for Core
-
     public BankHolder Banks { get; } = new();
+    
+    public List<SoundEvent> Events { get; } = new();
 
     public AudioSystem(out Result result, int maxChannels = 64)
     {
@@ -51,7 +51,7 @@ public unsafe class AudioSystem : Asset
         return Studio->UnloadAll();
     }
 
-    public SoundEvent GetEvent(Bank* bank, string eventName)
+    public SoundEvent GetEvent(string eventName)
     {
         return new SoundEvent(this, eventName);
     }

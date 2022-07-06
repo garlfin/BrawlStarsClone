@@ -1,16 +1,17 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using gE3.Engine.Windowing;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Texture;
 
 public class EmptyTexture : Texture
 {
-    public EmptyTexture(int width, int height, PixelInternalFormat format,
+    public unsafe EmptyTexture(GameWindow window, uint width, uint height, InternalFormat format,
         TextureWrapMode wrapMode = TextureWrapMode.Repeat, TexFilterMode filterMode = TexFilterMode.Linear,
-        PixelFormat pixelFormat = PixelFormat.Rgb, bool genMips = false, bool shadow = false) : base(width, height)
+        PixelFormat pixelFormat = PixelFormat.Rgb, bool genMips = false, bool shadow = false) : base(window, width, height, format)
     {
         _id = GL.GenTexture();
         GL.BindTexture(TextureTarget.Texture2D, _id);
-        GL.TexImage2D(TextureTarget.Texture2D, 0, format, width, height, 0, pixelFormat, PixelType.Short, IntPtr.Zero);
+        GL.TexImage2D(TextureTarget.Texture2D, 0,format, width, height, 0, pixelFormat, PixelType.Short, (void*) 0);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
         if (shadow)
@@ -29,6 +30,6 @@ public class EmptyTexture : Texture
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filter);
 
-        if (genMips) GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        if (genMips) GL.GenerateMipmap(TextureTarget.Texture2D);
     }
 }

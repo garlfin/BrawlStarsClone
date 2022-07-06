@@ -112,13 +112,29 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
-            "OpenTK": {
+            "Silk.NET.GLFW": {
               "target": "Package",
-              "version": "[4.7.1, )"
+              "version": "[2.15.0, )"
+            },
+            "Silk.NET.Input": {
+              "target": "Package",
+              "version": "[2.15.0, )"
             },
             "Silk.NET.Maths": {
               "target": "Package",
               "version": "[2.15.0, )"
+            },
+            "Silk.NET.OpenGL": {
+              "target": "Package",
+              "version": "[2.15.0, )"
+            },
+            "Silk.NET.Windowing": {
+              "target": "Package",
+              "version": "[2.15.0, )"
+            },
+            "Silk.NET.Windowing.Desktop": {
+              "target": "Package",
+              "version": "[1.9.0, )"
             }
           },
           "imports": [

@@ -1,20 +1,20 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using gE3.Engine.Component;
 using gE3.Engine.Windowing;
-using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Material;
 
 public class ShaderProgram : Asset
 {
-    public ShaderProgram(string fragPath, string vertPath, bool managed = true)
+    public ShaderProgram(GameWindow window, string fragPath, string vertPath, bool managed = true) : base(window)
     {
         if (managed) ProgramManager.Register(this);
         ID = GL.CreateProgram();
 
-        var fragment = new Shader(fragPath, ShaderType.FragmentShader);
-        var vertex = new Shader(vertPath, ShaderType.VertexShader);
+        var fragment = new Shader(_window, fragPath, ShaderType.FragmentShader);
+        var vertex = new Shader(_window, vertPath, ShaderType.VertexShader);
 
         fragment.Attach(this);
         vertex.Attach(this);
@@ -25,11 +25,11 @@ public class ShaderProgram : Asset
         vertex.Delete();
     }
 
-    public ShaderProgram(string computePath)
+    public ShaderProgram(GameWindow window, string computePath) : base(window)
     {
         ID = GL.CreateProgram();
 
-        var compute = new Shader(computePath, ShaderType.ComputeShader);
+        var compute = new Shader(window, computePath, ShaderType.ComputeShader);
 
         compute.Attach(this);
 
@@ -38,7 +38,7 @@ public class ShaderProgram : Asset
         compute.Delete();
     }
 
-    public int ID { get; }
+    public uint ID { get; }
 
     public void Use()
     {
@@ -99,7 +99,7 @@ public class ShaderProgram : Asset
         GL.UniformBlockBinding(ID, uniform, buffer.Location);
     }
 
-    public void BindToUBO(int location, string uniformName)
+    public void BindToUBO(uint location, string uniformName)
     {
         var uniform = GL.GetUniformBlockIndex(ID, uniformName);
         GL.UniformBlockBinding(ID, uniform, location);
@@ -117,12 +117,12 @@ public static class ProgramManager
 
     private static SceneData _scene;
 
-    public static unsafe void Init()
+    public static unsafe void Init(GameWindow window)
     {
-        _sceneData = new ShaderBuffer(sizeof(SceneData), BufferUsageHint.StreamDraw);
+        _sceneData = new ShaderBuffer(window, sizeof(SceneData), BufferUsageARB.StreamDraw);
         _sceneData.Bind(1);
         
-        _objectData = new ShaderBuffer(sizeof(ObjectData), BufferUsageHint.StreamDraw);
+        _objectData = new ShaderBuffer(window, sizeof(ObjectData), BufferUsageARB.StreamDraw);
         _objectData.Bind(2);
     }
 

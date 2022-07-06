@@ -6,10 +6,8 @@
 /* https://fmod.com/resources/documentation-api?version=2.0&page=core-api.html              */
 /* ======================================================================================== */
 
-using System;
 using System.Text;
 using System.Runtime.InteropServices;
-using System.Collections.Generic;
 using Silk.NET.Maths;
 
 namespace FMOD;

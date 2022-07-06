@@ -1,32 +1,33 @@
 ﻿using gE3.Engine.Asset.Material;
-using OpenTK.Graphics.OpenGL4;
+using gE3.Engine.Windowing;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
 
 public class PointVAO : VAO
 {
     private readonly ShaderProgram _debugShader;
-    private readonly int _length;
+    private readonly uint _length;
 
-    public PointVAO(int length)
+    public unsafe PointVAO(GameWindow window, uint length) : base(window)
     {
         _length = length;
-        _debugShader = new ShaderProgram("../../../debug.frag", "../../../debug.vert");
+        _debugShader = new ShaderProgram(window, "../../../debug.frag", "../../../debug.vert");
 
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
         _vbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, _length * sizeof(float) * 3, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+        GL.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
+        GL.BufferData(BufferTargetARB.ArrayBuffer, _length * sizeof(float) * 3, (void*) 0, BufferUsageARB.DynamicDraw);
 
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, (void*) (nuint) 0);
     }
 
     public unsafe void UpdateData(void* ptr)
     {
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-        GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, (IntPtr)(_length * sizeof(float) * 3), (IntPtr)ptr);
+        GL.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
+        GL.BufferSubData(BufferTargetARB.ArrayBuffer, 0, _length * sizeof(float) * 3, ptr);
     }
 
     public override void Render()
@@ -38,7 +39,7 @@ public class PointVAO : VAO
         GL.DepthFunc(DepthFunction.Less);
     }
 
-    public override void RenderInstanced(int count)
+    public override void RenderInstanced(uint count)
     {
     }
 

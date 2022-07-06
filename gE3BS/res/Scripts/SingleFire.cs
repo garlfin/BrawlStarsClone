@@ -1,12 +1,11 @@
 ﻿using gE3.Engine;
 using gE3.Engine.Asset.Audio;
-using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Component;
 using gE3.Engine.Component.Physics;
 using gE3.Engine.Utility;
 using gE3BS.Engine.Material;
-using OpenTK.Windowing.GraphicsLibraryFramework;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 
 namespace gE3BS.res.Scripts;
@@ -40,12 +39,13 @@ public class SingleFire : Behavior
 
     private int _maxAmmo = 3;
     private int _bulletCount = 3;
+    private bool _prevState;
     public float ReloadTime { get; set; } = 1.5f;
 
     public override void OnLoad()
     {
         _mesh = Owner.GetComponent<MeshRenderer>();
-        _bulletMesh = MeshLoader.LoadMesh("../../../res/model/plane2.bnk");
+        _bulletMesh = MeshLoader.LoadMesh(Window, "../../../res/model/plane2.bnk");
     }
 
     public override void OnUpdate(float deltaTime)
@@ -55,7 +55,7 @@ public class SingleFire : Behavior
         _time += deltaTime;
         _timeReload += deltaTime;
 
-        if (_bulletCount != 0 && _time > _fireRate && View.IsMouseButtonReleased(MouseButton.Left))
+        if (_bulletCount != 0 && _time > _fireRate && _prevState && !Window.Mouse.IsButtonPressed(MouseButton.Left))
         {
             _bulletCount--;
             _time = 0;
@@ -91,7 +91,9 @@ public class SingleFire : Behavior
             ReloadSound.Play();
         }
 
-        if (View.IsMouseButtonDown(MouseButton.Left))
+        _prevState = Window.Mouse.IsButtonPressed(MouseButton.Left);
+        if (_prevState)
             _mesh.Alpha = 0.6f;
+        
     }
 }

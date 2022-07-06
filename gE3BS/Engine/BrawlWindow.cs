@@ -20,17 +20,17 @@ public class BrawlWindow : GameWindow
     
     protected override unsafe void OnLoad()
     {
-        MatCapManager.Init();
+        MatCapManager.Init(this);
         
         var baseAudioPath = @"C:\Users\scion\OneDrive\Documents\FMOD Studio\BSClone\Build\Desktop";
         foreach (var path in Directory.GetFiles(baseAudioPath, "*.bank"))
             System.LoadBank(path);
 
-        var musicEvent = System.GetEvent(System.Banks[0], "event:/Music/Slugfest").CreateInstance();
+        var musicEvent = System.GetEvent("event:/Music/Slugfest").CreateInstance();
         musicEvent.SetParameter("TrackID", Rnd.Next(0, 3));
         musicEvent.Play();
 
-        MapLoader.Init();
+        MapLoader.Init(this);
 
         var camera = new Entity(this, name: "Camera");
         var transform = new Transform(camera)
@@ -67,9 +67,9 @@ public class BrawlWindow : GameWindow
         player.AddComponent(new MaterialComponent(new gE3.Engine.Asset.Material.Material[]
         {
             new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
-                new ImageTexture("../../../res/shelly.pvr"), "DefaultMaterial")
+                new ImageTexture(this, "../../../res/shelly.pvr"), "DefaultMaterial")
         }));
-        var playerMesh = MeshLoader.LoadMesh("../../../res/model/shelly.bnk");
+        var playerMesh = MeshLoader.LoadMesh(this, "../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
         player.AddComponent(new Animator(player));
         player.AddComponent(new PlayerMovement
@@ -86,21 +86,21 @@ public class BrawlWindow : GameWindow
             Location = new Vector3D<float>(0, 0.1f, 0),
             Rotation = new Vector3D<float>(0, 180, 0)
         });
-        tracer.AddComponent(new MeshRenderer(tracer, MeshLoader.LoadMesh("../../../res/model/plane.bnk", true)));
+        tracer.AddComponent(new MeshRenderer(tracer, MeshLoader.LoadMesh(this, "../../../res/model/plane.bnk", true)));
 
         var materials = new[]
         {
             new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit,
-                new ImageTexture("../../../res/white.pvr"), "DefaultMaterial")
+                new ImageTexture(this, "../../../res/white.pvr"), "DefaultMaterial")
         };
 
         tracer.AddComponent(new MaterialComponent(materials));
         tracer.AddComponent(new SingleFire
         {
             MatCap = new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit,
-                new ImageTexture("../../../res/pellet.pvr"), "DefaultMaterial"),
-            ShootSound = System.GetEvent(System.Banks[0], "event:/Characters/Shelly/Shoot").CreateInstance(),
-            ReloadSound = System.GetEvent(System.Banks[0], "event:/Characters/Shelly/Reload").CreateInstance()
+                new ImageTexture(this, "../../../res/pellet.pvr"), "DefaultMaterial"),
+            ShootSound = System.GetEvent("event:/Characters/Shelly/Shoot").CreateInstance(),
+            ReloadSound = System.GetEvent("event:/Characters/Shelly/Reload").CreateInstance()
         });
 
         player.GetComponent<PlayerMovement>().Tracer = tracer;
@@ -118,9 +118,9 @@ public class BrawlWindow : GameWindow
                 {
                     MultiplySpec = true // Marvelous thinking Sup Erc Ell
                 },
-                new ImageTexture("../../../res/ranged_bot.pvr"), "Metal")
+                new ImageTexture(this, "../../../res/ranged_bot.pvr"), "Metal")
         }));
-        var robotMesh = MeshLoader.LoadMesh("../../../res/model/roborange.bnk");
+        var robotMesh = MeshLoader.LoadMesh(this, "../../../res/model/roborange.bnk");
         robot.AddComponent(new MeshRenderer(robot, robotMesh));
         robot.AddComponent(new Animator(robot, MeshLoader.LoadAnimation("../../../res/model/roborange_idle.bnk")));
     }

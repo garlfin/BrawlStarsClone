@@ -3,7 +3,6 @@ using gE3.Engine.Asset.Audio;
 using gE3.Engine.Asset.Bounds;
 using gE3.Engine.Component.Physics;
 using gE3.Engine.Utility;
-using OpenTK.Mathematics;
 using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;
@@ -26,10 +25,10 @@ public class Camera : BaseCamera
 
     public override float FOV
     {
-        get => MathHelper.RadiansToDegrees(_fov);
+        get => _fov * Mathf.Rad2Deg;
         set
         {
-            _fov = value.DegToRad();
+            _fov = value * Mathf.Deg2Rad;
             UpdateProjection();
         }
     }

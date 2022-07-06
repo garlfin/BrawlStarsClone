@@ -6,10 +6,7 @@
 /* https://fmod.com/resources/documentation-api?version=2.0&page=page=studio-api.html       */
 /* ======================================================================================== */
 
-using System;
-using System.Text;
 using System.Runtime.InteropServices;
-using System.Collections;
 
 namespace FMOD.Studio;
 

@@ -3,7 +3,7 @@ using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Component;
 using gE3.Engine.Component.Physics;
 using gE3.Engine.Utility;
-using OpenTK.Windowing.GraphicsLibraryFramework;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 
 namespace gE3BS.res.Scripts;
@@ -58,10 +58,10 @@ public class PlayerMovement : Behavior
 
     public override void OnUpdate(float gameTime)
     {
-        key[0] = Owner.Window.Input.IsKeyDown(Keys.W);
-        key[1] = Owner.Window.Input.IsKeyDown(Keys.S);
-        key[2] = Owner.Window.Input.IsKeyDown(Keys.A);
-        key[3] = Owner.Window.Input.IsKeyDown(Keys.D);
+        key[0] = Window.Keyboard.IsKeyPressed(Key.W);
+        key[1] = Window.Keyboard.IsKeyPressed(Key.S);
+        key[2] = Window.Keyboard.IsKeyPressed(Key.A);
+        key[3] = Window.Keyboard.IsKeyPressed(Key.D);
 
         var mouse = Window.MousePositionNormalized; // Too lazy to add overrides
         var info = CameraSystem.CurrentCamera.ScreenToRay(ref mouse); // Get Camera Ray

@@ -1,17 +1,16 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using gE3.Engine.Windowing;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.FrameBuffer;
 
 public class RenderBuffer : Asset
 {
-    protected RenderBuffer()
+    public uint ID { get; }
+    protected RenderBuffer(GameWindow window) : base(window)
     {
         ID = GL.GenRenderbuffer();
     }
-
-    public int ID { get; }
-
-    public void BindToFrameBuffer(FrameBuffer buffer, RenderbufferStorage storage, FramebufferAttachment attachment)
+    public void BindToFrameBuffer(FrameBuffer buffer, InternalFormat storage, FramebufferAttachment attachment)
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
         GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, ID);

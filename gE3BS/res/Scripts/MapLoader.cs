@@ -21,18 +21,18 @@ public static class MapLoader
     public static ShaderProgram DiffuseProgram;
     private static Mesh[][] _tiles;
 
-    public static void Init()
+    public static void Init(GameWindow window)
     {
-        var diffuse = new ImageTexture("../../../res/diff.pvr");
-        var spec = new ImageTexture("../../../res/spec.pvr");
+        var diffuse = new ImageTexture(window, "../../../res/diff.pvr");
+        var spec = new ImageTexture(window, "../../../res/spec.pvr");
         Default = new MatCap
         {
             Diffuse = diffuse
         };
         Metal = new MatCap
         {
-            Diffuse = new ImageTexture("../../../res/metal_diff.pvr"),
-            Specular = new ImageTexture("../../../res/metal_spec.pvr"),
+            Diffuse = new ImageTexture(window, "../../../res/metal_diff.pvr"),
+            Specular = new ImageTexture(window, "../../../res/metal_spec.pvr"),
             UseSpecular = true,
             UseShadow = true,
             SpecColor = new Vector3D<float>(0.56078f, 0.54902f, 0.54902f)
@@ -54,17 +54,17 @@ public static class MapLoader
             UseShadow = true
         };
         
-        DiffuseProgram = new ShaderProgram("../../../res/shader/default.frag", "Engine/Internal/default.vert");
+        DiffuseProgram = new ShaderProgram(window, "../../../res/shader/default.frag", "Engine/Internal/default.vert");
 
         _tiles = new Mesh[2][];
         _tiles[0] = new[]
         {
-            MeshLoader.LoadMesh("../../../res/model/block.bnk")
+            MeshLoader.LoadMesh(window, "../../../res/model/block.bnk")
         };
         _tiles[1] = new[] // Tile Variations
         {
-            MeshLoader.LoadMesh("../../../res/model/grass.bnk"),
-            MeshLoader.LoadMesh("../../../res/model/grass2.bnk")
+            MeshLoader.LoadMesh(window, "../../../res/model/grass.bnk"),
+            MeshLoader.LoadMesh(window, "../../../res/model/grass2.bnk")
         };
     }
 
@@ -74,7 +74,7 @@ public static class MapLoader
         var reader = new BinaryReader(fileStream);
 
         var textures = new ImageTexture[reader.ReadUInt32()];
-        for (var i = 0; i < textures.Length; i++) textures[i] = new ImageTexture(reader.ReadPythonString());
+        for (var i = 0; i < textures.Length; i++) textures[i] = new ImageTexture(window, reader.ReadPythonString());
 
         var matCapMaterials = new MatCapMaterial[reader.ReadUInt32()];
         for (var i = 0; i < matCapMaterials.Length; i++)
@@ -95,7 +95,7 @@ public static class MapLoader
         }
 
         var meshes = new Mesh[reader.ReadUInt32()];
-        for (var i = 0; i < meshes.Length; i++) meshes[i] = MeshLoader.LoadMesh(reader.ReadPythonString());
+        for (var i = 0; i < meshes.Length; i++) meshes[i] = MeshLoader.LoadMesh(window, reader.ReadPythonString());
 
         var objectCount = reader.ReadUInt32();
         for (var i = 0; i < objectCount; i++)

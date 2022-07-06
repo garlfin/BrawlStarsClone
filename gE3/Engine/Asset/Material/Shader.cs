@@ -1,12 +1,13 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using gE3.Engine.Windowing;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Material;
 
 public class Shader : Asset
 {
-    private readonly int _id;
+    private readonly uint _id;
 
-    public Shader(string path, ShaderType type)
+    public Shader(GameWindow window, string path, ShaderType type) : base(window)
     {
         _id = GL.CreateShader(type);
         GL.ShaderSource(_id, File.ReadAllText(path));
@@ -26,7 +27,7 @@ public class Shader : Asset
         GL.DeleteShader(_id);
     }
 
-    public int Get()
+    public uint Get()
     {
         return _id;
     }

@@ -1,5 +1,6 @@
 ﻿using gE3.Engine.Windowing;
-using OpenTK.Windowing.Common;
+using Silk.NET.OpenGL;
+using Silk.NET.Windowing;
 
 namespace gE3.Engine.Component;
 
@@ -7,7 +8,9 @@ public abstract class Component
 {
     public Entity? Owner;
     public GameWindow Window => Owner.Window;
-    public OpenTK.Windowing.Desktop.GameWindow View => Owner.Window.View;
+    public IWindow View => Owner.Window.View;
+    // ReSharper disable once InconsistentNaming
+    protected GL GL => Owner.Window.GL;
     public bool Static => Owner.Static;
     public Entity? Parent => Owner.Parent;
     

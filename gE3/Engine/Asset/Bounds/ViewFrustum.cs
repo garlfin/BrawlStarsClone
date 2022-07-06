@@ -1,6 +1,4 @@
-﻿using Silk.NET.Maths;
-
-namespace gE3.Engine.Asset.Bounds;
+﻿namespace gE3.Engine.Asset.Bounds;
 
 public struct ViewFrustum
 {

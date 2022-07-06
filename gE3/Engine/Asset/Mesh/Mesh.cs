@@ -3,30 +3,31 @@ using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component;
 using gE3.Engine.Windowing;
-using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
 
-public class Mesh
+public class Mesh : BaseMesh
 {
     private readonly Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
     private readonly float[] _alpha = new float[100]; // 100 is the max amount.
     private int _modelBO;
 
-    public string[] Materials;
-    public int[] MeshTransform;
-    public MeshVao[] MeshVAO;
-    public VAO[] SkinnedVAO;
+    public string[] Materials { get; init; }
+    public int[] MeshTransform { get; private set; }
+    public MeshVao[] MeshVAO { get; init; }
+    public VAO[] SkinnedVAO { get; private set; }
 
     public int MaterialCount { get; set; }
-    public bool IsSkinned { get; set; }
+    public bool IsSkinned { get; private set; }
     public bool Instanced { get; set; }
     public List<Entity> Users { get; } = new();
     public BoneHierarchy Hierarchy { get; set; }
     public BoneHierarchy[] FlattenedHierarchy { get; set; }
     public bool UseBlending { get; set; }
     public VAO this[int index] => IsSkinned ? SkinnedVAO[index] : MeshVAO[index];
+    // ReSharper disable once InconsistentNaming
 
     public Matrix4X4<float> InverseTransform
     {
@@ -40,25 +41,26 @@ public class Mesh
 
     public BoundingBox<float> Bounds { get; set; }
 
-    public Mesh()
+    public Mesh(GameWindow window) : base(window)
     {
+        _window = window;
         MeshManager.Register(this);
     }
 
-    public void Register(Entity entity)
+    public override void Register(Entity entity)
     {
         Users.Add(entity);
     }
 
-    public void Remove(Entity entity)
+    public override void Remove(Entity entity)
     {
         Users.Remove(entity);
     }
 
-    public unsafe void ManagedRender(GameWindow window)
+    public override unsafe void ManagedRender()
     {
         if (UseBlending)
-            switch (window.State)
+            switch (_window.State)
             {
                 case EngineState.RenderTransparent:
                     GL.Enable(EnableCap.Blend);
@@ -68,7 +70,7 @@ public class Mesh
                 case EngineState.Render or EngineState.PostProcess:
                     return;
             }
-        else if (window.State is EngineState.RenderTransparent) return;
+        else if (_window.State is EngineState.RenderTransparent) return;
 
         for (var i = 0; i < MeshVAO.Length; i++)
         {
@@ -79,7 +81,7 @@ public class Mesh
                 _alpha[j] = Users[j].GetComponent<MeshRenderer>()?.Alpha ?? 1f;
             }
 
-            if (window.State is EngineState.Render or EngineState.RenderTransparent)
+            if (_window.State is EngineState.Render or EngineState.RenderTransparent)
                 Users[0].GetComponent<MaterialComponent>()[i].Use();
             
             fixed (void* ptr = _model, ptr2 = _alpha)
@@ -87,7 +89,7 @@ public class Mesh
                 ProgramManager.PushObjects(ptr, ptr2, users);
             }
 
-            this[i].RenderInstanced(Users.Count);   
+            this[i].RenderInstanced((uint) Users.Count);   
             TexSlotManager.ResetUnit();
             
         }
@@ -114,9 +116,9 @@ public static class MeshManager
         Meshes.Add(mesh);
     }
 
-    public static void Render(GameWindow window)
+    public static void Render()
     {
-        for (var i = 0; i < ManagedMeshes.Count; i++) ManagedMeshes[i].ManagedRender(window);
+        for (var i = 0; i < ManagedMeshes.Count; i++) ManagedMeshes[i].ManagedRender();
     }
 
     public static void VerifyUsers()

@@ -52,11 +52,18 @@
         <None Update="Engine\Internal\depth.frag">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="Engine\Internal\brdf.comp">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="OpenTK" Version="4.7.1" />
+        <PackageReference Include="Silk.NET.GLFW" Version="2.15.0" />
+        <PackageReference Include="Silk.NET.Input" Version="2.15.0" />
         <PackageReference Include="Silk.NET.Maths" Version="2.15.0" />
+        <PackageReference Include="Silk.NET.OpenGL" Version="2.15.0" />
+        <PackageReference Include="Silk.NET.Windowing" Version="2.15.0" />
+        <PackageReference Include="Silk.NET.Windowing.Desktop" Version="1.9.0" />
     </ItemGroup>
 
     <ItemGroup>

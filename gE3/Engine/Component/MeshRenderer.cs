@@ -1,11 +1,9 @@
-﻿using gE3.Engine.Asset.Bounds;
-using gE3.Engine.Utility;
-using gE3.Engine.Asset.Material;
+﻿using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Asset.Texture;
 using gE3.Engine.Windowing;
-using OpenTK.Graphics.OpenGL4;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Component;
 

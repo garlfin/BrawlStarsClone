@@ -1,8 +1,9 @@
 ﻿using gE3.Engine.Asset;
 using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Mesh;
-using OpenTK.Graphics.OpenGL4;
+using gE3.Engine.Windowing;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Component;
 
@@ -83,10 +84,10 @@ public class Animator : Component
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
             SkinManager.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransform[i]);
-            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
-            GL.BindBufferBase(BufferRangeTarget.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
+            GL.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
+            GL.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
             GL.DispatchCompute((uint)Math.Ceiling((double)_renderer.Mesh.MeshVAO[i].Mesh.Vertices.Length / 32), 1, 1);
-            GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
+            GL.MemoryBarrier(MemoryBarrierMask.AllBarrierBits);
         }
 
         if (!Paused) _currentTime += deltaTime;
@@ -131,10 +132,10 @@ internal class SkinManager : ComponentSystem<Animator>
     public static ShaderBuffer MatBuffer { get; private set; }
     public static ShaderProgram SkinningShader { get; private set; }
 
-    public static unsafe void Init()
+    public static unsafe void Init(GameWindow window)
     {
-        MatBuffer = new ShaderBuffer(sizeof(Matrix4X4<float>) * 255, BufferUsageHint.StreamDraw, Target.ShaderStorageBuffer);
+        MatBuffer = new ShaderBuffer(window, sizeof(Matrix4X4<float>) * 255, BufferUsageARB.StreamDraw, Target.ShaderStorageBuffer);
         MatBuffer.Bind(4);
-        SkinningShader = new ShaderProgram("Engine/Internal/skinning.comp");
+        SkinningShader = new ShaderProgram(window, "Engine/Internal/skinning.comp");
     }
 } 

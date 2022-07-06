@@ -1,25 +1,28 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using gE3.Engine.Windowing;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Texture;
 
 public abstract class Texture : Asset
 {
-    protected int _id;
+    protected uint _id;
     
-    protected int _width;
-    protected int _height;
+    protected uint _width;
+    protected uint _height;
+    protected InternalFormat _format;
     
-    public Vector2D<int> Size => new(_width, _height);
-    public int ID => _id;
+    public Vector2D<uint> Size => new(_width, _height);
+    public uint ID => _id;
     
-    public Texture(int width, int height)
+    public Texture(GameWindow window, uint width, uint height, InternalFormat format) : base(window)
     {
         _width = width;
         _height = height;
+        _format = format;
     }
 
-    public Texture()
+    public Texture(GameWindow window) : base(window)
     {
         
     }
@@ -33,14 +36,20 @@ public abstract class Texture : Asset
         return slot;
     }
 
+    public virtual int Use(int slot, BufferAccessARB access, int level = 0)
+    {
+        GL.BindImageTexture((uint) slot, _id, level, false, 0, access, _format);
+        return slot;
+    }
+
     public int GetMipsCount()
     {
         return (int)Math.Floor(Math.Log2(Math.Min(_width, _height)));
     }
 
-    public Vector2D<int> GetMipSize(int level)
+    public Vector2D<uint> GetMipSize(int level)
     {
-        return new Vector2D<int>(_width >> level, _height >> level); // Thank you bit shift ily
+        return new Vector2D<uint>(_width >> level, _height >> level); // Thank you bit shift ily
     }
 
     public virtual void BindToBuffer(FrameBuffer.FrameBuffer buffer, FramebufferAttachment attachmentLevel,
@@ -80,14 +89,14 @@ public static class TexSlotManager
         _unit = 0;
     }
 
-    public static bool IsSameSlot(int slot, int tex)
+    public static bool IsSameSlot(int slot, uint tex)
     {
-        return Slots[slot] == tex;
+        return Slots[slot] == (int) tex;
     }
 
-    public static void SetSlot(int slot, int tex)
+    public static void SetSlot(int slot, uint tex)
     {
-        Slots[slot] = tex;
+        Slots[slot] = (int)tex;
     }
 }
 
