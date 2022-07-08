@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using gE3.Engine.Component;
+using gE3.Engine.Utility;
 using gE3.Engine.Windowing;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -144,6 +145,15 @@ public static class ProgramManager
         {
             _sceneData.ReplaceData(ptr);
         }
+    }
+
+    public static unsafe void InitSkybox()
+    {
+        var viewNoTransform = _scene.View;
+        viewNoTransform.M41 = 0;
+        viewNoTransform.M42 = 0;
+        viewNoTransform.M43 = 0;
+        _sceneData.ReplaceData(&viewNoTransform, 64);
     }
 
     public static void Register(ShaderProgram program)

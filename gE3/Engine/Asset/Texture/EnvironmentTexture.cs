@@ -17,7 +17,7 @@ public class EnvironmentTexture : Texture
         _width = header.Width;
         _height = header.Height;
 
-        if (header.NumSurfaces + header.Depth + header.NumFaces > 3) throw new System.Exception("Invalid file");
+        if (header.NumFaces != 6) throw new System.Exception("Invalid file");
 
         var calcMip = !(header.MipMapCount > 1);
 
@@ -40,43 +40,58 @@ public class EnvironmentTexture : Texture
 
             passedMetaDataSize += (int) dataSize + 12;
         }
+
+        _format = header.Format.ToInternalFormat();
         
-        var internalFormat = header.Format.ToInternalFormat();
-        if (header.ColorSpace is ColorSpace.sRGB) internalFormat += 2140;
-
         _id = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture3D, _id);
+        GL.BindTexture(TextureTarget.TextureCubeMap, _id);
 
+        var compression = header.CompressionRatio;
 
         for (byte face = 0; face < 6; face++)
         {
             for (byte mip = 0; mip < header.MipMapCount; mip++)
             {
                 var currentMipSize = GetMipSize(mip);
-                var imageData =
-                    reader.ReadBytes((int)MathF.Ceiling(currentMipSize.X * currentMipSize.Y / 16f) * 16);
+                var toRead = (int)(MathF.Ceiling((float)currentMipSize.X * currentMipSize.Y / compression.Pixels) *
+                                   compression.Bytes);
+                if (!header.Compressed) toRead = (int)(currentMipSize.X * currentMipSize.Y * 4 * 3);
+                var imageData = reader.ReadBytes(toRead);
+                if (flipImage) Array.Reverse(imageData);
                 fixed (void* ptr = imageData)
                 {
-                    GL.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + face, mip, internalFormat, currentMipSize.X,
-                        currentMipSize.Y, 0, (uint)imageData.Length, ptr);
+                    if (header.Compressed)
+                        GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, _format, currentMipSize.X,
+                            currentMipSize.Y, 0, (uint) imageData.Length, ptr);
+                    else
+                        GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + face, mip, InternalFormat.Rgb32f, currentMipSize.X, currentMipSize.Y, 0, PixelFormat.Rgb, PixelType.Float, ptr);
                 }
             }
         }
 
-        GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-        GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+        GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
-        GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMinFilter,
+        GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter,
             (int)(
                 (calcMip && genMips) ||
                 header.MipMapCount > 1 // If we want to calculate mips and generate mips, or we already have mips set the filter to mip mode
                     ? TextureMinFilter.LinearMipmapLinear
                     : TextureMinFilter.Linear));
-        GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
         if (calcMip && genMips && header.MipMapCount == 1)
-            GL.GenerateMipmap(TextureTarget.Texture2D); // If we have no mips, generate them
+            GL.GenerateMipmap(TextureTarget.TextureCubeMap); // If we have no mips, generate them
         
         reader.Close();
         file.Close();
+    }
+
+    public override int Use(int slot)
+    {
+        if (TexSlotManager.IsSameSlot(slot, _id)) return slot;
+        TexSlotManager.SetSlot(slot, _id);
+        GL.ActiveTexture(TextureUnit.Texture0 + slot);
+        GL.BindTexture(TextureTarget.TextureCubeMap, _id);
+        return slot;
     }
 }

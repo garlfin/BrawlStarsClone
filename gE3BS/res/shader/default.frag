@@ -17,27 +17,23 @@ flat in float alpha;
 out vec4 FragColor;
 
 mat4 thresholdMatrix = 1.0 / 16 * mat4(0.0, 8.0, 2.0, 10.0,
-12.0, 4.0, 14.0, 6.0,
-3.0, 11.0, 1.0, 9.0,
-15.0, 7.0, 13.0, 5.0);
+                                        12.0, 4.0, 14.0, 6.0,
+                                        3.0, 11.0, 1.0, 9.0,
+                                        15.0, 7.0, 13.0, 5.0);
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5;
-    float currentDepth = projCoords.z;
-    float visibility = 0;
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w * 0.5 + 0.5;
 
     float texelSize = 1.0/2048.0;
-    int pcfCount = 1;
-    for (int x = -pcfCount; x<= pcfCount; x++){
-        for (int y =-pcfCount; y<=pcfCount; y++){
-            visibility += texture(shadowMap, vec3(projCoords.xy+vec2(x, y)*texelSize, currentDepth - 0.0005));
-        }
-    }
-    visibility /= (pcfCount * 2 + 1) * (pcfCount * 2 + 1);
+    
+    float ditherSample = thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
+    ditherSample = ditherSample * 2 - 1;
+    ditherSample *= texelSize;
+    
+    float visibility = texture(shadowMap, vec3(projCoords.xy + vec2(ditherSample), projCoords.z - 0.0001));
+    
     if (projCoords.z > 1.0) visibility = 1;
-
     return visibility;
 }
 

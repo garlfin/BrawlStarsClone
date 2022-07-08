@@ -48,16 +48,24 @@ public class ImageTexture : Texture
         GL.BindTexture(TextureTarget.Texture2D, _id);
 
 
+        var compression = header.CompressionRatio;
+
         for (byte mip = 0; mip < header.MipMapCount; mip++)
         {
             var currentMipSize = GetMipSize(mip);
-            var imageData =
-                reader.ReadBytes((int)MathF.Ceiling((float)currentMipSize.X * currentMipSize.Y / 16) * 16);
+            var toRead = (int)(MathF.Ceiling((float)currentMipSize.X * currentMipSize.Y / compression.Pixels) *
+                               compression.Bytes);
+            if (!header.Compressed) toRead = (int)(currentMipSize.X * currentMipSize.Y);
+            var imageData = reader.ReadBytes(toRead);
             if (flipImage) Array.Reverse(imageData);
             fixed (void* ptr = imageData)
             {
-                GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, _format, currentMipSize.X,
-                    currentMipSize.Y, 0, (uint) imageData.Length, ptr);
+                if (header.Compressed)
+                    GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, _format, currentMipSize.X,
+                        currentMipSize.Y, 0, (uint) imageData.Length, ptr);
+                else
+                    GL.TexImage2D(TextureTarget.Texture2D, mip, _format, currentMipSize.X, currentMipSize.Y, 0,
+                        header.Format.ToPixelFormat(), header.ChannelType.ToPixelType(), ptr);
             }
         }
 

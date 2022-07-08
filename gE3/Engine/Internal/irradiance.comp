@@ -1,7 +1,7 @@
 ﻿#version 430
 
-layout (binding = 0, rgb16f) restrict writeonly uniform image2D outImage;
-layout (binding = 1, rgb16f) restrict readonly uniform image2D inImage;
+layout (binding = 0, rgb16f) restrict writeonly uniform imageCube outImage;
+layout (binding = 1, rgb16f) restrict readonly uniform imageCube inImage;
 
 layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
@@ -55,9 +55,9 @@ void main()
         {
             vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
             vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;
-            irradiance += imageLoad(inImage, sampleVec).rgb * cos(theta) * sin(theta);
+            irradiance += texture(inImage, sampleVec).rgb * cos(theta) * sin(theta);
             samples++;
         }
     }
-    imageStore(outImage, dir, vec4(PI * irradiance / float(samples), 1.0));
+    imageStore(outImage, ivec3(gl_GlobalInvocationID), vec4(PI * irradiance / float(samples), 1.0));
 }

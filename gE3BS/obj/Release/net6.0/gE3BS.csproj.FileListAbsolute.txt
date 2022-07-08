@@ -47,3 +47,5 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\runtimes\l
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\runtimes\osx-x64\native\libSDL2-2.0.dylib
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\runtimes\win-x64\native\SDL2.dll
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\brdf.comp
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\skybox.frag
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\skybox.vert

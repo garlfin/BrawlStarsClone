@@ -1,4 +1,5 @@
-﻿using Silk.NET.OpenGL;
+﻿using gE3.Engine.Asset.Texture;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Utility;
 
@@ -7,21 +8,29 @@ public static class PvrLoader
     // Loads a PVR file from a stream.
     public static PVRHeader LoadPVR(BinaryReader reader)
     {
-        return new PVRHeader
+        var pvr = new PVRHeader();
+        
+        pvr.Version = reader.ReadUInt32(); // Version
+        pvr.Flags = (Flags)reader.ReadUInt32();
+
+        var preFormat = reader.ReadInt32();
+        if (preFormat == 0) pvr.Format = (PvrPixelFormat)reader.ReadUInt32();
+        else
         {
-            Version = reader.ReadUInt32(), // Version
-            Flags = (Flags)reader.ReadUInt32(),
-            Format = (PvrPixelFormat)reader.ReadUInt64(),
-            ColorSpace = (ColorSpace)reader.ReadUInt32(),
-            ChannelType = (ChannelType)reader.ReadUInt32(),
-            Width = reader.ReadUInt32(),
-            Height = reader.ReadUInt32(),
-            Depth = reader.ReadUInt32(),
-            NumSurfaces = reader.ReadUInt32(),
-            NumFaces = reader.ReadUInt32(),
-            MipMapCount = reader.ReadUInt32(),
-            MetaDataSize = reader.ReadUInt32()
-        };
+            reader.ReadUInt32();
+            pvr.Format = (PvrPixelFormat)preFormat;
+        }
+        pvr.ColorSpace = (ColorSpace)reader.ReadUInt32();
+        pvr.ChannelType = (ChannelType)reader.ReadUInt32();
+        pvr.Width = reader.ReadUInt32();
+        pvr.Height = reader.ReadUInt32();
+        pvr.Depth = reader.ReadUInt32();
+        pvr.NumSurfaces = reader.ReadUInt32();
+        pvr.NumFaces = reader.ReadUInt32();
+        pvr.MipMapCount = reader.ReadUInt32();
+        pvr.MetaDataSize = reader.ReadUInt32();
+        
+        return pvr;
     }
 
     public static InternalFormat ToInternalFormat(this PvrPixelFormat format)
@@ -33,38 +42,53 @@ public static class PvrLoader
             PvrPixelFormat.Dxt5 => InternalFormat.CompressedRgbaS3TCDxt5Ext,
             PvrPixelFormat.Bc4 => InternalFormat.CompressedRedRgtc1,
             PvrPixelFormat.Bc5 => InternalFormat.CompressedRGRgtc2,
-            PvrPixelFormat.Etc2Rgb => InternalFormat.CompressedRgb8Etc2,
-            PvrPixelFormat.Etc2Rgba => InternalFormat.CompressedRgba8Etc2Eac,
-            PvrPixelFormat.Etc2RgbA1 => InternalFormat.CompressedRgb8PunchthroughAlpha1Etc2,
-            PvrPixelFormat.EacR11 => InternalFormat.CompressedR11Eac,
-            PvrPixelFormat.EacRg11 => InternalFormat.CompressedRG11Eac,
-            PvrPixelFormat.Astc4X4 => InternalFormat.CompressedRgbaAstc4x4,
-            PvrPixelFormat.Astc5X4 => InternalFormat.CompressedRgbaAstc5x4,
-            PvrPixelFormat.Astc5X5 => InternalFormat.CompressedRgbaAstc5x5,
-            PvrPixelFormat.Astc6X5 => InternalFormat.CompressedRgbaAstc6x5,
-            PvrPixelFormat.Astc6X6 => InternalFormat.CompressedRgbaAstc6x6,
-            PvrPixelFormat.Astc8X5 => InternalFormat.CompressedRgbaAstc8x5,
-            PvrPixelFormat.Astc8X6 => InternalFormat.CompressedRgbaAstc8x6,
-            PvrPixelFormat.Astc8X8 => InternalFormat.CompressedRgbaAstc8x8,
-            PvrPixelFormat.Astc10X5 => InternalFormat.CompressedRgbaAstc10x5,
-            PvrPixelFormat.Astc10X6 => InternalFormat.CompressedRgbaAstc10x6,
-            PvrPixelFormat.Astc10X8 => InternalFormat.CompressedRgbaAstc10x8,
-            PvrPixelFormat.Astc10X10 => InternalFormat.CompressedRgbaAstc10x10,
-            PvrPixelFormat.Astc12X10 => InternalFormat.CompressedRgbaAstc12x10,
-            PvrPixelFormat.Astc12X12 => InternalFormat.CompressedRgbaAstc12x12,
-            PvrPixelFormat.Astc3X3X3 => InternalFormat.CompressedRgbaAstc3x3x3Oes,
-            PvrPixelFormat.Astc4X3X3 => InternalFormat.CompressedRgbaAstc4x3x3Oes,
-            PvrPixelFormat.Astc4X4X3 => InternalFormat.CompressedRgbaAstc4x4x3Oes,
-            PvrPixelFormat.Astc4X4X4 => InternalFormat.CompressedRgbaAstc4x4x4Oes,
-            PvrPixelFormat.Astc5X4X4 => InternalFormat.CompressedRgbaAstc5x4x4Oes,
-            PvrPixelFormat.Astc5X5X4 => InternalFormat.CompressedRgbaAstc5x5x4Oes,
-            PvrPixelFormat.Astc5X5X5 => InternalFormat.CompressedRgbaAstc5x5x5Oes,
-            PvrPixelFormat.Astc6X5X5 => InternalFormat.CompressedRgbaAstc6x5x5Oes,
-            PvrPixelFormat.Astc6X6X5 => InternalFormat.CompressedRgbaAstc6x6x5Oes,
-            PvrPixelFormat.Astc6X6X6 => InternalFormat.CompressedRgbaAstc6x6x6Oes,
+            PvrPixelFormat.RGB => InternalFormat.Rgb32f,
+            PvrPixelFormat.RGBA => InternalFormat.Rgba,
+            
             _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
         };
     }
+
+    public static PixelType ToPixelType(this ChannelType format)
+    {
+        return format switch
+        {
+            ChannelType.Float => PixelType.Float,
+            ChannelType.UnsignedByte => PixelType.UnsignedByte,
+            ChannelType.UnsignedShort => PixelType.UnsignedShort,
+            ChannelType.UnsignedInteger => PixelType.UnsignedInt,
+            ChannelType.SignedByte => PixelType.Byte,
+            ChannelType.SignedShort => PixelType.Short,
+            ChannelType.SignedInteger => PixelType.Int,
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
+        };
+    }
+
+    public static PixelFormat ToPixelFormat(this PvrPixelFormat format)
+    {
+        return format switch
+        {
+            PvrPixelFormat.Bc4 => PixelFormat.Red,
+            PvrPixelFormat.Bc5 => PixelFormat.RG,
+            PvrPixelFormat.RGB => PixelFormat.Rgb,
+            _ => PixelFormat.Rgba
+        };
+    }
+
+    public static CompressionRatio Compression(this PvrPixelFormat format)
+    {
+        return format switch
+        {
+            PvrPixelFormat.Dxt1 => Ratios[0],
+            _ => Ratios[1]
+        };
+    }
+
+    private static readonly CompressionRatio[] Ratios =
+    {
+        new(16, 8), // DXT1
+        new(16, 16), // DXT2 & 3, BC4 & 5
+    };
 }
 
 public struct PVRHeader
@@ -81,6 +105,9 @@ public struct PVRHeader
     public uint NumFaces;
     public uint MipMapCount;
     public uint MetaDataSize;
+    
+    public CompressionRatio CompressionRatio => Format.Compression();
+    public bool Compressed => Format is PvrPixelFormat.Dxt1 or PvrPixelFormat.Dxt3 or PvrPixelFormat.Dxt5 or PvrPixelFormat.Bc4 or PvrPixelFormat.Bc5;
 }
 
 public enum ColorSpace
@@ -148,7 +175,11 @@ public enum PvrPixelFormat
     Astc5X5X5 = 47,
     Astc6X5X5 = 48,
     Astc6X6X5 = 49,
-    Astc6X6X6 = 50
+    Astc6X6X6 = 50,
+    R = 114,
+    RG = 26482,
+    RGB = 6449010,
+    RGBA = 1633838962
 }
 
 public enum ChannelType

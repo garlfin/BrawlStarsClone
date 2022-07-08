@@ -23,8 +23,11 @@ public class GameWindow
     public EmptyTexture ShadowMap { get; private set; }
     public IMouse Mouse => Input.Mice[0];
     public IKeyboard Keyboard => Input.Keyboards[0];
+    
+    public EnvironmentTexture? Skybox { get; set; }
+    private SkyboxVAO? _skyboxVao;
+    private ShaderProgram? _skyboxShader;
 
-    private bool _updateFinished;
     private bool _isClosed;
     
     // ReSharper disable once InconsistentNaming
@@ -36,7 +39,7 @@ public class GameWindow
         var windowOptions = WindowOptions.Default;
         windowOptions.Size = new Vector2D<int>(width, height);
         windowOptions.Title = name;
-        windowOptions.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Default, new APIVersion(4, 5));
+        windowOptions.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new APIVersion(4, 5));
         windowOptions.FramesPerSecond = 144;
         View = Window.Create(windowOptions);
     }
@@ -80,7 +83,6 @@ public class GameWindow
 
     protected virtual void OnUpdate(double t)
     {
-        _updateFinished = false;
         var time = (float)t;
         if (Keyboard.IsKeyPressed(Key.Escape)) View.Close();
         BehaviorSystem.InitializeQueue();
@@ -90,7 +92,6 @@ public class GameWindow
         CameraSystem.Update(time);
         AssetManager.StartRemoval();
         System.Update();
-        _updateFinished = true;
     }
 
     protected virtual void OnMouseMove(IMouse mouse, Vector2 vector2)
@@ -114,10 +115,15 @@ public class GameWindow
 
         ProgramManager.Init(this);
         SkinManager.Init(this);
-        BRDFTexture.Init(this);
+        
+        /*BRDFTexture.Init(this);
         BRDFTexture tex = new BRDFTexture(this, 512);
         BRDFTexture.ShaderDispose();
-
+        
+        _skyboxShader = new ShaderProgram(this, "Engine/Internal/skybox.frag", "Engine/Internal/skybox.vert");
+        _skyboxVao = new SkyboxVAO(this);
+        Skybox = new EnvironmentTexture(this, "../../../res/sky.pvr");
+        */
         Root = new Entity(this, name: "Root");
         Root.AddComponent(new Transform(Root));
         
@@ -163,7 +169,7 @@ public class GameWindow
     {
         var time = (float)t;
         View.Title = $"gE2 - FPS: {1f / time}";
-        if (_isClosed || !_updateFinished) return;
+        if (_isClosed) return;
         // Main Render Pass
         State = EngineState.Render;
         MeshManager.VerifyUsers();
@@ -179,6 +185,15 @@ public class GameWindow
         MeshManager.Render();
         State = EngineState.RenderTransparent;
         MeshManager.Render();
+        
+        if (_skyboxVao != null && Skybox != null && _skyboxShader != null)
+        {
+            ProgramManager.InitSkybox();
+            _skyboxShader.Use();
+            _skyboxShader.SetUniform(0, Skybox.Use(TexSlotManager.Unit));
+            _skyboxVao.Render();
+        }
+        
         //View.SwapBuffers();
     }
 }

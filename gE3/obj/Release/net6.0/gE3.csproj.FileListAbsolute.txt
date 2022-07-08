@@ -18,3 +18,5 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Inter
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\default.vert
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\depth.frag
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\brdf.comp
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\skybox.frag
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\skybox.vert
