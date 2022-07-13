@@ -40,7 +40,7 @@ public class BrawlWindow : GameWindow
         };
 
         camera.AddComponent(transform);
-        camera.AddComponent(new Camera(camera, 31f, 0.1f, 1000f, System));
+        camera.AddComponent(new Camera(camera, 31f, 0.1f, 100f, System));
         camera.GetComponent<Camera>().Set();
 
         var player = new Entity(this, name: "Player");
@@ -86,11 +86,14 @@ public class BrawlWindow : GameWindow
             Location = new Vector3D<float>(0, 0.1f, 0),
             Rotation = new Vector3D<float>(0, 180, 0)
         });
-        tracer.AddComponent(new MeshRenderer(tracer, MeshLoader.LoadMesh(this, "../../../res/model/plane.bnk", true)));
+        tracer.AddComponent(new MeshRenderer(tracer, MeshLoader.LoadMesh(this, "../../../res/model/plane.bnk")));
 
         var materials = new[]
         {
-            new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit,
+            new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Unlit with
+                {
+                    UseShadow = false
+                },
                 new ImageTexture(this, "../../../res/white.pvr"), "DefaultMaterial")
         };
 

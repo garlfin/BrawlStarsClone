@@ -1,19 +1,20 @@
 ﻿using gE3.Engine.Asset.Bounds;
 using gE3.Engine.Component.Physics;
+using gE3.Engine.Utility;
 using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;
 
 public class Sun : BaseCamera
 {
-    private readonly int _size;
+    public int Size { get; }
     private readonly Transform _entityTransform;
 
     public Vector3D<float> Offset = Vector3D<float>.Zero;
 
     public Sun(Entity? owner, int size, float clipNear = 0.1f, float clipFar = 300f) : base(owner, clipNear, clipFar)
     {
-        _size = size;
+        Size = size;
         UpdateProjection();
         _entityTransform = owner.GetComponent<Transform>() ??
                            throw new InvalidOperationException($"No transform on sun object {Owner.Name}!");
@@ -33,10 +34,8 @@ public class Sun : BaseCamera
 
     public override void OnRender(float deltaTime)
     {
-        _view = Matrix4X4.CreateLookAt(
-            new Vector3D<float>(_entityTransform.Model.M41, _entityTransform.Model.M42, _entityTransform.Model.M43) +
-            Offset, Vector3D<float>.Zero + Offset,
-            Vector3D<float>.UnitY);
+        Position = _entityTransform.Model.Transformation() + Offset;
+        _view = Matrix4X4.CreateLookAt(Position, Offset, Vector3D<float>.UnitY);
     }
 
     public override void Dispose()
@@ -46,7 +45,7 @@ public class Sun : BaseCamera
 
     public sealed override void UpdateProjection()
     {
-        _projection = Matrix4X4.CreateOrthographic(_size, _size, ClipNear, ClipFar);
+        _projection = Matrix4X4.CreateOrthographic(Size, Size, ClipNear, ClipFar);
     }
 
     public override Vector3D<float> WorldToScreen(ref Vector3D<float> vector3D)
@@ -63,4 +62,11 @@ public class Sun : BaseCamera
     {
         throw new NotImplementedException();
     }
+}
+
+public struct SunInfo
+{
+    public Matrix4X4<float> ViewProjection;
+    public Vector3D<float> Position;
+    private float _pad;
 }

@@ -8,38 +8,57 @@ layout (std140, binding = 3) uniform MatcapData {
     vec4 specularColor;
 };
 
+struct SunInfo
+{
+    mat4 ViewProj;
+    vec4 SunPos;
+    vec4 PPOffset;
+};
+
+layout (std140, binding = 1) uniform SceneData {
+    mat4 view;
+    mat4 projection;
+    vec3 viewPos;
+    SunInfo sun;
+};
+
 uniform sampler2D albedoTex;
 uniform sampler2D diffCap;
 uniform sampler2D specCap;
-uniform sampler2DShadow shadowMap;
+uniform sampler2D shadowMap;
+
 flat in float alpha;
+in vec3 Normal;
+in vec3 FragPos;
 
 out vec4 FragColor;
 
-mat4 thresholdMatrix = 1.0 / 16 * mat4(0.0, 8.0, 2.0, 10.0,
+const mat4 thresholdMatrix = mat4(0.0, 8.0, 2.0, 10.0,
                                         12.0, 4.0, 14.0, 6.0,
                                         3.0, 11.0, 1.0, 9.0,
-                                        15.0, 7.0, 13.0, 5.0);
+                                        15.0, 7.0, 13.0, 5.0) / 17;
+
+float ditherSample = thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w * 0.5 + 0.5;
-
-    float texelSize = 1.0/2048.0;
     
-    float ditherSample = thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
-    ditherSample = ditherSample * 2 - 1;
-    ditherSample *= texelSize;
+    float size = 2;
     
-    float visibility = texture(shadowMap, vec3(projCoords.xy + vec2(ditherSample), projCoords.z - 0.0001));
+    float ditherSampleCopy = ditherSample;
+    ditherSampleCopy = ditherSampleCopy * 2 - 1;
+    ditherSampleCopy *= 1.0 / textureSize(shadowMap, 0).x * size;
     
-    if (projCoords.z > 1.0) visibility = 1;
-    return visibility;
+    float bias = 0.001 * max(dot(Normal, sun.SunPos.xyz), 0); 
+    bias = clamp(bias, 0f, 0.001);
+    
+    return projCoords.z > 1 ? 1 : texture(shadowMap, projCoords.xy + vec2(ditherSampleCopy)).r > projCoords.z - bias ? 1 : 0;
 }
 
 void main(){
     vec4 diffuseColor = texture(albedoTex, TexCoord.xy);
-    if (alpha * diffuseColor.a <= thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4] && int(specularColor.a) != 3) discard;
+    if (alpha * diffuseColor.a <= ditherSample) discard;
     FragColor = vec4(diffuseColor.rgb, 1);
     FragColor *= vec4(mix(vec3(1.0), texture(diffCap, TexCoord.zw).rgb, influence.x), 1.0);
 
@@ -48,7 +67,10 @@ void main(){
     else
         FragColor += vec4(texture(specCap, TexCoord.zw).rgb * diffuseColor.rgb * influence.y, 0.0);
 
-    FragColor *= mix(1.0, mix(0.75, 1.0, ShadowCalculation(FragPosLightSpace)), influence.z);
+    FragColor *= mix(1.0, mix(0.75f, 1f, ShadowCalculation(FragPosLightSpace)), influence.z);
     FragColor *= alpha;
     FragColor = vec4(pow(FragColor.rgb, vec3(0.4545)), 1.0);
+    
+    //vec3 reflect = normalize(reflect(normalize(FragPos - viewPos), Normal));
+    //FragColor = vec4(rayMarch(FragPos, reflect, 10), 1);
 }

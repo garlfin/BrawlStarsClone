@@ -48,11 +48,6 @@ public static class AssetManager
     private static readonly List<Tuple<Entity, bool>> RemovalQueue = new();
     private static readonly List<Asset> Assets = new();
 
-    public static void DeleteAllAssets()
-    {
-        for (var i = 0; i < Assets.Count; i++) Assets[i].Dispose();
-    }
-
     public static void Register(Asset asset)
     {
         Assets.Add(asset);

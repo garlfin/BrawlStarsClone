@@ -24,20 +24,20 @@ public class MatCapMaterial : gE3.Engine.Asset.Material.Material
     private readonly Texture _albedo;
     private MatCap _matCap;
 
-    public MatCapMaterial(GameWindow window, ShaderProgram program, MatCap matCap, gE3.Engine.Asset.Texture.Texture albedo,
+    public MatCapMaterial(GameWindow window, ShaderProgram program, MatCap matCap, Texture albedo,
         string name) : base(window, program, name)
     {
         _matCap = matCap;
         _albedo = albedo;
     }
-
-    public override void Use()
+    
+    protected override void Set()
     {
-        Program.Use();
         Program.SetUniform("albedoTex", _albedo.Use(TexSlotManager.Unit));
         Program.SetUniform("diffCap", _matCap.UseDiffuse ? _matCap.Diffuse.Use(TexSlotManager.Unit) : 0);
         Program.SetUniform("specCap", _matCap.UseSpecular ? _matCap.Specular.Use(TexSlotManager.Unit) : 0);
         Program.SetUniform("shadowMap", Window.ShadowMap.Use(TexSlotManager.Unit));
+
         MatCapManager.PushMatCap(ref _matCap, (float) Window.State);
     }
 }

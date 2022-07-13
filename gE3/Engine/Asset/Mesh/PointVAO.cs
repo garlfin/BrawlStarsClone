@@ -21,7 +21,7 @@ public class PointVAO : VAO
         GL.BufferData(BufferTargetARB.ArrayBuffer, _length * sizeof(float) * 3, (void*) 0, BufferUsageARB.DynamicDraw);
 
         GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, (void*) (nuint) 0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, (void*) 0);
     }
 
     public unsafe void UpdateData(void* ptr)

@@ -6,7 +6,8 @@ namespace gE3.Engine.Asset.FrameBuffer;
 public class RenderBuffer : Asset
 {
     public uint ID { get; }
-    protected RenderBuffer(GameWindow window) : base(window)
+
+    public RenderBuffer(GameWindow window) : base(window)
     {
         ID = GL.GenRenderbuffer();
     }

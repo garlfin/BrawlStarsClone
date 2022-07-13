@@ -9,7 +9,7 @@ namespace gE3.Engine.Utility;
 
 public static class MeshLoader
 {
-    public static Mesh LoadMesh(GameWindow window, string path, bool transparent = false)
+    public static Mesh LoadMesh(GameWindow window, string path)
     {
         var file = File.Open(path, FileMode.Open, FileAccess.Read);
         var reader = new BinaryReader(file);
@@ -126,7 +126,6 @@ public static class MeshLoader
 
         file.Close();
         reader.Close();
-        mesh.UseBlending = transparent;
         mesh.Bounds = new BoundingBox<float>(minX, minY, minZ, maxX, maxY, maxZ);
         return mesh;
     }

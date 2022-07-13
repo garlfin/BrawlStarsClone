@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using gE3.Engine.Component;
-using gE3.Engine.Utility;
 using gE3.Engine.Windowing;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -9,13 +8,14 @@ namespace gE3.Engine.Asset.Material;
 
 public class ShaderProgram : Asset
 {
-    public ShaderProgram(GameWindow window, string fragPath, string vertPath, bool managed = true) : base(window)
+    
+    public ShaderProgram(GameWindow window, string fragPath, string vertPath, bool managed = true) : base(window) 
     {
         if (managed) ProgramManager.Register(this);
         ID = GL.CreateProgram();
 
-        var fragment = new Shader(_window, fragPath, ShaderType.FragmentShader);
-        var vertex = new Shader(_window, vertPath, ShaderType.VertexShader);
+        Shader fragment = new Shader(_window, fragPath, ShaderType.FragmentShader);
+        Shader vertex = new Shader(_window, vertPath, ShaderType.VertexShader);
 
         fragment.Attach(this);
         vertex.Attach(this);
@@ -24,6 +24,38 @@ public class ShaderProgram : Asset
 
         fragment.Delete();
         vertex.Delete();
+    }
+    
+    public ShaderProgram(GameWindow window, string fragPath, string vertPath, string deferredPath) : base(window)
+    {
+        ProgramManager.Register(this);
+        ID = GL.CreateProgram();
+        
+        Shader fragment = new Shader(_window, fragPath, ShaderType.FragmentShader);
+        Shader vertex = new Shader(_window, vertPath, ShaderType.VertexShader);
+
+        fragment.Attach(this);
+        vertex.Attach(this);
+        
+        GL.LinkProgram(ID);
+        
+        fragment.Delete();
+        vertex.Delete();
+    }
+    
+    public ShaderProgram(GameWindow window, string fragPath, Shader vertex) : base(window)
+    {
+        ProgramManager.Register(this);
+        ID = GL.CreateProgram();
+        
+        Shader fragment = new Shader(_window, fragPath, ShaderType.FragmentShader);
+
+        fragment.Attach(this);
+        vertex.Attach(this);
+        
+        GL.LinkProgram(ID);
+        
+        fragment.Delete();
     }
 
     public ShaderProgram(GameWindow window, string computePath) : base(window)
@@ -125,6 +157,8 @@ public static class ProgramManager
         
         _objectData = new ShaderBuffer(window, sizeof(ObjectData), BufferUsageARB.StreamDraw);
         _objectData.Bind(2);
+
+        _scene.Sun = new SunInfo();
     }
 
     public static unsafe void InitFrame(GameWindow window)
@@ -133,13 +167,15 @@ public static class ProgramManager
         {
             _scene.Projection = CameraSystem.Sun.Projection;
             _scene.View = CameraSystem.Sun.View;
-            _scene.LightProjection = CameraSystem.Sun.View * CameraSystem.Sun.Projection;
+            
+             _scene.Sun.ViewProjection = CameraSystem.Sun.View * CameraSystem.Sun.Projection;
+             _scene.Sun.Position = CameraSystem.Sun.Position;
         }
         else
         {
             _scene.Projection = CameraSystem.CurrentCamera.Projection;
             _scene.View = CameraSystem.CurrentCamera.View;
-            _scene.LightProjection = CameraSystem.Sun.View * CameraSystem.Sun.Projection;
+            _scene.ViewPos = CameraSystem.CurrentCamera.Position;
         }
         fixed (void* ptr = &_scene)
         {
@@ -156,9 +192,10 @@ public static class ProgramManager
         _sceneData.ReplaceData(&viewNoTransform, 64);
     }
 
-    public static void Register(ShaderProgram program)
+    public static int Register(ShaderProgram program)
     {
         _Programs.Add(program);
+        return _Programs.Count - 1;
     }
 
     public static unsafe void PushObject(void* model, float transparency, int index = 0)
@@ -178,7 +215,9 @@ public struct SceneData
 {
     public Matrix4X4<float> View; // 64
     public Matrix4X4<float> Projection; // 64
-    public Matrix4X4<float> LightProjection; // 64
+    public Vector3D<float> ViewPos; // 16
+    private float _pad; // 4
+    public SunInfo Sun;
 }
 
 public unsafe struct ObjectData

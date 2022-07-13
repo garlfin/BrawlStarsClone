@@ -37,18 +37,14 @@ public sealed class MeshRenderer : Component
 
         ProgramManager.PushObject(&matrix, Alpha);
 
-        if (Alpha < 1 && Mesh.UseBlending) GL.Enable(EnableCap.Blend);
-
         for (var i = 0; i < Mesh.MeshVAO.Length; i++)
         {
-            if (Owner.Window.State is EngineState.Render or EngineState.RenderTransparent)
-                (Owner.GetComponent<MaterialComponent>()![Mesh.Materials[i]] ?? Owner.GetComponent<MaterialComponent>()![i]).Use();
-
+            
+            (Owner.GetComponent<MaterialComponent>()![Mesh.Materials[i]] ?? Owner.GetComponent<MaterialComponent>()![i]).Use();
             Mesh[i].Render();
             //Owner.GetComponent<Animator>()?.RenderDebug();
             TexSlotManager.ResetUnit();
         }
-        GL.Disable(EnableCap.Blend);
     }
 
     public override void Dispose()

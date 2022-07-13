@@ -25,7 +25,6 @@ public class Mesh : BaseMesh
     public List<Entity> Users { get; } = new();
     public BoneHierarchy Hierarchy { get; set; }
     public BoneHierarchy[] FlattenedHierarchy { get; set; }
-    public bool UseBlending { get; set; }
     public VAO this[int index] => IsSkinned ? SkinnedVAO[index] : MeshVAO[index];
     // ReSharper disable once InconsistentNaming
 
@@ -59,19 +58,6 @@ public class Mesh : BaseMesh
 
     public override unsafe void ManagedRender()
     {
-        if (UseBlending)
-            switch (_window.State)
-            {
-                case EngineState.RenderTransparent:
-                    GL.Enable(EnableCap.Blend);
-                    break;
-                case EngineState.Shadow:
-                    break;
-                case EngineState.Render or EngineState.PostProcess:
-                    return;
-            }
-        else if (_window.State is EngineState.RenderTransparent) return;
-
         for (var i = 0; i < MeshVAO.Length; i++)
         {
             var users = Math.Min(Users.Count, 100);
@@ -80,9 +66,8 @@ public class Mesh : BaseMesh
                 _model[j] = Users[j].GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
                 _alpha[j] = Users[j].GetComponent<MeshRenderer>()?.Alpha ?? 1f;
             }
-
-            if (_window.State is EngineState.Render or EngineState.RenderTransparent)
-                Users[0].GetComponent<MaterialComponent>()[i].Use();
+            
+            Users[0].GetComponent<MaterialComponent>()[i].Use();
             
             fixed (void* ptr = _model, ptr2 = _alpha)
             {
@@ -91,10 +76,7 @@ public class Mesh : BaseMesh
 
             this[i].RenderInstanced((uint) Users.Count);   
             TexSlotManager.ResetUnit();
-            
         }
-
-        if (UseBlending) GL.Disable(EnableCap.Blend);
     }
 
     public void SetSkinned()

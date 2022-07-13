@@ -11,6 +11,7 @@ public abstract class BaseCamera : Component
     protected Vector3D<float> _right;
     protected Vector3D<float> _up;
     protected Matrix4X4<float> _view = Matrix4X4<float>.Identity;
+    public Vector3D<float> Position;
 
     protected BaseCamera(Entity? owner, float clipNear, float clipFar) : base(owner)
     {
@@ -50,5 +51,5 @@ public abstract class BaseCamera : Component
 public class CameraSystem : ComponentSystem<BaseCamera>
 {
     public static BaseCamera? CurrentCamera;
-    public static BaseCamera? Sun;
+    public static Sun? Sun;
 }

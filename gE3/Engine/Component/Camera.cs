@@ -14,8 +14,8 @@ public class Camera : BaseCamera
 
     public AudioSystem System { get; }
 
-    public Camera(Entity? owner, float fov, float clipNear, float clipEnd, AudioSystem system) : base(owner, clipNear,
-        clipEnd)
+    public Camera(Entity? owner, float fov, float clipNear, float clipFar, AudioSystem system) : base(owner, clipNear,
+        clipFar)
     {
         FOV = fov;
         System = system;
@@ -48,10 +48,12 @@ public class Camera : BaseCamera
 
         _right = Vector3D.Normalize(Vector3D.Cross(_front, Vector3D<float>.UnitY));
         _up = Vector3D.Normalize(Vector3D.Cross(_right, _front));
-        var loc = _entityTransform.Model.Transformation();
-        _view = Matrix4X4.CreateLookAt(loc, loc + _front, _up);
         
-        _attributes.Pointer->position = _entityTransform.GlobalMatrix.Transformation();
+        Position = _entityTransform.Model.Transformation();
+        
+        _view = Matrix4X4.CreateLookAt(Position, Position + _front, _up);
+        
+        _attributes.Pointer->position = Position;
         _attributes.Pointer->forward = _front;
         _attributes.Pointer->up = _up;
 

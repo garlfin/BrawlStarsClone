@@ -5,7 +5,7 @@ namespace gE3.Engine.Asset.Mesh;
 
 public unsafe class SkyboxVAO : VAO
 {
-    private static float[] skyboxVertices = {
+    private static readonly float[] SkyboxVertices = {
         -1, -1, -1,
         -1, -1, 1,
         -1, 1, 1,
@@ -16,7 +16,7 @@ public unsafe class SkyboxVAO : VAO
         1, 1, -1
     };
     
-    private static ushort[] skyboxIndices = {
+    private static readonly ushort[] SkyboxIndices = {
         0, 1, 2,
         0, 2, 3,
         4, 5, 6,
@@ -42,7 +42,7 @@ public unsafe class SkyboxVAO : VAO
         _vbo = GL.GenBuffer();
         GL.BindBuffer(GLEnum.ArrayBuffer, _vbo);
         
-        fixed (void* ptr = skyboxVertices)
+        fixed (void* ptr = SkyboxVertices)
         {
             GL.BufferData(GLEnum.ArrayBuffer, 96, ptr, GLEnum.StaticDraw);
         }
@@ -50,9 +50,9 @@ public unsafe class SkyboxVAO : VAO
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 12, (nuint*) 0);
         var ebo = GL.GenBuffer();
         GL.BindBuffer(GLEnum.ElementArrayBuffer, ebo);
-        fixed (void* ptr = skyboxIndices)
+        fixed (void* ptr = SkyboxIndices)
         {
-            GL.BufferData(GLEnum.ElementArrayBuffer, (nuint)(skyboxIndices.Length * sizeof(ushort)), ptr, GLEnum.StaticDraw);
+            GL.BufferData(GLEnum.ElementArrayBuffer, (nuint)(SkyboxIndices.Length * sizeof(ushort)), ptr, GLEnum.StaticDraw);
         }
     }
 

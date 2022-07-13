@@ -54,7 +54,7 @@ public static class MapLoader
             UseShadow = true
         };
         
-        DiffuseProgram = new ShaderProgram(window, "../../../res/shader/default.frag", "Engine/Internal/default.vert");
+        DiffuseProgram = new ShaderProgram(window, "../../../res/shader/default.frag", window.DefaultVertex);
 
         _tiles = new Mesh[2][];
         _tiles[0] = new[]
