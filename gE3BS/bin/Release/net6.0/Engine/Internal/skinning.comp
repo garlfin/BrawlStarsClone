@@ -1,6 +1,4 @@
-﻿#version 430
-
-struct Vertex {
+﻿struct Vertex {
     vec3 pos;
     float _pad0;
     vec3 normal;

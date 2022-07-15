@@ -8,16 +8,7 @@ public struct BoundingBox<T> where T : unmanaged, IFormattable, IEquatable<T>, I
     public Plane<T> Min;
     public Plane<T> Max;
 
-    public Vector3D<T>[] Vertices
-    {
-        get
-        {
-            var arr = new Vector3D<T>[8] ;
-            Array.Copy(Min.Vertices, arr, 4);
-            Array.Copy(Max.Vertices, 0, arr, 4, 4);
-            return arr;
-        }
-    }
+    public Vector3D<T>[] Vertices => new[] {Min._xyz, Min._Xyz, Min._xYz, Min._XYz, Max._xyz, Max._Xyz, Max._xYz, Max._XYz};
 
     public Vector3D<T> Center
     {

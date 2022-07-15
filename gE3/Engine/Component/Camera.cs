@@ -108,7 +108,7 @@ public class Camera : BaseCamera
             Vector3D.Normalize(new Vector3D<float>(result.X, result.Y, result.Z)));
     }
 
-    public override ViewFrustum GetViewFrustum()
+    protected override ViewFrustum GetViewFrustum()
     {
 
         var frustum = new ViewFrustum();

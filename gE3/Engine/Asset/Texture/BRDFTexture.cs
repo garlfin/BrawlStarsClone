@@ -23,10 +23,10 @@ public sealed class BRDFTexture : Texture
         _height = _width = size;
         _format = InternalFormat.RG16f;
 
-        _id = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, _id);
+        ID = GL.GenTexture();
+        GL.BindTexture(TextureTarget.Texture2D, ID);
         
-        GL.TextureStorage2D(_id, 1, (SizedInternalFormat) _format, _height, _height);
+        GL.TextureStorage2D(ID, 1, (SizedInternalFormat) _format, _height, _height);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
             (int)TextureMinFilter.Linear);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,

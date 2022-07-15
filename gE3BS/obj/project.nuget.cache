@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "8S7VCA5FmSxc3tHvMoMt2DYwH7jtQUhBpXO6oo3xQacQpdX24dzT+uh34h1i7Jzvw1AIrcg3ITyKzRbyvedxVQ==",
+  "dgSpecHash": "ubZ8dEJAjGi9TODINElg1ymjSHh/nLpj3ll8JZbHBTyOpsuqTUiv+Nhz8jpi1TMDwrxDkNxNBr2Sq3JCTXlFWQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\gE3BS\\gE3BS.csproj",
   "expectedPackageFiles": [
@@ -15,6 +15,7 @@
     "C:\\Users\\scion\\.nuget\\packages\\silk.net.input.sdl\\2.15.0\\silk.net.input.sdl.2.15.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\silk.net.maths\\2.15.0\\silk.net.maths.2.15.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\silk.net.opengl\\2.15.0\\silk.net.opengl.2.15.0.nupkg.sha512",
+    "C:\\Users\\scion\\.nuget\\packages\\silk.net.opengl.extensions.arb\\2.15.0\\silk.net.opengl.extensions.arb.2.15.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\silk.net.sdl\\2.15.0\\silk.net.sdl.2.15.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\silk.net.windowing\\2.15.0\\silk.net.windowing.2.15.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\silk.net.windowing.common\\2.15.0\\silk.net.windowing.common.2.15.0.nupkg.sha512",

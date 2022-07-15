@@ -42,7 +42,7 @@ public class Mesh : BaseMesh
 
     public Mesh(GameWindow window) : base(window)
     {
-        _window = window;
+        Window = window;
         MeshManager.Register(this);
     }
 
@@ -67,7 +67,7 @@ public class Mesh : BaseMesh
                 _alpha[j] = Users[j].GetComponent<MeshRenderer>()?.Alpha ?? 1f;
             }
             
-            Users[0].GetComponent<MaterialComponent>()[i].Use();
+            Users[0].GetComponent<MaterialComponent>()[Materials[i]].Use();
             
             fixed (void* ptr = _model, ptr2 = _alpha)
             {
@@ -76,6 +76,7 @@ public class Mesh : BaseMesh
 
             this[i].RenderInstanced((uint) Users.Count);   
             TexSlotManager.ResetUnit();
+            
         }
     }
 

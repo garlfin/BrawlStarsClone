@@ -129,6 +129,10 @@
               "target": "Package",
               "version": "[2.15.0, )"
             },
+            "Silk.NET.OpenGL.Extensions.ARB": {
+              "target": "Package",
+              "version": "[2.15.0, )"
+            },
             "Silk.NET.Windowing": {
               "target": "Package",
               "version": "[2.15.0, )"

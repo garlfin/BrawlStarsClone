@@ -51,3 +51,5 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Int
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\skybox.vert
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\fbcopy.frag
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\framebuffer.vert
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\depth.vert
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Silk.NET.OpenGL.Extensions.ARB.dll

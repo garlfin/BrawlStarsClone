@@ -1,6 +1,4 @@
-﻿#version 420 core
-
-layout (location = 0) in vec3 aPos;
+﻿layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 // layout (location = 3) in ivec4 BoneID;
@@ -10,7 +8,6 @@ struct SunInfo
 {
     mat4 ViewProj;
     vec4 SunPos;
-    vec4 PPOffset;
 };
 
 layout (std140, binding = 1) uniform SceneData {
@@ -33,7 +30,8 @@ out vec4 FragPos;
 
 flat out float alpha;
 
-void main(){
+void main()
+{
     gl_Position = projection * view * model[gl_InstanceID] * vec4(aPos, 1.0);
     
     FragPos = vec4((model[gl_InstanceID] * vec4(aPos, 1.0)).xyz, 1);

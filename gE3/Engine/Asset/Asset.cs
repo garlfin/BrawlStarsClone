@@ -5,12 +5,13 @@ namespace gE3.Engine.Asset;
 
 public abstract class Asset : IDisposable
 {
-    protected GameWindow _window;
-    // ReSharper disable once InconsistentNaming
-    protected GL GL => _window.GL;
+    protected GameWindow Window;
+    // ReSharper disable twice InconsistentNaming
+    protected GL GL => Window.GL;
+    protected Utility.ARB ARB => Window.ARB;
     protected Asset(GameWindow window)
     {
-        _window = window;
+        Window = window;
         AssetManager.Register(this);
     }
 
@@ -26,7 +27,7 @@ public abstract class Asset : IDisposable
 
     public abstract void Delete();
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         Delete();
     }

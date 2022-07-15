@@ -1,6 +1,4 @@
-﻿#version 430
-
-layout (binding = 0, rgb16f) restrict writeonly uniform imageCube outImage;
+﻿layout (binding = 0, rgb16f) restrict writeonly uniform imageCube outImage;
 layout (binding = 1, rgb16f) restrict readonly uniform imageCube inImage;
 
 layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;

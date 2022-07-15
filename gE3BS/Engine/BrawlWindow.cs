@@ -14,7 +14,7 @@ public class BrawlWindow : GameWindow
 {
     private static readonly Random Rnd = new();
     
-    public BrawlWindow(int width, int height, string name) : base(width, height, name)
+    public BrawlWindow(int width, int height, string name, bool debug = false) : base(width, height, name, debug)
     {
     }
     

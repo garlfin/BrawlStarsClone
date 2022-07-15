@@ -6,15 +6,14 @@ namespace gE3.Engine.Asset.Texture;
 
 public abstract class Texture : Asset
 {
-    protected uint _id;
-    
     protected uint _width;
     protected uint _height;
     protected InternalFormat _format;
     
     public Vector2D<uint> Size => new(_width, _height);
-    public uint ID => _id;
-    
+    public uint ID { get; protected set; }
+    public ulong Handle { get; protected set; }
+
     public Texture(GameWindow window, uint width, uint height, InternalFormat format) : base(window)
     {
         _width = width;
@@ -25,20 +24,26 @@ public abstract class Texture : Asset
     public Texture(GameWindow window) : base(window)
     {
         
+    }  
+    protected void GenerateHandle()
+    {
+        if (ARB.BT == null) return;
+        
+        Handle = ARB.BT.GetTextureHandle(ID);
+        ARB.BT.MakeTextureHandleResident(Handle);
     }
 
     public override int Use(int slot)
     {
-        if (TexSlotManager.IsSameSlot(slot, _id)) return slot;
-        TexSlotManager.SetSlot(slot, _id);
-        GL.ActiveTexture(TextureUnit.Texture0 + slot);
-        GL.BindTexture(TextureTarget.Texture2D, _id);
+        if (TexSlotManager.IsSameSlot(slot, ID)) return slot;
+        TexSlotManager.SetSlot(slot, ID);
+        GL.BindTextureUnit((uint)slot, ID);
         return slot;
     }
 
     public virtual int Use(int slot, BufferAccessARB access, int level = 0)
     {
-        GL.BindImageTexture((uint) slot, _id, level, false, 0, access, _format);
+        GL.BindImageTexture((uint) slot, ID, level, false, 0, access, _format);
         return slot;
     }
 
@@ -56,12 +61,13 @@ public abstract class Texture : Asset
         TextureTarget target = TextureTarget.Texture2D, int level = 0)
     {
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, attachmentLevel, target, _id, level);
+        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, attachmentLevel, target, ID, level);
     }
 
     public override void Delete()
     {
-        GL.DeleteTexture(_id);
+        ARB.BT.MakeTextureHandleNonResident(Handle);
+        GL.DeleteTexture(ID);
     }
 }
 

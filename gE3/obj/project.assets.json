@@ -127,6 +127,19 @@
           "lib/net5.0/Silk.NET.OpenGL.dll": {}
         }
       },
+      "Silk.NET.OpenGL.Extensions.ARB/2.15.0": {
+        "type": "package",
+        "dependencies": {
+          "Silk.NET.Core": "2.15.0",
+          "Silk.NET.OpenGL": "2.15.0"
+        },
+        "compile": {
+          "lib/net5.0/Silk.NET.OpenGL.Extensions.ARB.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/Silk.NET.OpenGL.Extensions.ARB.dll": {}
+        }
+      },
       "Silk.NET.SDL/2.15.0": {
         "type": "package",
         "dependencies": {
@@ -564,6 +577,27 @@
         "silkdotnet_v3.png"
       ]
     },
+    "Silk.NET.OpenGL.Extensions.ARB/2.15.0": {
+      "sha512": "QMTSQSxFwonHnm7H+0Zw6WnSNNQVnquQnt0aauuns5vLOjAyUHeFeiNV782X5gr1ZLrT7RSYYIFwFjSpGY1Dnw==",
+      "type": "package",
+      "path": "silk.net.opengl.extensions.arb/2.15.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net5.0/Silk.NET.OpenGL.Extensions.ARB.dll",
+        "lib/net5.0/Silk.NET.OpenGL.Extensions.ARB.xml",
+        "lib/netcoreapp3.1/Silk.NET.OpenGL.Extensions.ARB.dll",
+        "lib/netcoreapp3.1/Silk.NET.OpenGL.Extensions.ARB.xml",
+        "lib/netstandard2.0/Silk.NET.OpenGL.Extensions.ARB.dll",
+        "lib/netstandard2.0/Silk.NET.OpenGL.Extensions.ARB.xml",
+        "lib/netstandard2.1/Silk.NET.OpenGL.Extensions.ARB.dll",
+        "lib/netstandard2.1/Silk.NET.OpenGL.Extensions.ARB.xml",
+        "silk.net.opengl.extensions.arb.2.15.0.nupkg.sha512",
+        "silk.net.opengl.extensions.arb.nuspec",
+        "silkdotnet_v3.png"
+      ]
+    },
     "Silk.NET.SDL/2.15.0": {
       "sha512": "rx5T+25piwGWrpHhddC/7w5GivikUJC7oCtfkMtZ7708RCQPx1tgkP+LfSOfafkl2SSupaRzzPZkwzD4glxDwA==",
       "type": "package",
@@ -821,6 +855,7 @@
       "Silk.NET.Input >= 2.15.0",
       "Silk.NET.Maths >= 2.15.0",
       "Silk.NET.OpenGL >= 2.15.0",
+      "Silk.NET.OpenGL.Extensions.ARB >= 2.15.0",
       "Silk.NET.Windowing >= 2.15.0",
       "Silk.NET.Windowing.Desktop >= 1.9.0"
     ]
@@ -882,6 +917,10 @@
             "version": "[2.15.0, )"
           },
           "Silk.NET.OpenGL": {
+            "target": "Package",
+            "version": "[2.15.0, )"
+          },
+          "Silk.NET.OpenGL.Extensions.ARB": {
             "target": "Package",
             "version": "[2.15.0, )"
           },

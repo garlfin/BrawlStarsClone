@@ -22,3 +22,4 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Inter
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\skybox.vert
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\fbcopy.frag
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\framebuffer.vert
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\depth.vert

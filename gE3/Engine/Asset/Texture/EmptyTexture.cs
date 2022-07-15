@@ -9,8 +9,8 @@ public class EmptyTexture : Texture
         TextureWrapMode wrapMode = TextureWrapMode.Repeat, TexFilterMode filterMode = TexFilterMode.Linear,
         PixelFormat pixelFormat = PixelFormat.Rgb, bool genMips = false, bool shadow = false) : base(window, width, height, format)
     {
-        _id = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, _id);
+        ID = GL.GenTexture();
+        GL.BindTexture(TextureTarget.Texture2D, ID);
         GL.TexImage2D(TextureTarget.Texture2D, 0,format, width, height, 0, pixelFormat, PixelType.Short, (void*) 0);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
@@ -19,7 +19,7 @@ public class EmptyTexture : Texture
                 (int)TextureCompareMode.CompareRefToTexture);
 
         TextureMinFilter filter;
-        var magFilter =
+        TextureMinFilter magFilter =
             filter = filterMode is TexFilterMode.Linear ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
         if (genMips)
             filter = filterMode is TexFilterMode.Linear
@@ -31,5 +31,6 @@ public class EmptyTexture : Texture
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filter);
 
         if (genMips) GL.GenerateMipmap(TextureTarget.Texture2D);
+        GenerateHandle();
     }
 }

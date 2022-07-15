@@ -12,6 +12,7 @@
           "Silk.NET.Input": "2.15.0",
           "Silk.NET.Maths": "2.15.0",
           "Silk.NET.OpenGL": "2.15.0",
+          "Silk.NET.OpenGL.Extensions.ARB": "2.15.0",
           "Silk.NET.Windowing": "2.15.0",
           "Silk.NET.Windowing.Desktop": "1.9.0"
         },
@@ -121,6 +122,18 @@
         },
         "runtime": {
           "lib/net5.0/Silk.NET.OpenGL.dll": {
+            "assemblyVersion": "2.15.0.0",
+            "fileVersion": "2.15.0.0"
+          }
+        }
+      },
+      "Silk.NET.OpenGL.Extensions.ARB/2.15.0": {
+        "dependencies": {
+          "Silk.NET.Core": "2.15.0",
+          "Silk.NET.OpenGL": "2.15.0"
+        },
+        "runtime": {
+          "lib/net5.0/Silk.NET.OpenGL.Extensions.ARB.dll": {
             "assemblyVersion": "2.15.0.0",
             "fileVersion": "2.15.0.0"
           }
@@ -328,6 +341,13 @@
       "sha512": "sha512-OjbNtoY/yumri3auFVrspQTfj7HJnvrOqYidQXFJ24ei7Vjxo0Rij5hBxiy4n9ukhD6hdmJA2nNzdsNoq4us8Q==",
       "path": "silk.net.opengl/2.15.0",
       "hashPath": "silk.net.opengl.2.15.0.nupkg.sha512"
+    },
+    "Silk.NET.OpenGL.Extensions.ARB/2.15.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-QMTSQSxFwonHnm7H+0Zw6WnSNNQVnquQnt0aauuns5vLOjAyUHeFeiNV782X5gr1ZLrT7RSYYIFwFjSpGY1Dnw==",
+      "path": "silk.net.opengl.extensions.arb/2.15.0",
+      "hashPath": "silk.net.opengl.extensions.arb.2.15.0.nupkg.sha512"
     },
     "Silk.NET.SDL/2.15.0": {
       "type": "package",

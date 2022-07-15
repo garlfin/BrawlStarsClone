@@ -134,7 +134,7 @@ internal class SkinManager : ComponentSystem<Animator>
 
     public static unsafe void Init(GameWindow window)
     {
-        MatBuffer = new ShaderBuffer(window, sizeof(Matrix4X4<float>) * 255, BufferUsageARB.StreamDraw, Target.ShaderStorageBuffer);
+        MatBuffer = new ShaderBuffer(window, sizeof(Matrix4X4<float>) * 255, Target.ShaderStorageBuffer);
         MatBuffer.Bind(4);
         SkinningShader = new ShaderProgram(window, "Engine/Internal/skinning.comp");
     }

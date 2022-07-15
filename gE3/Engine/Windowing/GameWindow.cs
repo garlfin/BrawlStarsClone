@@ -19,7 +19,7 @@ namespace gE3.Engine.Windowing;
 
 public class GameWindow
 {
-    
+    private readonly bool _debug;
     public Shader FramebufferShader { get; private set; }
     public Shader DefaultVertex { get; private set; }
     
@@ -32,7 +32,7 @@ public class GameWindow
     public IKeyboard Keyboard => Input.Keyboards[0];
 
     private EmptyTexture _screenTexture;
-    private EmptyTexture _screenSpeular;
+    private EmptyTexture _prevScreenTexture;
     private FrameBuffer _screenFramebuffer;
     private RenderBuffer _screenDepth; 
     //public EmptyTexture PrevScreenTexture { get; private set; }
@@ -45,16 +45,18 @@ public class GameWindow
     private bool _isClosed;
     
     // ReSharper disable once InconsistentNaming
-    public GL GL { get; set; }
+    public GL GL { get; private set; }
+    public ARB ARB { get; private set; }
 
 
-    public GameWindow(int width, int height, string name)
+    public GameWindow(int width, int height, string name, bool debug = false)
     {
+        _debug = debug;
         var windowOptions = WindowOptions.Default;
         windowOptions.Samples = 0;
         windowOptions.Size = new Vector2D<int>(width, height);
         windowOptions.Title = name;
-        windowOptions.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Default, new APIVersion(4, 5));
+        windowOptions.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, _debug ? ContextFlags.Debug : ContextFlags.Default, new APIVersion(4, 6));
         windowOptions.FramesPerSecond = 144;
         View = Window.Create(windowOptions);
     }
@@ -108,7 +110,7 @@ public class GameWindow
         AssetManager.StartRemoval();
         System.Update();
     }
-
+    
     protected virtual void OnMouseMove(IMouse mouse, Vector2 vector2)
     {
         BehaviorSystem.MouseMove(new MouseMoveEventArgs(mouse, new Vector2D<float>(vector2.X, vector2.Y)));
@@ -117,12 +119,20 @@ public class GameWindow
     private void OnClose()
     {
         _isClosed = true;
+        
+        if (!_debug) return;
+        
+        Console.WriteLine("Press any key to exit.");
+        Console.ReadLine();
     }
 
     private void InternalLoad()
     {
         GL = GL.GetApi(View);
-        //Debug.Init(this);
+        Console.WriteLine($"API: {GL.GetStringS(StringName.Version)}");
+        ARB = new ARB(GL);
+        
+        if (_debug) Debug.Init(this);
         Input = View.CreateInput();
         Input.Mice[0].MouseMove += OnMouseMove;
         System = new AudioSystem(out _);
@@ -164,6 +174,8 @@ public class GameWindow
         _screenTexture = new EmptyTexture(this, Size.X, Size.Y, InternalFormat.Rgba32f, TextureWrapMode.ClampToBorder,
             TexFilterMode.Linear, PixelFormat.Rgba);
         _screenTexture.BindToFrameBuffer(_screenFramebuffer, FramebufferAttachment.ColorAttachment0);
+        _prevScreenTexture = new EmptyTexture(this, Size.X, Size.Y, InternalFormat.Rgba32f,
+            TextureWrapMode.ClampToBorder, TexFilterMode.Linear, PixelFormat.Rgba);
 
         _fbCopyProgram = new ShaderProgram(this, "Engine/Internal/fbcopy.frag", FramebufferShader);
         _screenPlane = new PlaneVAO(this);
@@ -178,8 +190,7 @@ public class GameWindow
         CameraSystem.Render(0f);
         ProgramManager.InitFrame(this);
 
-        
-        _depthShader = new ShaderProgram(this, "Engine/Internal/depth.frag", DefaultVertex);
+        _depthShader = new ShaderProgram(this, "Engine/Internal/depth.frag", "Engine/Internal/depth.vert");
         _depthShader.Use();
 
         MeshRendererSystem.Render(0f);
@@ -230,12 +241,15 @@ public class GameWindow
         MeshManager.Render();
 
         State = EngineState.PostProcess;
-        
-        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         _fbCopyProgram.SetUniform(0, _screenTexture.Use(0));
         _fbCopyProgram.Use();
         _screenPlane.Render();
+        
+        GL.CopyImageSubData(_screenTexture.ID, CopyImageSubDataTarget.Texture2D, 0, 0, 0, 0, _prevScreenTexture.ID,
+            GLEnum.Texture2D, 0, 0, 0, 0, _screenTexture.Size.X, _screenTexture.Size.Y, 1);
+        
 
         /*if (_skyboxVao != null && Skybox != null && _skyboxShader != null)
         {

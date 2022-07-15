@@ -40,7 +40,7 @@ public abstract class BaseCamera : Component
     public abstract Vector3D<float> WorldToScreen(ref Vector3D<float> point);
     public abstract Vector3D<float> ScreenToWorld2D(ref Vector3D<float> point);
     public abstract RayInfo ScreenToRay(ref Vector2D<float> point);
-    public abstract ViewFrustum GetViewFrustum();
+    protected abstract ViewFrustum GetViewFrustum();
 
     public virtual void Set()
     {

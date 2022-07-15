@@ -14,8 +14,8 @@ public class ShaderProgram : Asset
         if (managed) ProgramManager.Register(this);
         ID = GL.CreateProgram();
 
-        Shader fragment = new Shader(_window, fragPath, ShaderType.FragmentShader);
-        Shader vertex = new Shader(_window, vertPath, ShaderType.VertexShader);
+        Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader);
+        Shader vertex = new Shader(Window, vertPath, ShaderType.VertexShader);
 
         fragment.Attach(this);
         vertex.Attach(this);
@@ -26,13 +26,13 @@ public class ShaderProgram : Asset
         vertex.Delete();
     }
     
-    public ShaderProgram(GameWindow window, string fragPath, string vertPath, string deferredPath) : base(window)
+    public ShaderProgram(GameWindow window, string fragPath, string vertPath) : base(window)
     {
         ProgramManager.Register(this);
         ID = GL.CreateProgram();
-        
-        Shader fragment = new Shader(_window, fragPath, ShaderType.FragmentShader);
-        Shader vertex = new Shader(_window, vertPath, ShaderType.VertexShader);
+
+        Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader);
+        Shader vertex = new Shader(Window, vertPath, ShaderType.VertexShader);
 
         fragment.Attach(this);
         vertex.Attach(this);
@@ -48,12 +48,15 @@ public class ShaderProgram : Asset
         ProgramManager.Register(this);
         ID = GL.CreateProgram();
         
-        Shader fragment = new Shader(_window, fragPath, ShaderType.FragmentShader);
+        Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader);
 
         fragment.Attach(this);
         vertex.Attach(this);
         
         GL.LinkProgram(ID);
+
+        GL.GetProgramInfoLog(ID, out var infoLog);
+        if (!string.IsNullOrEmpty(infoLog)) throw new System.Exception(infoLog);
         
         fragment.Delete();
     }
@@ -152,10 +155,10 @@ public static class ProgramManager
 
     public static unsafe void Init(GameWindow window)
     {
-        _sceneData = new ShaderBuffer(window, sizeof(SceneData), BufferUsageARB.StreamDraw);
+        _sceneData = new ShaderBuffer(window, sizeof(SceneData));
         _sceneData.Bind(1);
         
-        _objectData = new ShaderBuffer(window, sizeof(ObjectData), BufferUsageARB.StreamDraw);
+        _objectData = new ShaderBuffer(window, sizeof(ObjectData));
         _objectData.Bind(2);
 
         _scene.Sun = new SunInfo();

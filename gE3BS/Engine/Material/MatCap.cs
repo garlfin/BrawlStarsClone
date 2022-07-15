@@ -1,12 +1,12 @@
 ﻿using gE3.Engine.Asset.Texture;
 using Silk.NET.Maths;
 
-namespace gE3.Engine.Asset.Material;
+namespace gE3BS.Engine.Material;
 
 public struct MatCap
 {
-    public ImageTexture Diffuse = null;
-    public ImageTexture Specular = null;
+    public ImageTexture? Diffuse = null;
+    public ImageTexture? Specular = null;
     public bool UseDiffuse = true;
     public bool UseSpecular = false;
     public bool UseShadow = true;

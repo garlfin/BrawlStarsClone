@@ -3,11 +3,11 @@ using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Material;
 
-public class Material
+public abstract class Material
 {
     protected readonly ShaderProgram Program;
     protected readonly GameWindow Window;
-    protected readonly DepthFunction _function;
+    private readonly DepthFunction _function;
 
     protected Material(GameWindow window, ShaderProgram program, string name, DepthFunction function = DepthFunction.Less)
     {
@@ -21,15 +21,18 @@ public class Material
 
     public void Use()
     {
-        Window.GL.DepthFunc(Window.State is EngineState.PreZ or EngineState.Shadow ? _function : DepthFunction.Equal);
-        if (Window.State == EngineState.Render) Program.Use();
-        Set();
-    }
-    
-    protected virtual void Set()
-    {
+        if (Window.State is EngineState.Shadow or EngineState.PreZ) Window.GL.DepthFunc(_function);
+        RequiredSet();
+
+        if (Window.State != EngineState.Render) return;
         
+        Program.Use();
+        Set();
+
     }
+
+    protected abstract void RequiredSet();
+    protected abstract void Set();
     public override string ToString()
     {
         return Name;

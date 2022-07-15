@@ -21,7 +21,7 @@ public class Sun : BaseCamera
         ViewFrustum = new ViewFrustum();
     }
 
-    public override ViewFrustum GetViewFrustum()
+    protected override ViewFrustum GetViewFrustum()
     {
         throw new NotImplementedException();
     }

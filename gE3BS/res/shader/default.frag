@@ -1,18 +1,31 @@
-﻿#version 420 core
-
-in vec4 TexCoord;
+﻿in vec4 TexCoord;
 in vec4 FragPosLightSpace;
 
-layout (std140, binding = 3) uniform MatcapData {
+layout(early_fragment_tests) in;
+
+layout(std430, binding = 3) buffer MatcapData
+{
     vec4 influence;
     vec4 specularColor;
+    #ifdef GL_ARB_bindless_texture
+    sampler2D albedoTex;
+    sampler2D diffCap;
+    sampler2D specCap;
+    sampler2D shadowMap;
+    #endif
 };
+
+#ifndef GL_ARB_bindless_texture
+uniform sampler2D albedoTex;
+uniform sampler2D diffCap;
+uniform sampler2D specCap;
+uniform sampler2D shadowMap;
+#endif
 
 struct SunInfo
 {
     mat4 ViewProj;
     vec4 SunPos;
-    vec4 PPOffset;
 };
 
 layout (std140, binding = 1) uniform SceneData {
@@ -22,10 +35,6 @@ layout (std140, binding = 1) uniform SceneData {
     SunInfo sun;
 };
 
-uniform sampler2D albedoTex;
-uniform sampler2D diffCap;
-uniform sampler2D specCap;
-uniform sampler2D shadowMap;
 
 flat in float alpha;
 in vec3 Normal;

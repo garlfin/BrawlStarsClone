@@ -43,8 +43,8 @@ public class EnvironmentTexture : Texture
 
         _format = header.Format.ToInternalFormat();
         
-        _id = GL.GenTexture();
-        GL.BindTexture(TextureTarget.TextureCubeMap, _id);
+        ID = GL.GenTexture();
+        GL.BindTexture(TextureTarget.TextureCubeMap, ID);
 
         var compression = header.CompressionRatio;
 
@@ -88,10 +88,10 @@ public class EnvironmentTexture : Texture
 
     public override int Use(int slot)
     {
-        if (TexSlotManager.IsSameSlot(slot, _id)) return slot;
-        TexSlotManager.SetSlot(slot, _id);
+        if (TexSlotManager.IsSameSlot(slot, ID)) return slot;
+        TexSlotManager.SetSlot(slot, ID);
         GL.ActiveTexture(TextureUnit.Texture0 + slot);
-        GL.BindTexture(TextureTarget.TextureCubeMap, _id);
+        GL.BindTexture(TextureTarget.TextureCubeMap, ID);
         return slot;
     }
 }
