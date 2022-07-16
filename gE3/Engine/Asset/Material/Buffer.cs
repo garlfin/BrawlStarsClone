@@ -1,20 +1,19 @@
 ﻿using gE3.Engine.Windowing;
 using Silk.NET.OpenGL;
 
-namespace gE3.Engine.Asset;
+namespace gE3.Engine.Asset.Material;
 
-public class ShaderBuffer : Asset
+public class Buffer : Asset
 {
     private readonly Target _target;
     public int Size { get; }
-    public uint ID { get; }
     public uint Location { get; private set; }
-    public unsafe ShaderBuffer(GameWindow window, int size,
+    public unsafe Buffer(GameWindow window, int size,
         Target target = Target.UniformBuffer) : base(window)
     {
         _target = target;
         Size = size;
-        ID = GL.CreateBuffer();
+        _id = GL.CreateBuffer();
         GL.NamedBufferStorage(ID, (nuint)size, (void*)0, BufferStorageMask.DynamicStorageBit);
     }
     

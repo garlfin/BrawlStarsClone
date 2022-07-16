@@ -5,25 +5,22 @@ namespace gE3.Engine.Asset.Audio;
 
 public unsafe class SoundEvent : Asset
 {
-    private PinnedObject<EventDescription> _eventDescription;
-
+    private readonly PinnedObject<EventDescription> _eventDescription;
     public EventDescription* EventDescription => _eventDescription.Pointer;
-    
-    public List<SoundEventInstance> Instances { get; } = new();
-
-    private AudioSystem _audioSystem;
+    public List<SoundEventInstance> Instances { get; } = new List<SoundEventInstance>();
+    private readonly AudioSystem _audioSystem;
 
     public SoundEvent(AudioSystem audioSystem, string name)
     {
         _audioSystem = audioSystem;
         _audioSystem.Events.Add(this);
-        audioSystem.Studio->GetEvent(name, out var eventDescription);
+        audioSystem.Studio->GetEvent(name, out EventDescription eventDescription);
         _eventDescription = new PinnedObject<EventDescription>(ref eventDescription);
     }
 
     public SoundEventInstance CreateInstance()
     {
-        var instance = new SoundEventInstance(this);
+        SoundEventInstance instance = new SoundEventInstance(this);
         Instances.Add(instance);
         return instance;
     }

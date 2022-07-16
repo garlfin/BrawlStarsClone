@@ -4,6 +4,7 @@ using gE3.Engine.Asset.Texture;
 using gE3.Engine.Map;
 using gE3.Engine.Windowing;
 using Silk.NET.Maths;
+using Buffer = gE3.Engine.Asset.Material.Buffer;
 using Texture = gE3.Engine.Asset.Texture.Texture;
 
 namespace gE3BS.Engine.Material;
@@ -60,14 +61,14 @@ public class MatCapMaterial : gE3.Engine.Asset.Material.Material
 
 public static class MatCapManager
 {
-    private static ShaderBuffer MatCap { get; set; } = null!;
+    private static Buffer MatCap { get; set; } = null!;
     private static MatCapUniformBuffer _matCapData;
 
     private static GameWindow _window;
 
     public static unsafe void Init(GameWindow window)
     {
-        MatCap = new ShaderBuffer(window, sizeof(MatCapUniformBuffer), Target.ShaderStorageBuffer);
+        MatCap = new Buffer(window, sizeof(MatCapUniformBuffer), Target.ShaderStorageBuffer);
         MatCap.Bind(3);
         _window = window;
     }

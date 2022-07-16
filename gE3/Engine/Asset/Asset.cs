@@ -6,9 +6,15 @@ namespace gE3.Engine.Asset;
 public abstract class Asset : IDisposable
 {
     protected GameWindow Window;
+    
+
     // ReSharper disable twice InconsistentNaming
     protected GL GL => Window.GL;
     protected Utility.ARB ARB => Window.ARB;
+    
+    protected uint _id;
+    public uint ID => _id;
+
     protected Asset(GameWindow window)
     {
         Window = window;

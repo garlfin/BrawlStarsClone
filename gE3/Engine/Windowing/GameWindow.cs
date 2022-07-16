@@ -123,7 +123,7 @@ public class GameWindow
         if (!_debug) return;
         
         Console.WriteLine("Press any key to exit.");
-        Console.ReadLine();
+        Console.ReadKey();
     }
 
     private void InternalLoad()
@@ -156,10 +156,9 @@ public class GameWindow
         
         GL.Enable(EnableCap.DepthTest);
         GL.Enable(EnableCap.CullFace);
-                                                                                                                  
         GL.Enable(EnableCap.TextureCubeMapSeamless);
         
-        State = EngineState.Shadow;
+        
         
         ShadowBuffer = new FrameBuffer(this, 2048, 2048, new []{DrawBufferMode.None});
         ShadowMap = new EmptyTexture(this, 2048, 2048, InternalFormat.DepthComponent16, TextureWrapMode.ClampToEdge,
@@ -185,10 +184,13 @@ public class GameWindow
         PhysicsSystem.Load();
 
         ShadowBuffer.Bind(ClearBufferMask.DepthBufferBit);
-
+        
+        State = EngineState.Shadow;
+        
         TransformSystem.Update(Root);
         CameraSystem.Render(0f);
         ProgramManager.InitFrame(this);
+        MeshManager.VerifyUsers();
 
         _depthShader = new ShaderProgram(this, "Engine/Internal/depth.frag", "Engine/Internal/depth.vert");
         _depthShader.Use();

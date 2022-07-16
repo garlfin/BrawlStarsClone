@@ -23,30 +23,22 @@ public class EnvironmentTexture : Texture
 
         int passedMetaDataSize = 0;
 
-        bool flipImage = false;
-        
         while (passedMetaDataSize < header.MetaDataSize)
         {
             reader.ReadBytes(4); // FourCC
             var key = reader.ReadUInt32();
             var dataSize = reader.ReadUInt32();
-            if (key == 3)
-            {
-                reader.ReadByte();
-                flipImage = reader.ReadByte() == 1;
-                reader.ReadByte();
-            } else
-                reader.ReadBytes((int)dataSize);
-
+            
+            reader.ReadBytes((int)dataSize);
             passedMetaDataSize += (int) dataSize + 12;
         }
 
         _format = header.Format.ToInternalFormat();
         
-        ID = GL.GenTexture();
+        _id = GL.GenTexture();
         GL.BindTexture(TextureTarget.TextureCubeMap, ID);
 
-        var compression = header.CompressionRatio;
+        CompressionRatio compression = header.CompressionRatio;
 
         for (byte face = 0; face < 6; face++)
         {
@@ -57,7 +49,6 @@ public class EnvironmentTexture : Texture
                                    compression.Bytes);
                 if (!header.Compressed) toRead = (int)(currentMipSize.X * currentMipSize.Y * 4 * 3);
                 var imageData = reader.ReadBytes(toRead);
-                if (flipImage) Array.Reverse(imageData);
                 fixed (void* ptr = imageData)
                 {
                     if (header.Compressed)
@@ -73,13 +64,9 @@ public class EnvironmentTexture : Texture
         GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
         GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter,
-            (int)(
-                (calcMip && genMips) ||
-                header.MipMapCount > 1 // If we want to calculate mips and generate mips, or we already have mips set the filter to mip mode
-                    ? TextureMinFilter.LinearMipmapLinear
-                    : TextureMinFilter.Linear));
+            (int)(calcMip && genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
         GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        if (calcMip && genMips && header.MipMapCount == 1)
+        if (calcMip && genMips)
             GL.GenerateMipmap(TextureTarget.TextureCubeMap); // If we have no mips, generate them
         
         reader.Close();

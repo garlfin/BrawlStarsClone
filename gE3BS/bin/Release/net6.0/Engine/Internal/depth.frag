@@ -8,7 +8,7 @@ layout(std430, binding = 3) buffer MatcapData
 {
     vec4 influence;
     vec4 specularColor;
-    #ifdef GL_ARB_bindless_texture
+    #ifdef ARB_BINDLESS
     sampler2D albedoTex;
     sampler2D diffCap;
     sampler2D specCap;
@@ -16,7 +16,7 @@ layout(std430, binding = 3) buffer MatcapData
     #endif
 };
 
-#ifndef GL_ARB_bindless_texture
+#ifndef ARB_BINDLESS
 uniform sampler2D albedoTex;
 #endif
 

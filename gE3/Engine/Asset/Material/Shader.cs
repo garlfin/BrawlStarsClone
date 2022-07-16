@@ -6,21 +6,20 @@ namespace gE3.Engine.Asset.Material;
 
 public class Shader : Asset
 {
-    public uint ID { get; }
-
     public Shader(GameWindow window, string path, ShaderType type) : base(window)
     {
-        ID = GL.CreateShader(type);
+        _id = GL.CreateShader(type);
 
         APIVersion apiVersion = window.View.API.Version;
         
-        var source = $"#version {apiVersion.MajorVersion}{apiVersion.MinorVersion}0 core \n #extension GL_ARB_bindless_texture : enable \n";
+        var source = $"#version {apiVersion.MajorVersion}{apiVersion.MinorVersion}0 core \n";
+        if (ARB.BT != null) source += "#extension GL_ARB_bindless_texture : require \n #define ARB_BINDLESS 1 \n";
 
         GL.ShaderSource(ID, source + File.ReadAllText(path));
         GL.CompileShader(ID);
 
         var log = GL.GetShaderInfoLog(ID);
-        if (!string.IsNullOrEmpty(log)) throw new System.Exception($"File {path} compile error: {log}");
+        if (!string.IsNullOrEmpty(log)) Console.WriteLine($"File {path} compile error:\n {log}");
     }
 
     public void Attach(ShaderProgram program)

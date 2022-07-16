@@ -10,8 +10,7 @@ public abstract class Texture : Asset
     protected uint _height;
     protected InternalFormat _format;
     
-    public Vector2D<uint> Size => new(_width, _height);
-    public uint ID { get; protected set; }
+    public Vector2D<uint> Size => new Vector2D<uint>(_width, _height);
     public ulong Handle { get; protected set; }
 
     public Texture(GameWindow window, uint width, uint height, InternalFormat format) : base(window)
@@ -25,10 +24,10 @@ public abstract class Texture : Asset
     {
         
     }  
-    protected void GenerateHandle()
+    protected void GetHandle()
     {
         if (ARB.BT == null) return;
-        
+
         Handle = ARB.BT.GetTextureHandle(ID);
         ARB.BT.MakeTextureHandleResident(Handle);
     }
@@ -57,11 +56,9 @@ public abstract class Texture : Asset
         return new Vector2D<uint>(_width >> level, _height >> level); // Thank you bit shift ily
     }
 
-    public virtual void BindToFrameBuffer(FrameBuffer.FrameBuffer buffer, FramebufferAttachment attachmentLevel,
-        TextureTarget target = TextureTarget.Texture2D, int level = 0)
+    public virtual void BindToFrameBuffer(FrameBuffer.FrameBuffer buffer, FramebufferAttachment attachmentLevel, int level = 0)
     {
-        GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
-        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, attachmentLevel, target, ID, level);
+        GL.NamedFramebufferTexture(buffer.ID, attachmentLevel, _id, level);
     }
 
     public override void Delete()

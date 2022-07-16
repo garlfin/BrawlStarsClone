@@ -33,8 +33,8 @@ public unsafe class AudioSystem : Asset
 
     public Result LoadBank(string path, bool nonBlocking = false)
     {
-        var result = Studio->LoadBankFile(path, nonBlocking ? LoadBankFlags.Nonblocking : LoadBankFlags.Normal,
-            out var tempBank);
+        Result result = Studio->LoadBankFile(path, nonBlocking ? LoadBankFlags.Nonblocking : LoadBankFlags.Normal,
+            out Bank tempBank);
         if (result != Result.Ok)
             throw new System.Exception(result.ToString());
         Banks.Push(new PinnedObject<Bank>(ref tempBank));

@@ -17,13 +17,12 @@ public class FrameBuffer : Asset
         ReadBuffer = read;
         DrawBuffers = draw ?? new[] { DrawBufferMode.ColorAttachment0 };
         
-        ID = GL.GenFramebuffer();
+        _id = GL.GenFramebuffer();
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, ID);
-        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        
     }
 
     public Vector2D<uint> Size => new(_width, _height);
-    public uint ID { get; }
 
     public GLEnum Status
     {

@@ -60,23 +60,29 @@ public class Mesh : BaseMesh
     {
         for (var i = 0; i < MeshVAO.Length; i++)
         {
-            var users = Math.Min(Users.Count, 100);
-            for (var j = 0; j < users; j++)
-            {
-                _model[j] = Users[j].GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
-                _alpha[j] = Users[j].GetComponent<MeshRenderer>()?.Alpha ?? 1f;
-            }
-            
             Users[0].GetComponent<MaterialComponent>()[Materials[i]].Use();
-            
-            fixed (void* ptr = _model, ptr2 = _alpha)
+            var index = 0;
+            while (true)
             {
-                ProgramManager.PushObjects(ptr, ptr2, users);
-            }
+                var leftover = Users.Count - index * 100;
+                var users = Math.Min(leftover, 100);
+                
+                for (var j = 0; j < users; j++)
+                {
+                    _model[j] = Users[index + j].GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
+                    _alpha[j] = Users[index + j].GetComponent<MeshRenderer>()?.Alpha ?? 1f;
+                }
 
-            this[i].RenderInstanced((uint) Users.Count);   
+                fixed (void* ptr = _model, ptr2 = _alpha)
+                {
+                    ProgramManager.PushObjects(ptr, ptr2, users);
+                }
+                this[i].RenderInstanced((uint)Users.Count);
+                
+                index += 100;
+                if (leftover - 100 < 0) break;
+            }
             TexSlotManager.ResetUnit();
-            
         }
     }
 

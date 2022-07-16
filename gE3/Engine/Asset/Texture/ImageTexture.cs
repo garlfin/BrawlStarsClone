@@ -19,69 +19,53 @@ public class ImageTexture : Texture
 
         if (header.NumSurfaces + header.Depth + header.NumFaces > 3) throw new System.Exception("Invalid file");
 
-        var calcMip = header.MipMapCount == 1;
+        var calcMip = header.MipMapCount < GetMipsCount();
         var passedMetaDataSize = 0;
-        var flipImage = false;
-        
+
         while (passedMetaDataSize < header.MetaDataSize)
         {
             reader.ReadBytes(4); // FourCC
             var key = reader.ReadUInt32();
             var dataSize = reader.ReadUInt32();
-            if (key == 3)
-            {
-                reader.ReadByte();
-                flipImage = reader.ReadByte() == 1;
-                reader.ReadByte();
-            } else
-                reader.ReadBytes((int)dataSize);
-
+            
+            reader.ReadBytes((int)dataSize);
+            
             passedMetaDataSize += (int) dataSize + 12;
         }
         
         _format = header.Format.ToInternalFormat();
         if (header.ColorSpace is ColorSpace.sRGB) _format += 2140;
-
-        GL.CreateTextures(TextureTarget.Texture2D, 1, out uint id);
-        ID = id;
-        
-        
         CompressionRatio compression = header.CompressionRatio;
+        
+        GL.CreateTextures(TextureTarget.Texture2D, 1, out _id);
 
         GL.TextureStorage2D(ID, (uint) GetMipsCount(), (GLEnum)_format, _width, _height);
-        
         GL.TextureParameter(ID, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
         GL.TextureParameter(ID, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-
-        GL.TextureParameter(ID, TextureParameterName.TextureMinFilter,
-            (int)((calcMip && genMips) || header.MipMapCount > 1 // If we want to calculate mips and generate mips, or we already have mips set the filter to mip mode
-                ? TextureMinFilter.LinearMipmapLinear
-                : TextureMinFilter.Linear));
         GL.TextureParameter(ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        
-        for (byte mip = 0; mip < header.MipMapCount; mip++)
+        GL.TextureParameter(ID, TextureParameterName.TextureMinFilter, (int)(calcMip && genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
+        for (byte mip = 0; mip < header.MipMapCount; mip++) // The texture would have to be 1.15792089 * 10^77px to overflow.. Not happening LOL
         {
             var currentMipSize = GetMipSize(mip);
-            var toRead = (int)(MathF.Ceiling((float)currentMipSize.X * currentMipSize.Y / compression.Pixels) *
-                               compression.Bytes);
-            if (!header.Compressed) toRead = (int)(currentMipSize.X * currentMipSize.Y);
+            var toRead = (int)(currentMipSize.X * currentMipSize.Y);
+            if (header.Compressed) toRead = (int)(MathF.Ceiling((float)currentMipSize.X * currentMipSize.Y / compression.Pixels) * compression.Bytes);
+            
             var imageData = reader.ReadBytes(toRead);
-            if (flipImage) Array.Reverse(imageData);
+
             fixed (void* ptr = imageData)
             {
-                if (header.Compressed)
-                    GL.CompressedTextureSubImage2D(ID, mip, 0, 0, currentMipSize.X, currentMipSize.Y, _format, (uint) imageData.Length, ptr);
+                if (header.Compressed) 
+                    GL.CompressedTextureSubImage2D(ID, mip, 0, 0, currentMipSize.X, currentMipSize.Y, _format, (uint) toRead, ptr);
                 else
-                     GL.TextureSubImage2D(ID, mip, 0, 0, currentMipSize.X, currentMipSize.Y, header.Format.ToPixelFormat(), header.ChannelType.ToPixelType(), ptr);
+                    GL.TextureSubImage2D(ID, mip, 0, 0, currentMipSize.X, currentMipSize.Y, header.Format.ToPixelFormat(), header.ChannelType.ToPixelType(), ptr);
             }
         }
         
-        if (calcMip && genMips)
-            GL.GenerateTextureMipmap(ID); // If we have no mips, generate them
+        if (file.Position != file.Length) Console.WriteLine("Warning: File not fully read");
+        if (calcMip && genMips) GL.GenerateTextureMipmap(ID);
+        GetHandle();
         
         reader.Close();
         file.Close();
-        
-        GenerateHandle();
     }
 }

@@ -12,7 +12,7 @@ public class ShaderProgram : Asset
     public ShaderProgram(GameWindow window, string fragPath, string vertPath, bool managed = true) : base(window) 
     {
         if (managed) ProgramManager.Register(this);
-        ID = GL.CreateProgram();
+        _id = GL.CreateProgram();
 
         Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader);
         Shader vertex = new Shader(Window, vertPath, ShaderType.VertexShader);
@@ -29,7 +29,7 @@ public class ShaderProgram : Asset
     public ShaderProgram(GameWindow window, string fragPath, string vertPath) : base(window)
     {
         ProgramManager.Register(this);
-        ID = GL.CreateProgram();
+        _id = GL.CreateProgram();
 
         Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader);
         Shader vertex = new Shader(Window, vertPath, ShaderType.VertexShader);
@@ -46,7 +46,7 @@ public class ShaderProgram : Asset
     public ShaderProgram(GameWindow window, string fragPath, Shader vertex) : base(window)
     {
         ProgramManager.Register(this);
-        ID = GL.CreateProgram();
+        _id = GL.CreateProgram();
         
         Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader);
 
@@ -56,16 +56,16 @@ public class ShaderProgram : Asset
         GL.LinkProgram(ID);
 
         GL.GetProgramInfoLog(ID, out var infoLog);
-        if (!string.IsNullOrEmpty(infoLog)) throw new System.Exception(infoLog);
+        if (!string.IsNullOrEmpty(infoLog)) Console.WriteLine($"Linker error: {infoLog}");
         
         fragment.Delete();
     }
 
     public ShaderProgram(GameWindow window, string computePath) : base(window)
     {
-        ID = GL.CreateProgram();
+        _id = GL.CreateProgram();
 
-        var compute = new Shader(window, computePath, ShaderType.ComputeShader);
+        Shader compute = new Shader(window, computePath, ShaderType.ComputeShader);
 
         compute.Attach(this);
 
@@ -73,8 +73,6 @@ public class ShaderProgram : Asset
 
         compute.Delete();
     }
-
-    public uint ID { get; }
 
     public void Use()
     {
@@ -129,7 +127,7 @@ public class ShaderProgram : Asset
         GL.DeleteProgram(ID);
     }
 
-    public void BindToUBO(ShaderBuffer buffer, string uniformName)
+    public void BindToUBO(Buffer buffer, string uniformName)
     {
         var uniform = GL.GetUniformBlockIndex(ID, uniformName);
         GL.UniformBlockBinding(ID, uniform, buffer.Location);
@@ -148,17 +146,17 @@ public static class ProgramManager
 
     public static ShaderProgram CurrentProgram;
     
-    private static ShaderBuffer _objectData;
-    private static ShaderBuffer _sceneData;
+    private static Buffer _objectData;
+    private static Buffer _sceneData;
 
     private static SceneData _scene;
 
     public static unsafe void Init(GameWindow window)
     {
-        _sceneData = new ShaderBuffer(window, sizeof(SceneData));
+        _sceneData = new Buffer(window, sizeof(SceneData));
         _sceneData.Bind(1);
         
-        _objectData = new ShaderBuffer(window, sizeof(ObjectData));
+        _objectData = new Buffer(window, sizeof(ObjectData));
         _objectData.Bind(2);
 
         _scene.Sun = new SunInfo();

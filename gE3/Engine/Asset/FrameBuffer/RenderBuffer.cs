@@ -5,11 +5,9 @@ namespace gE3.Engine.Asset.FrameBuffer;
 
 public class RenderBuffer : Asset
 {
-    public uint ID { get; }
-
     public RenderBuffer(GameWindow window) : base(window)
     {
-        ID = GL.GenRenderbuffer();
+        _id = GL.GenRenderbuffer();
     }
     public void BindToFrameBuffer(FrameBuffer buffer, InternalFormat storage, FramebufferAttachment attachment)
     {

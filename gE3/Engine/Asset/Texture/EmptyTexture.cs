@@ -9,28 +9,16 @@ public class EmptyTexture : Texture
         TextureWrapMode wrapMode = TextureWrapMode.Repeat, TexFilterMode filterMode = TexFilterMode.Linear,
         PixelFormat pixelFormat = PixelFormat.Rgb, bool genMips = false, bool shadow = false) : base(window, width, height, format)
     {
-        ID = GL.GenTexture();
-        GL.BindTexture(TextureTarget.Texture2D, ID);
-        GL.TexImage2D(TextureTarget.Texture2D, 0,format, width, height, 0, pixelFormat, PixelType.Short, (void*) 0);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
+        GL.CreateTextures(TextureTarget.Texture2D, 1, out _id);
+        GL.TextureStorage2D(_id, (uint)(genMips ? GetMipsCount() : 1), (SizedInternalFormat)format, width, height);
+        GL.TextureParameter(_id, TextureParameterName.TextureWrapS, (int)wrapMode);
+        GL.TextureParameter(_id, TextureParameterName.TextureWrapT, (int)wrapMode);
         if (shadow)
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode,
-                (int)TextureCompareMode.CompareRefToTexture);
+            GL.TextureParameter(_id, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRefToTexture);
 
-        TextureMinFilter filter;
-        TextureMinFilter magFilter =
-            filter = filterMode is TexFilterMode.Linear ? TextureMinFilter.Linear : TextureMinFilter.Nearest;
-        if (genMips)
-            filter = filterMode is TexFilterMode.Linear
-                ? TextureMinFilter.LinearMipmapLinear
-                : TextureMinFilter.LinearMipmapNearest;
-
-
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filter);
+        GL.TextureParameter(ID, TextureParameterName.TextureMinFilter, (int)(genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
 
         if (genMips) GL.GenerateMipmap(TextureTarget.Texture2D);
-        GenerateHandle();
+        GetHandle();
     }
 }
