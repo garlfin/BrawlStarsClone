@@ -52,7 +52,7 @@ public class GameWindow
     public GameWindow(int width, int height, string name, bool debug = false)
     {
         _debug = debug;
-        var windowOptions = WindowOptions.Default;
+        WindowOptions windowOptions = WindowOptions.Default;
         windowOptions.Samples = 0;
         windowOptions.Size = new Vector2D<int>(width, height);
         windowOptions.Title = name;
@@ -157,8 +157,6 @@ public class GameWindow
         GL.Enable(EnableCap.DepthTest);
         GL.Enable(EnableCap.CullFace);
         GL.Enable(EnableCap.TextureCubeMapSeamless);
-        
-        
         
         ShadowBuffer = new FrameBuffer(this, 2048, 2048, new []{DrawBufferMode.None});
         ShadowMap = new EmptyTexture(this, 2048, 2048, InternalFormat.DepthComponent16, TextureWrapMode.ClampToEdge,

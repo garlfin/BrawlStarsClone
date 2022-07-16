@@ -46,9 +46,9 @@ public abstract class Texture : Asset
         return slot;
     }
 
-    public int GetMipsCount()
+    public uint GetMipsCount()
     {
-        return (int)Math.Floor(Math.Log2(Math.Min(_width, _height)));
+        return (uint)Math.Floor(Math.Log2(Math.Min(_width, _height))) + 1;
     }
 
     public Vector2D<uint> GetMipSize(int level)

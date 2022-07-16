@@ -38,8 +38,8 @@ public class ImageTexture : Texture
         CompressionRatio compression = header.CompressionRatio;
         
         GL.CreateTextures(TextureTarget.Texture2D, 1, out _id);
-
-        GL.TextureStorage2D(ID, (uint) GetMipsCount(), (GLEnum)_format, _width, _height);
+        
+        GL.TextureStorage2D(ID, Math.Max(GetMipsCount(), header.MipMapCount), (GLEnum)_format, _width, _height);
         GL.TextureParameter(ID, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
         GL.TextureParameter(ID, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
         GL.TextureParameter(ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
@@ -64,7 +64,6 @@ public class ImageTexture : Texture
         if (file.Position != file.Length) Console.WriteLine("Warning: File not fully read");
         if (calcMip && genMips) GL.GenerateTextureMipmap(ID);
         GetHandle();
-        
         reader.Close();
         file.Close();
     }
