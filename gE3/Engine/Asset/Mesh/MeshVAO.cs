@@ -1,11 +1,12 @@
 ﻿using gE3.Engine.Windowing;
+using gEModel.Struct;
 using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
 
 public sealed class MeshVao : VAO
 {
-    public unsafe MeshVao(GameWindow window, MeshData mesh) : base(window)
+    public unsafe MeshVao(GameWindow window, SubMesh mesh) : base(window, mesh)
     {
         var finalData = new Vertex[mesh.Vertices.Length];
 
@@ -21,8 +22,6 @@ public sealed class MeshVao : VAO
             for (var i = 0; i < mesh.Vertices.Length; i++)
                 finalData[i].Weight = mesh.Weights[i];
 
-        _mesh = mesh;
-
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
 
@@ -33,16 +32,13 @@ public sealed class MeshVao : VAO
             GL.BufferData(BufferTargetARB.ArrayBuffer, (nuint) (sizeof(Vertex) * finalData.Length), ptr,
                 BufferUsageARB.StaticDraw);
         }
-
-        if (_mesh.Faces is not null)
+        
+        EBO = (int) GL.GenBuffer();
+        GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, (uint) EBO);
+        fixed (void* ptr = Mesh.IndexBuffer)
         {
-            EBO = (int) GL.GenBuffer();
-            GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, (uint) EBO);
-            fixed (void* ptr = _mesh.Faces)
-            {
-                GL.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint) (sizeof(int) * 3 * _mesh.Faces.Length), ptr,
-                    BufferUsageARB.StaticRead);
-            }
+            GL.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint) (sizeof(int) * 3 * Mesh.IndexCount), ptr,
+                BufferUsageARB.StaticRead);
         }
 
         GL.EnableVertexAttribArray(0);
@@ -58,10 +54,7 @@ public sealed class MeshVao : VAO
     public override unsafe void Render()
     {
         GL.BindVertexArray(_vao);
-        if (_mesh.Faces is null)
-            GL.DrawArrays(PrimitiveType.Triangles, 0, (uint) _mesh.Vertices.Length * 3);
-        else
-            GL.DrawElements(PrimitiveType.Triangles, (uint) _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, (void*) 0);
+        GL.DrawElements(PrimitiveType.Triangles, Mesh.IndexCount * 3, DrawElementsType.UnsignedInt, (void*) 0);
     }
 
     public override void Delete()

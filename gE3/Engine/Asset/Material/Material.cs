@@ -8,19 +8,19 @@ public abstract class Material
     protected readonly ShaderProgram Program;
     protected readonly GameWindow Window;
     private readonly DepthFunction _function;
+    private readonly bool _cull;
 
-    protected Material(GameWindow window, ShaderProgram program, string name, DepthFunction function = DepthFunction.Less)
+    protected Material(GameWindow window, ShaderProgram program, bool cull = true, DepthFunction function = DepthFunction.Less)
     {
         Window = window;
         Program = program;
-        Name = name;
+        _cull = cull;
         _function = function;
     }
 
-    public string Name { get; }
-
     public void Use()
     {
+        if (_cull) Window.GL.Enable(EnableCap.CullFace); else Window.GL.Disable(EnableCap.CullFace);
         if (Window.State is EngineState.Shadow or EngineState.PreZ) Window.GL.DepthFunc(_function);
         RequiredSet();
 
@@ -28,13 +28,9 @@ public abstract class Material
         
         Program.Use();
         Set();
-
+        Window.GL.Disable(EnableCap.CullFace);
     }
 
     protected abstract void RequiredSet();
     protected abstract void Set();
-    public override string ToString()
-    {
-        return Name;
-    }
 }

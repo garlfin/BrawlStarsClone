@@ -20,3 +20,5 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\obj\Release\net6.0\refint\g
 C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\obj\Release\net6.0\gEModel.pdb
 C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\obj\Release\net6.0\gEModel.genruntimeconfig.cache
 C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\obj\Release\net6.0\ref\gEModel.dll
+C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\bin\Release\net6.0\gEMath.dll
+C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\bin\Release\net6.0\gEMath.pdb

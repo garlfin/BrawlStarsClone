@@ -58,7 +58,6 @@ public unsafe class SkyboxVAO : VAO
 
     public override void Render()
     {
-        GL.DepthFunc(DepthFunction.Lequal);
         GL.BindVertexArray(_vao);
         GL.DrawElements(PrimitiveType.Triangles, 36, DrawElementsType.UnsignedShort,(void*) 0);
     }

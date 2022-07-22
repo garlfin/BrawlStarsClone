@@ -1,4 +1,5 @@
 ﻿using gE3.Engine.Windowing;
+using gEModel.Struct;
 using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
@@ -7,10 +8,9 @@ public class SkinnedVAO : VAO
 {
     private int _ebo;
     
-    public unsafe SkinnedVAO(GameWindow window, int length, MeshData data, int ebo = -1) : base(window) 
+    public unsafe SkinnedVAO(GameWindow window, int length, SubMesh mesh, int ebo = -1) : base(window, mesh) 
     {
         _ebo = ebo;
-        _mesh = data;
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
 
@@ -33,9 +33,6 @@ public class SkinnedVAO : VAO
     public override unsafe void Render()
     {
         GL.BindVertexArray(_vao);
-        if (_ebo == -1)
-            GL.DrawArrays(PrimitiveType.Triangles, 0, (uint) _mesh.Vertices.Length * 3);
-        else
-            GL.DrawElements(PrimitiveType.Triangles, (uint) _mesh.Faces.Length * 3, DrawElementsType.UnsignedInt, (void*) 0);
+        GL.DrawElements(PrimitiveType.Triangles, Mesh.IndexCount * 3, DrawElementsType.UnsignedInt, (void*) 0);
     }
 }

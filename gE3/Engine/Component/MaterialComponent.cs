@@ -1,5 +1,5 @@
-﻿using gE3.Engine.Asset.Material;
-using gE3.Engine.Asset.Mesh;
+﻿using gEModel.Struct;
+using Material = gE3.Engine.Asset.Material.Material;
 
 namespace gE3.Engine.Component;
 
@@ -7,9 +7,9 @@ public class MaterialComponent : Component
 {
     private readonly Material?[] _materials;
 
-    public MaterialComponent(Mesh mesh)
+    public MaterialComponent(gETF mesh)
     {
-        _materials = new Material?[mesh.MaterialCount];
+        _materials = new Material?[mesh.Body.MaterialCount];
     }
 
     public MaterialComponent(Material[] materials)
@@ -18,17 +18,6 @@ public class MaterialComponent : Component
     }
 
     public Material this[int index] => _materials[index]!;
-
-    public Material? this[string name]
-    {
-        get
-        {
-            for (var i = 0; i < _materials.Length; i++)
-                if (_materials[i]!.Name == name)
-                    return _materials[i];
-            return null;
-        }
-    }
 
     public override void Dispose()
     {

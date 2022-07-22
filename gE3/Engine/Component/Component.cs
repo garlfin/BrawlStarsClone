@@ -1,4 +1,5 @@
 ﻿using gE3.Engine.Windowing;
+using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
@@ -9,6 +10,9 @@ public abstract class Component
     public Entity? Owner;
     public GameWindow Window => Owner.Window;
     public IWindow View => Owner.Window.View;
+    public IInputContext Input => Owner.Window.Input;
+    public IKeyboard Keyboard => Owner.Window.Input.Keyboards[0];
+    public IMouse Mouse => Owner.Window.Input.Mice[0];
     // ReSharper disable once InconsistentNaming
     protected GL GL => Owner.Window.GL;
     public bool Static => Owner.Static;

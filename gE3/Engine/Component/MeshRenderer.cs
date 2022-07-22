@@ -1,6 +1,8 @@
 ﻿using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Asset.Texture;
+using gE3.Engine.Windowing;
+using gEMath.Bounds;
 using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;
@@ -8,10 +10,13 @@ namespace gE3.Engine.Component;
 public sealed class MeshRenderer : Component
 {
     private readonly bool _overrideInstance;
-    private bool _calculatedBounds;
 
+    public bool InFrustum { get; private set; }
+    
     public Mesh Mesh { get; }
     public float Alpha { get; set; } = 1.0f;
+    private Transform? _transform;
+    public AABB Bounds { get; private set; }
     
     public MeshRenderer(Entity? owner, Mesh mesh, bool overrideInstance = false) : base(owner)
     {
@@ -19,26 +24,19 @@ public sealed class MeshRenderer : Component
         Mesh = mesh;
         _overrideInstance = overrideInstance;
         if (!overrideInstance) mesh.Register(Owner);
-    }
-
-    public override void OnUpdate(float deltaTime)
-    {
-        if (_calculatedBounds) return;
-        _calculatedBounds = true;
-        var bounds = Mesh.Bounds;
+        _transform = owner?.GetComponent<Transform>();
     }
 
     public override unsafe void OnRender(float deltaTime)
     {
-        if (Mesh.Instanced && !_overrideInstance) return;
-        var matrix = Owner.GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
-
+        if (!InFrustum) return;
+        if (Mesh.Instanced && !_overrideInstance) return; 
+        var matrix = _transform?.Model ?? Matrix4X4<float>.Identity;
         ProgramManager.PushObject(&matrix, Alpha);
 
         for (var i = 0; i < Mesh.MeshVAO.Length; i++)
         {
-            
-            (Owner.GetComponent<MaterialComponent>()![Mesh.Materials[i]] ?? Owner.GetComponent<MaterialComponent>()![i]).Use();
+            Owner.GetComponent<MaterialComponent>()![Mesh.RenderMesh.SubMeshes[i].MaterialID].Use();
             Mesh[i].Render();
             //Owner.GetComponent<Animator>()?.RenderDebug();
             TexSlotManager.ResetUnit();
@@ -50,8 +48,47 @@ public sealed class MeshRenderer : Component
         MeshRendererSystem.Remove(this);
         if (!_overrideInstance) Mesh.Remove(Owner);
     }
+
+    public override void OnUpdate(float deltaTime)
+    {
+        var matrix = _transform.Model;
+        AABB _bounds;
+        Bounds = _bounds = Mesh.Bounds.Transform(ref matrix);
+        InFrustum = (Window.State == EngineState.Shadow ?  CameraSystem.Sun! : CameraSystem.CurrentCamera!).IsAABBVisible(ref _bounds);
+    }
 }
 
 public class MeshRendererSystem : ComponentSystem<MeshRenderer>
 {
+    public static List<Mesh> Meshes { get; } = new List<Mesh>();
+    private static readonly List<Mesh> ManagedMeshes = new List<Mesh>();
+
+    public static void Register(Mesh mesh)
+    {
+        Meshes.Add(mesh);
+    }
+
+    public static void Render()
+    {
+        for (var i = 0; i < ManagedMeshes.Count; i++) ManagedMeshes[i].ManagedRender();
+    }
+
+    public static void VerifyUsers()
+    {
+        for (var i = 0; i < Meshes.Count; i++)
+        {
+            var mesh = Meshes[i];
+
+            if (mesh.Users.Count < 2 && mesh.Instanced)
+            {
+                ManagedMeshes.Remove(mesh);
+                mesh.Instanced = false;
+            }
+            else if (mesh.Users.Count > 1 && !mesh.Instanced)
+            {
+                ManagedMeshes.Add(mesh);
+                mesh.Instanced = true;
+            }
+        }
+    }
 }

@@ -1,7 +1,7 @@
 ﻿using gE3.Engine.Asset;
 using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Texture;
-using gE3.Engine.Map;
+using gE3.Engine.Utility;
 using gE3.Engine.Windowing;
 using Silk.NET.Maths;
 using Buffer = gE3.Engine.Asset.Material.Buffer;

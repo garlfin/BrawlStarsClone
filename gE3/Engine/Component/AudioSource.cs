@@ -1,6 +1,7 @@
 ﻿using FMOD;
 using gE3.Engine.Asset.Audio;
 using gE3.Engine.Utility;
+using gEMath.Math;
 using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;

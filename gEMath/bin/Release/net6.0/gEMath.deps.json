@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "gEMath/1.0.0": {
+        "dependencies": {
+          "Silk.NET.Maths": "2.15.0"
+        },
+        "runtime": {
+          "gEMath.dll": {}
+        }
+      },
+      "Silk.NET.Maths/2.15.0": {
+        "runtime": {
+          "lib/net5.0/Silk.NET.Maths.dll": {
+            "assemblyVersion": "2.15.0.0",
+            "fileVersion": "2.15.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "gEMath/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Silk.NET.Maths/2.15.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7aDFUR+wSU8kv/YrJX9PxTNye+ZO4ReYEoGI9YjLiipDHYivGJ/I+iR2xtSP+hkeKbC+xmOgE6TnZVf5INCqNg==",
+      "path": "silk.net.maths/2.15.0",
+      "hashPath": "silk.net.maths.2.15.0.nupkg.sha512"
+    }
+  }
+}

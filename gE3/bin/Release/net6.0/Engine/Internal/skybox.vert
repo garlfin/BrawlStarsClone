@@ -8,7 +8,9 @@ layout (std140, binding = 1) uniform SceneData {
 
 out vec3 TexCoord;
 
-void main(){
-    gl_Position = projection * view * vec4(aPos, 1.0);
+void main()
+{
     TexCoord = aPos;
+    vec4 pos = projection * mat4(mat3(view)) * vec4(aPos, 1.0);
+    gl_Position = pos.xyww;
 }

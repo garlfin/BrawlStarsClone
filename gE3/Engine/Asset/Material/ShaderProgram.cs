@@ -26,7 +26,7 @@ public class ShaderProgram : Asset
         vertex.Delete();
     }
     
-    public ShaderProgram(GameWindow window, string fragPath, string vertPath) : base(window)
+    public ShaderProgram(GameWindow window, string vertPath, string fragPath) : base(window)
     {
         ProgramManager.Register(this);
         _id = GL.CreateProgram();
@@ -171,6 +171,7 @@ public static class ProgramManager
             
              _scene.Sun.ViewProjection = CameraSystem.Sun.View * CameraSystem.Sun.Projection;
              _scene.Sun.Position = CameraSystem.Sun.Position;
+             _scene.Sun.ShadowMap = CameraSystem.Sun.ShadowMap.Handle;
         }
         else
         {
@@ -182,15 +183,6 @@ public static class ProgramManager
         {
             _sceneData.ReplaceData(ptr);
         }
-    }
-
-    public static unsafe void InitSkybox()
-    {
-        var viewNoTransform = _scene.View;
-        viewNoTransform.M41 = 0;
-        viewNoTransform.M42 = 0;
-        viewNoTransform.M43 = 0;
-        _sceneData.ReplaceData(&viewNoTransform, 64);
     }
 
     public static int Register(ShaderProgram program)

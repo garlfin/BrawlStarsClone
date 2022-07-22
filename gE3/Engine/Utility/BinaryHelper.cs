@@ -1,7 +1,7 @@
 ﻿using gE3.Engine.Asset.Mesh;
 using Silk.NET.Maths;
 
-namespace gE3.Engine.Map;
+namespace gE3.Engine.Utility;
 
 public static class BinaryHelper
 {
@@ -50,10 +50,5 @@ public static class BinaryHelper
             Weight3 = (float)reader.ReadUInt16() / ushort.MaxValue,
             Weight4 = (float)reader.ReadUInt16() / ushort.MaxValue
         };
-    }
-
-    public static int AsInt(this bool boolean)
-    {
-        return boolean ? 1 : 0;
     }
 }

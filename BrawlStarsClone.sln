@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gEModel", "gEModel\gEModel.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gE3BS", "gE3BS\gE3BS.csproj", "{15B52962-027F-46BC-9DEC-3C759FB8F986}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoaderDemo", "LoaderDemo\LoaderDemo.csproj", "{D3F548F1-11A3-48E9-B0E3-6084CBCC6C46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gEMath", "gEMath\gEMath.csproj", "{C904A6DD-3E32-4822-A7BA-B7820731E4E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{15B52962-027F-46BC-9DEC-3C759FB8F986}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15B52962-027F-46BC-9DEC-3C759FB8F986}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15B52962-027F-46BC-9DEC-3C759FB8F986}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3F548F1-11A3-48E9-B0E3-6084CBCC6C46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3F548F1-11A3-48E9-B0E3-6084CBCC6C46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3F548F1-11A3-48E9-B0E3-6084CBCC6C46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3F548F1-11A3-48E9-B0E3-6084CBCC6C46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C904A6DD-3E32-4822-A7BA-B7820731E4E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C904A6DD-3E32-4822-A7BA-B7820731E4E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C904A6DD-3E32-4822-A7BA-B7820731E4E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C904A6DD-3E32-4822-A7BA-B7820731E4E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

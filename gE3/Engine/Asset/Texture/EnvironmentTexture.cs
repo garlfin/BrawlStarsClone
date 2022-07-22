@@ -9,19 +9,18 @@ public class EnvironmentTexture : Texture
     public unsafe EnvironmentTexture(GameWindow window, string path, bool genMips = true) : base (window)
     {
         if (!File.Exists(path)) throw new FileNotFoundException(path);
-        var file = File.Open(path, FileMode.Open);
-        var reader = new BinaryReader(file);
+        FileStream file = File.Open(path, FileMode.Open);
+        BinaryReader reader = new BinaryReader(file);
 
-        var header = PvrLoader.LoadPVR(reader);
+        PVRHeader header = PvrLoader.LoadPVR(reader);
 
         _width = header.Width;
         _height = header.Height;
 
-        if (header.NumFaces != 6) throw new System.Exception("Invalid file");
+        //if (header.NumSurfaces + header.Depth + header.NumFaces > 3) throw new System.Exception("Invalid file");
 
-        var calcMip = !(header.MipMapCount > 1);
-
-        int passedMetaDataSize = 0;
+        var calcMip = header.MipMapCount == 1;
+        var passedMetaDataSize = 0;
 
         while (passedMetaDataSize < header.MetaDataSize)
         {
@@ -30,45 +29,44 @@ public class EnvironmentTexture : Texture
             var dataSize = reader.ReadUInt32();
             
             reader.ReadBytes((int)dataSize);
+            
             passedMetaDataSize += (int) dataSize + 12;
         }
-
-        _format = header.Format.ToInternalFormat();
         
-        _id = GL.GenTexture();
-        GL.BindTexture(TextureTarget.TextureCubeMap, ID);
-
+        _format = header.Format.ToInternalFormat();
+        if (header.ColorSpace is ColorSpace.sRGB) _format += 2140;
         CompressionRatio compression = header.CompressionRatio;
-
-        for (byte face = 0; face < 6; face++)
-        {
-            for (byte mip = 0; mip < header.MipMapCount; mip++)
+        
+        GL.CreateTextures(TextureTarget.TextureCubeMap, 1, out _id);
+        
+        GL.TextureStorage2D(ID, calcMip ? GetMipsCount() : header.MipMapCount, (GLEnum)_format, _width, _height);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Repeat);
+        GL.TextureParameter(ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        GL.TextureParameter(ID, TextureParameterName.TextureMinFilter, (int)(calcMip && genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
+        
+        for (byte mip = 0; mip < header.MipMapCount; mip++)
+            for (byte face = 0; face < 6; face++)
             {
                 var currentMipSize = GetMipSize(mip);
-                var toRead = (int)(MathF.Ceiling((float)currentMipSize.X * currentMipSize.Y / compression.Pixels) *
-                                   compression.Bytes);
-                if (!header.Compressed) toRead = (int)(currentMipSize.X * currentMipSize.Y * 4 * 3);
+                var toRead = (int)(currentMipSize.X * currentMipSize.Y);
+                if (header.Compressed) toRead = (int)(MathF.Ceiling((float)currentMipSize.X * currentMipSize.Y / compression.Pixels) * compression.Bytes);
+                    
                 var imageData = reader.ReadBytes(toRead);
+
                 fixed (void* ptr = imageData)
                 {
                     if (header.Compressed)
-                        GL.CompressedTexImage2D(TextureTarget.Texture2D, mip, _format, currentMipSize.X,
-                            currentMipSize.Y, 0, (uint) imageData.Length, ptr);
+                        GL.CompressedTextureSubImage3D(ID, mip, 0, 0,face, currentMipSize.X, currentMipSize.Y, 1, _format, (uint)toRead, ptr);
                     else
-                        GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + face, mip, InternalFormat.Rgb32f, currentMipSize.X, currentMipSize.Y, 0, PixelFormat.Rgb, PixelType.Float, ptr);
+                        GL.TextureSubImage3D(ID, mip, 0, 0, face, currentMipSize.X, currentMipSize.Y, 1, header.Format.ToPixelFormat(), header.ChannelType.ToPixelType(), ptr);
                 }
             }
-        }
-
-        GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-        GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-
-        GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter,
-            (int)(calcMip && genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
-        GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-        if (calcMip && genMips)
-            GL.GenerateMipmap(TextureTarget.TextureCubeMap); // If we have no mips, generate them
         
+        if (file.Position != file.Length) Console.WriteLine("Warning: File not fully read");
+        if (calcMip && genMips) GL.GenerateTextureMipmap(ID);
+        GetHandle();
         reader.Close();
         file.Close();
     }

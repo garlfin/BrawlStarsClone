@@ -1,7 +1,9 @@
-﻿using gE3.Engine.Asset.Bounds;
+﻿using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component.Physics;
-using gE3.Engine.Utility;
+using gEMath.Bounds;
+using gEMath.Math;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Component;
 
@@ -9,31 +11,28 @@ public class Sun : BaseCamera
 {
     public int Size { get; }
     private readonly Transform _entityTransform;
-
     public Vector3D<float> Offset = Vector3D<float>.Zero;
 
-    public Sun(Entity? owner, int size, float clipNear = 0.1f, float clipFar = 300f) : base(owner, clipNear, clipFar)
+    public EmptyTexture ShadowMap { get; }
+
+    public Sun(Entity? owner, int size, float clipNear = 0.1f, float clipFar = 300f, uint shadowMapSize = 2048) : base(owner, clipNear, clipFar)
     {
         Size = size;
         UpdateProjection();
         _entityTransform = owner.GetComponent<Transform>() ??
                            throw new InvalidOperationException($"No transform on sun object {Owner.Name}!");
-        ViewFrustum = new ViewFrustum();
-    }
 
-    protected override ViewFrustum GetViewFrustum()
-    {
-        throw new NotImplementedException();
+        ShadowMap = new EmptyTexture(Window, shadowMapSize, shadowMapSize, InternalFormat.DepthComponent32f, TextureWrapMode.ClampToBorder, false, true);
     }
 
     public override void Set()
     {
         CameraSystem.Sun = this;
-        CameraSystem.CurrentCamera = this;
     }
 
     public override void OnRender(float deltaTime)
     {
+        ShadowMap.BindToFrameBuffer(Window.ShadowBuffer, FramebufferAttachment.DepthAttachment);
         Position = _entityTransform.Model.Transformation() + Offset;
         _view = Matrix4X4.CreateLookAt(Position, Offset, Vector3D<float>.UnitY);
     }
@@ -62,6 +61,11 @@ public class Sun : BaseCamera
     {
         throw new NotImplementedException();
     }
+
+    public override bool IsAABBVisible(ref AABB aabb)
+    {
+        return true;
+    }
 }
 
 public struct SunInfo
@@ -69,4 +73,6 @@ public struct SunInfo
     public Matrix4X4<float> ViewProjection;
     public Vector3D<float> Position;
     private float _pad;
+    public ulong ShadowMap;
+    private ulong _pad2;
 }

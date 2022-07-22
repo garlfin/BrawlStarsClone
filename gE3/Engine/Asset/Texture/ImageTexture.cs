@@ -19,7 +19,7 @@ public class ImageTexture : Texture
 
         if (header.NumSurfaces + header.Depth + header.NumFaces > 3) throw new System.Exception("Invalid file");
 
-        var calcMip = header.MipMapCount < GetMipsCount();
+        var calcMip = header.MipMapCount == 1;
         var passedMetaDataSize = 0;
 
         while (passedMetaDataSize < header.MetaDataSize)
@@ -39,7 +39,7 @@ public class ImageTexture : Texture
         
         GL.CreateTextures(TextureTarget.Texture2D, 1, out _id);
         
-        GL.TextureStorage2D(ID, Math.Max(GetMipsCount(), header.MipMapCount), (GLEnum)_format, _width, _height);
+        GL.TextureStorage2D(ID, calcMip ? GetMipsCount() : header.MipMapCount, (GLEnum)_format, _width, _height);
         GL.TextureParameter(ID, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
         GL.TextureParameter(ID, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
         GL.TextureParameter(ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);

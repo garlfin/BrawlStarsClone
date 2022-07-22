@@ -1,8 +1,9 @@
 ﻿using FMOD;
 using gE3.Engine.Asset.Audio;
-using gE3.Engine.Asset.Bounds;
 using gE3.Engine.Component.Physics;
 using gE3.Engine.Utility;
+using gEMath.Bounds;
+using gEMath.Math;
 using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;
@@ -59,7 +60,8 @@ public class Camera : BaseCamera
 
         System.Studio->SetListenerAttributes(0, *_attributes.Pointer);
 
-        ViewFrustum = GetViewFrustum();
+        var viewProj = _view * _projection;
+        ViewFrustum = GetViewFrustum(ref viewProj);
     }
     
 
@@ -107,25 +109,10 @@ public class Camera : BaseCamera
         return new RayInfo(_entityTransform.Location,
             Vector3D.Normalize(new Vector3D<float>(result.X, result.Y, result.Z)));
     }
-
-    protected override ViewFrustum GetViewFrustum()
+    public override bool IsAABBVisible(ref AABB aabb)
     {
-
-        var frustum = new ViewFrustum();
-
-        var halfVSide = ClipFar * MathF.Tan(_fov * .5f);
-        var halfHSide = halfVSide * Window.AspectRatio;
-        var frontMultFar = ClipFar * Front;
-
-        var transform = Owner.GetComponent<Transform>().Location;
-
-        frustum.NearFace = new(transform + ClipNear * Front, Front);
-        frustum.FarFace = new(transform + frontMultFar, -Front );
-        frustum.RightFace = new(transform, Vector3D.Cross(Up,frontMultFar + Right * halfHSide));
-        frustum.LeftFace = new(transform, Vector3D.Cross(frontMultFar - Right * halfHSide, Up));
-        frustum.TopFace = new(transform, Vector3D.Cross(Right, frontMultFar - Up * halfVSide));
-        frustum.BottomFace = new(transform, Vector3D.Cross(frontMultFar + Up * halfVSide, Right));
-
-        return frustum;
+        return ViewFrustum.AABBVsFrustum(ref aabb);
     }
+    
+    
 }

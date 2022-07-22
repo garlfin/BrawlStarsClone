@@ -3,19 +3,16 @@ using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Windowing;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
-using Buffer = gE3.Engine.Asset.Material.Buffer;
+using Buffer = gE3.Engine.Asset.Buffer;
 
 namespace gE3.Engine.Component;
-
+[Obsolete("Animator under maintenance, will be reworked.", false)]
 public class Animator : Component
 {
     private readonly Matrix4X4<float>[] _matTransform;
     private readonly MeshRenderer _renderer;
 
-    private Animation? _animation;
     private int _currentFrame;
-
     private float _currentTime;
 
     // Commented stuff is leftover debug stuff I can keep for later if needed.
@@ -28,21 +25,18 @@ public class Animator : Component
 
         _renderer = owner.GetComponent<MeshRenderer>();
 
-        if (animation is not null) _animation = animation;
+        if (animation is not null) Animation = animation;
 
         _currentTime = 0;
         _currentFrame = 0;
 
-        _matTransform = new Matrix4X4<float>[_renderer.Mesh.FlattenedHierarchy.Length];
+        //_matTransform = new Matrix4X4<float>[_renderer.Mesh.FlattenedHierarchy.Length];
+        
         //_debugVao = new PointVAO(_renderer.Mesh.FlattenedHierarchy.Length);
         //_boneTransform = new Vector3D<float>[_renderer.Mesh.FlattenedHierarchy.Length];
     }
 
-    public Animation? Animation
-    {
-        get => _animation;
-        set => _animation = value;
-    }
+    public Animation? Animation { get; set; }
 
     public bool Paused { get; set; }
 
@@ -68,13 +62,13 @@ public class Animator : Component
 
     public override unsafe void OnRender(float deltaTime)
     {
-        SkinManager.SkinningShader.Use();
+        /*SkinManager.SkinningShader.Use();
 
-        if (_currentTime > (_animation?.Time ?? 0)) _currentTime = 0;
-        _currentFrame = (int)MathF.Floor(_currentTime * (_animation?.FPS ?? 1));
+        if (_currentTime > (Animation?.Time ?? 0)) _currentTime = 0;
+        _currentFrame = (int)MathF.Floor(_currentTime * (Animation?.FPS ?? 1));
 
         var ident = Matrix4X4<float>.Identity;
-        IterateMatrix(_renderer.Mesh.Hierarchy, ref ident);
+        IterateMatrix(_renderer.Mesh.NodeHierarchy, ref ident);
 
         //fixed (void* ptr = _boneTransform) _debugVao.UpdateData(ptr);
         fixed (void* ptr = _matTransform)
@@ -91,7 +85,7 @@ public class Animator : Component
             GL.MemoryBarrier(MemoryBarrierMask.AllBarrierBits);
         }
 
-        if (!Paused) _currentTime += deltaTime;
+        if (!Paused) _currentTime += deltaTime;*/
     }
 
     public override void Dispose()
@@ -101,7 +95,7 @@ public class Animator : Component
 
     private void IterateMatrix(BoneHierarchy bone, ref Matrix4X4<float> parentTransform)
     {
-        var frame = Animation?[bone.Name]?.Frames[_currentFrame];
+        /*var frame = Animation?[bone.Name]?.Frames[_currentFrame];
 
         var transform = bone.Transform;
         if (frame is not null)
@@ -112,7 +106,7 @@ public class Animator : Component
         //_boneTransform[bone.Index] = new Vector3D<float>(globalTransform.M41, -globalTransform.M43, globalTransform.M42); // Convert 
         _matTransform[bone.Index] = bone.Offset * globalTransform * _renderer.Mesh.InverseTransform;
 
-        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], ref globalTransform);
+        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], ref globalTransform);*/
     }
 
     public void RenderDebug()
@@ -123,7 +117,7 @@ public class Animator : Component
     public void SetAnimation(Animation animation, bool resetTime = false)
     {
         if (resetTime) _currentTime = 0;
-        _animation = animation;
+        Animation = animation;
     }
 }
 

@@ -1,7 +1,11 @@
-﻿using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 using Assimp;
+using gEModel.Struct;
+using gEModel.Utility;
 using Silk.NET.Maths;
+using File = System.IO.File;
+using Mesh = gEModel.Struct.Mesh;
+using Node = gEModel.Struct.Node;
 using Vector3D = Assimp.Vector3D;
 
 namespace gEModel;
@@ -10,132 +14,97 @@ public static class Program
 {
     public static unsafe void Main(string[] args)
     {
-        Console.Write("Use index buffer? y/n: ");
-        var faces = Console.ReadLine().ToUpper()[0] == 'Y';
-        var context = new AssimpContext();
-        var steps = PostProcessSteps.Triangulate | PostProcessSteps.OptimizeMeshes |
-                    PostProcessSteps.LimitBoneWeights | PostProcessSteps.RemoveRedundantMaterials;
-        if (faces) steps |= PostProcessSteps.JoinIdenticalVertices;
-        var scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open), steps);
+        AssimpContext context = new AssimpContext();
+        const PostProcessSteps steps = PostProcessSteps.Triangulate | PostProcessSteps.LimitBoneWeights | PostProcessSteps.RemoveRedundantMaterials | PostProcessSteps.JoinIdenticalVertices;
+        
+        Scene? scene = context.ImportFileFromStream(File.Open(args[0], FileMode.Open), steps);
+        
         var fileName = Path.GetFileNameWithoutExtension(args[0]);
         var finalPath = $"{Path.GetDirectoryName(args[0])}\\{fileName}.bnk";
         if (args.Length == 2) finalPath = $"{args[1]}{fileName}.bnk";
 
-        var bones = new List<Bone>();
-        IterateBone(scene.RootNode, bones);
-
-        foreach (var bone in bones)
-        foreach (var parent in bones)
+        gETF outFile = new gETF
         {
-            if (bone.Parent != parent.Name) continue;
-            parent.Children.Add(bone);
-        }
+            Header = new Header(8, 30, 0),
+            Body = new Body
+            {
+                Materials = new Struct.Material[scene.MaterialCount]
+            }
+        };
 
-        var matrixData = new byte[64];
-        if (scene.HasMeshes)
+        for (var i = 0; i < scene.MaterialCount; i++)
+            outFile.Body.Materials[i] = new Struct.Material((ushort)i, scene.Materials[i].Name);
+
+        var meshes = new List<Tuple<SubMesh, string>>();
+        for (var i = 0; i < scene.Meshes.Count; i++)
         {
-            var stream = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
-            var writer = new BinaryWriter(stream, Encoding.UTF8, true);
-            writer.Write(new[] { 'B', 'S', '3', 'D' });
-            writer.Write((uint)7); // Version 
-            writer.Write((ushort)scene.MaterialCount);
-            for (var i = 0; i < scene.MaterialCount; i++)
+            Assimp.Mesh mesh = scene.Meshes[i];
+            SubMesh subMesh = new SubMesh
             {
-            }
-
-            writer.Write((ushort)scene.MeshCount);
-            for (var i = 0; i < scene.MeshCount; i++)
+                Vertices = AssimpHelper.AssimpListToSilkList(mesh.Vertices),
+                Normals = AssimpHelper.AssimpListToSilkList(mesh.Normals),
+                UVs = AssimpHelper.AssimpUVListToSilkList(mesh.TextureCoordinateChannels[0]),
+                IndexBuffer = AssimpHelper.AssimpListToSilkList(mesh.Faces),
+                Tangents = Array.Empty<Vector3D<float>>(),
+                MaterialID = (ushort)mesh.MaterialIndex
+            };
+            if (mesh.HasBones)
             {
-                var currentMesh = scene.Meshes[i];
-                writer.Write(currentMesh.Name);
-                writer.Write(currentMesh.Vertices.Count);
-                foreach (var vertex in currentMesh.Vertices) writer.Write(vertex);
-                writer.Write(currentMesh.TextureCoordinateChannels[0].Count);
-                foreach (var vertex in currentMesh.TextureCoordinateChannels[0])
-                {
-                    writer.Write(vertex.X);
-                    writer.Write(vertex.Y);
-                }
-
-                writer.Write(currentMesh.Normals.Count);
-                foreach (var vertex in currentMesh.Normals) writer.Write(vertex);
-                writer.Write(faces);
-                if (faces)
-                {
-                    writer.Write(currentMesh.Faces.Count);
-                    foreach (var face in currentMesh.Faces)
-                    {
-                        writer.Write((ushort)face.Indices[0]);
-                        writer.Write((ushort)face.Indices[1]);
-                        writer.Write((ushort)face.Indices[2]);
-                    }
-                    // "If this flag is not specified, no vertices are referenced by more than one 
-                    // face and no index buffer is required for rendering." - PostProcessSteps.JoinIdenticalVertices
-                }
-
-                writer.Write(scene.Materials[currentMesh.MaterialIndex].Name);
-                writer.Write(currentMesh.HasBones);
-                if (!currentMesh.HasBones) continue;
-
-                var weights = new VertexWeight[currentMesh.Vertices.Count];
-                for (var index = 0; index < currentMesh.BoneCount; index++)
-                {
-                    var bone = currentMesh.Bones[index];
-                    foreach (var weight in bone.VertexWeights)
-                    {
-                        if (weight.Weight == 0) continue;
-                        var realIndex = 0;
-                        for (var j = 0; j < 4; j++)
-                        {
-                            if (weights[weight.VertexID].Weight[j] == 0) break;
-                            realIndex++;
-                        }
-
-                        var boneIndex = GetBoneIndexFromName(bone.Name, bones);
-                        bones[boneIndex].Offset = bone.OffsetMatrix;
-                        ReplaceItem(ref weights[weight.VertexID].Bone, realIndex, boneIndex);
-                        ReplaceItem(ref weights[weight.VertexID].Weight, realIndex,
-                            (ushort)(ushort.MaxValue * weight.Weight));
-                    }
-                }
-
-                var data = new byte[sizeof(VertexWeight) * weights.Length];
-                fixed (VertexWeight* ptr = weights)
-                {
-                    Marshal.Copy((IntPtr)ptr, data, 0, sizeof(VertexWeight) * weights.Length);
-                }
-
-                writer.Write(data);
+                subMesh.Weights = new Struct.VertexWeight[mesh.VertexCount];
             }
-
-            writer.Write((ushort)bones.Count);
-            foreach (var bone in bones)
-            {
-                writer.Write(bone.Name);
-                writer.Write(bone.Parent);
-                writer.Write(bone.MeshIndex is not null);
-                writer.Write((ushort)(bone.MeshIndex ?? 0));
-                bone.Offset.Transpose(); // Transpose because it reads it row major in MeshLoader.cs
-                fixed (void* ptr = &bone.Offset)
-                {
-                    Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
-                }
-
-                writer.Write(matrixData);
-                bone.Transform.Transpose();
-                fixed (void* ptr = &bone.Transform)
-                {
-                    Marshal.Copy((IntPtr)ptr, matrixData, 0, 64);
-                }
-
-                writer.Write(matrixData);
-            }
-
-            writer.Close();
-            stream.Close();
+            meshes.Add(new Tuple<SubMesh, string>(subMesh, mesh.Name));
         }
+        
+        var finalMeshes = new List<Mesh>();
+        for (var i = 0; i < meshes.Count; i++)
+        {
+            var mesh = meshes[i];
+            var foundIndex = -1;
+            for (var x = 0; x < finalMeshes.Count; x++)
+                if (finalMeshes[x].Name == mesh.Item2)
+                    foundIndex = x;
+            if (foundIndex == -1)
+                finalMeshes.Add(new Mesh
+                {
+                    FourCC = new []{'M', 'E', 'S', 'H'},
+                    Index = (ushort)finalMeshes.Count,
+                    Name = mesh.Item2,
+                    SubMeshes = new List<SubMesh>()
+                });
+            finalMeshes[^1].SubMeshes.Add(mesh.Item1);
+        }
+        outFile.Body.Meshes = finalMeshes.ToArray();
+        
+        var nodes = new List<Node>();
+        IterateNode(scene.RootNode, nodes, 0, finalMeshes, scene);
+        
+        for (int i = 1; i < nodes.Count; i++)
+        {
+            var parent = scene.RootNode.FindNode(nodes[i].Name).Parent;
+            var childIndex = -1;
+            for (int x = 0; x < parent.ChildCount; x++)
+                if (parent.Children[x].Name == nodes[i].Name)
+                {
+                    childIndex = x;
+                    break;
+                }
+            if (childIndex == -1) throw new InvalidOperationException("Could not find child node in parent");
+            var parentIndex = nodes.FindIndex(x => x.Name == parent.Name);
+            // Im tired and i may be overcomplicating this...
+            nodes[parentIndex].ChildIDs[childIndex] = (uint) i;
+        }
+        outFile.Body.Nodes = nodes.ToArray();
+       
+      
 
-        for (var index = 0; index < scene.Animations.Count; index++)
+        var stream = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
+        var writer = new BinaryWriter(stream, Encoding.UTF8, true);
+        
+        outFile.Write(writer);
+        
+        stream.Close();
+
+        /*for (var index = 0; index < scene.Animations.Count; index++)
         {
             var animation = scene.Animations[index];
             var stream = File.Open($"{fileName}_{animation.Name}.bnk", FileMode.Create);
@@ -163,7 +132,7 @@ public static class Program
 
             stream.Close();
             writer.Close();
-        }
+        }*/
     }
 
     private static void Write(this BinaryWriter writer, Vector3D vert)
@@ -173,77 +142,32 @@ public static class Program
         writer.Write(vert.Z);
     }
 
-    private static void IterateBone(Node bone, List<Bone> bones)
+    private static void IterateNode(Assimp.Node node, List<Node> outBones, uint parentID, List<Mesh> meshes, Scene scene)
     {
-        var newBone = new Bone
+        node.Transform.Decompose(out var scaling, out var rotation, out var translation);
+        outBones.Add(new Node
         {
-            Name = bone.Name,
-            Parent = bone.Parent?.Name ?? "",
-            Children = new List<Bone>(),
-            Offset = Matrix4x4.Identity,
-            Transform = bone.Transform
-        };
-
-        if (bone.MeshIndices.Count > 0) newBone.MeshIndex = bone.MeshIndices[0];
-
-        bones.Add(newBone);
-
-        foreach (var child in bone.Children) IterateBone(child, bones);
+            FourCC = new[] { 'N', 'O', 'D', 'E' },
+            ID = (uint)outBones.Count,
+            Name = node.Name,
+            Transform = new Frame(translation.ToSilk(), rotation.ToSilk(), scaling.ToSilk()),
+            ParentID = parentID,
+            ChildIDs = new uint[node.ChildCount],
+            Frames = Array.Empty<Frame>(),
+            MeshID = node.HasMeshes ? MeshIDFromName(scene.Meshes[node.MeshIndices[0]].Name, meshes) : null
+        });
+        var preCount = (uint)outBones.Count - 1;
+        foreach (Assimp.Node child in node.Children) IterateNode(child, outBones, preCount, meshes, scene);
     }
 
-    private static ushort GetBoneIndexFromName(string name, List<Bone> bones)
+    public static ushort MeshIDFromName(string name, List<Mesh> meshes)
     {
-        return (ushort)bones.IndexOf(bones.First(bone => bone.Name == name));
-    }
-
-    public static void Write(this BinaryWriter writer, Quaternion quaternion)
-    {
-        writer.Write(quaternion.X);
-        writer.Write(quaternion.Y);
-        writer.Write(quaternion.Z);
-        writer.Write(quaternion.W);
-    }
-
-    public static void ReplaceItem<T>(ref Vector4D<T> vec, int index, T item)
-        where T : unmanaged, IFormattable, IEquatable<T>, IComparable<T>
-    {
-        switch (index)
+        for (var i = 0; i < meshes.Count; i++)
         {
-            case 0:
-                vec.X = item;
-                break;
-            case 1:
-                vec.Y = item;
-                break;
-            case 2:
-                vec.Z = item;
-                break;
-            case 3:
-                vec.W = item;
-                break;
-            default: throw new ArgumentOutOfRangeException(nameof(index), index, null);
+            if (meshes[i].Name == name)
+                return (ushort)i;
         }
-    }
 
-    private struct VertexWeight
-    {
-        public Vector4D<ushort> Bone;
-        public Vector4D<ushort> Weight;
-
-        public VertexWeight()
-        {
-            Bone = new Vector4D<ushort>();
-            Weight = new Vector4D<ushort>();
-        }
-    }
-
-    public class Bone
-    {
-        public List<Bone> Children;
-        public int? MeshIndex;
-        public string Name;
-        public Matrix4x4 Offset;
-        public string Parent;
-        public Matrix4x4 Transform;
+        throw new Exception( $"Mesh {name} not found");
     }
 }

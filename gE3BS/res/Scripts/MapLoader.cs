@@ -4,7 +4,6 @@ using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component;
 using gE3.Engine.Component.Physics;
-using gE3.Engine.Map;
 using gE3.Engine.Utility;
 using gE3.Engine.Windowing;
 using gE3BS.Engine.Material;

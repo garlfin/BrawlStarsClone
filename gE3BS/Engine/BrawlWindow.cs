@@ -1,4 +1,6 @@
 ﻿using gE3.Engine;
+using gE3.Engine.Asset.Audio;
+using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component;
 using gE3.Engine.Component.Physics;
@@ -12,7 +14,7 @@ namespace gE3BS.Engine;
 
 public class BrawlWindow : GameWindow
 {
-    private static readonly Random Rnd = new();
+    private static readonly Random Rnd = new Random();
     
     public BrawlWindow(int width, int height, string name, bool debug = false) : base(width, height, name, debug)
     {
@@ -22,18 +24,18 @@ public class BrawlWindow : GameWindow
     {
         MatCapManager.Init(this);
         
-        var baseAudioPath = @"C:\Users\scion\OneDrive\Documents\FMOD Studio\BSClone\Build\Desktop";
+        const string baseAudioPath = @"C:\Users\scion\OneDrive\Documents\FMOD Studio\BSClone\Build\Desktop";
         foreach (var path in Directory.GetFiles(baseAudioPath, "*.bank"))
             System.LoadBank(path);
 
-        var musicEvent = System.GetEvent("event:/Music/Slugfest").CreateInstance();
+        SoundEventInstance musicEvent = System.GetEvent("event:/Music/Slugfest").CreateInstance();
         musicEvent.SetParameter("TrackID", Rnd.Next(0, 3));
         musicEvent.Play();
 
         MapLoader.Init(this);
 
-        var camera = new Entity(this, name: "Camera");
-        var transform = new Transform(camera)
+        Entity camera = new Entity(this, name: "Camera");
+        Transform transform = new Transform(camera)
         {
             Location = new Vector3D<float>(0, 0, 10),
             Rotation = new Vector3D<float>(0, -90, 0)
@@ -43,11 +45,11 @@ public class BrawlWindow : GameWindow
         camera.AddComponent(new Camera(camera, 31f, 0.1f, 100f, System));
         camera.GetComponent<Camera>().Set();
 
-        var player = new Entity(this, name: "Player");
+        Entity player = new Entity(this, name: "Player");
         MapLoader.LoadMap("../../../res/model/test.map", this,
             File.ReadAllText("../../../testmap.txt").Replace(Environment.NewLine, ""), player);
 
-        var sun = new Entity(this, name: "Sun");
+        Entity sun = new Entity(this, name: "Sun");
         sun.AddComponent(new Transform(sun)
         {
             Location = new Vector3D<float>(20, 40, -20) * 2
@@ -69,7 +71,7 @@ public class BrawlWindow : GameWindow
             new MatCapMaterial(this, MapLoader.DiffuseProgram, MapLoader.Default,
                 new ImageTexture(this, "../../../res/shelly.pvr"), "DefaultMaterial")
         }));
-        var playerMesh = MeshLoader.LoadMesh(this, "../../../res/model/shelly.bnk");
+        Mesh playerMesh = MeshLoader.LoadMesh(this, "../../../res/model/shelly.bnk");
         player.AddComponent(new MeshRenderer(player, playerMesh));
         player.AddComponent(new Animator(player));
         player.AddComponent(new PlayerMovement
@@ -80,7 +82,7 @@ public class BrawlWindow : GameWindow
         });
         player.AddComponent(new SquareCollider(player, false, null, null, PhysicsLayer.Zero, true));
         camera.AddComponent(new CameraMovement(player));
-        var tracer = new Entity(this, player, "Tracer");
+        Entity tracer = new Entity(this, player, "Tracer");
         tracer.AddComponent(new Transform(tracer)
         {
             Location = new Vector3D<float>(0, 0.1f, 0),
@@ -108,7 +110,7 @@ public class BrawlWindow : GameWindow
 
         player.GetComponent<PlayerMovement>().Tracer = tracer;
 
-        var robot = new Entity(this, name: "Robot");
+        Entity robot = new Entity(this, name: "Robot");
         robot.AddComponent(new Transform(robot)
         {
             Location = new Vector3D<float>(8.5f, 0, 2),
@@ -123,7 +125,7 @@ public class BrawlWindow : GameWindow
                 },
                 new ImageTexture(this, "../../../res/ranged_bot.pvr"), "Metal")
         }));
-        var robotMesh = MeshLoader.LoadMesh(this, "../../../res/model/roborange.bnk");
+        Mesh robotMesh = MeshLoader.LoadMesh(this, "../../../res/model/roborange.bnk");
         robot.AddComponent(new MeshRenderer(robot, robotMesh));
         robot.AddComponent(new Animator(robot, MeshLoader.LoadAnimation("../../../res/model/roborange_idle.bnk")));
     }

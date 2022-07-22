@@ -83,7 +83,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Engine\Asset\Bounds" />
       <Folder Include="Engine\Map" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\gEMath\gEMath.csproj" />
+      <ProjectReference Include="..\gEModel\gEModel.csproj" />
     </ItemGroup>
 
 </Project>

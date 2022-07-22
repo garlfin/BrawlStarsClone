@@ -9,8 +9,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AssimpNet" Version="4.1.0"/>
-        <PackageReference Include="Silk.NET.Maths" Version="2.15.0"/>
+        <PackageReference Include="AssimpNet" Version="4.1.0" />
+        <PackageReference Include="Silk.NET.Maths" Version="2.15.0" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\..\Downloads\gMod File Specification.pdf">
+        <Link>gMod File Specification.pdf</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\gEMath\gEMath.csproj" />
+    </ItemGroup>
+
+  
 
 </Project>
