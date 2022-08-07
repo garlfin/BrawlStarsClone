@@ -6,6 +6,7 @@ using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component;
+using gE3.Engine.Component.Camera;
 using gE3.Engine.Component.Physics;
 using gE3.Engine.Utility;
 using Silk.NET.Input;
@@ -29,15 +30,15 @@ public class GameWindow
     public IMouse Mouse => Input.Mice[0];
     public IKeyboard Keyboard => Input.Keyboards[0];
 
-    private EmptyTexture _screenTexture;
-    private EmptyTexture _prevScreenTexture;
-    private FrameBuffer _screenFramebuffer;
+    private Texture2D _screenTexture;
+    private Texture2D _prevScreenTexture;
+    public FrameBuffer ScreenFramebuffer { get; private set; }
     private RenderBuffer _screenDepth; 
     //public EmptyTexture PrevScreenTexture { get; private set; }
     private PlaneVAO _screenPlane;
     private PrimitiveVao _frustumTest;
     
-    public EnvironmentTexture? Skybox { get; set; }
+    public CubemapTexture? Skybox { get; set; }
     private SkyboxVAO? _skyboxVao;
     private ShaderProgram? _skyboxShader;
 
@@ -46,6 +47,8 @@ public class GameWindow
     // ReSharper disable once InconsistentNaming
     public GL GL { get; private set; }
     public ARB ARB { get; private set; }
+    
+    protected List<PostEffect> PostEffects { get; } = new List<PostEffect>();
 
 
     public GameWindow(int width, int height, string name, bool debug = false)
@@ -56,18 +59,19 @@ public class GameWindow
         windowOptions.Size = new Vector2D<int>(width, height);
         windowOptions.Title = name;
         windowOptions.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, _debug ? ContextFlags.Debug : ContextFlags.Default, new APIVersion(4, 6));
-        windowOptions.FramesPerSecond = 144;
-        View = Window.Create(windowOptions);
+        windowOptions.FramesPerSecond = 0;
+        windowOptions.VSync = false;
+        Window = Silk.NET.Windowing.Window.Create(windowOptions);
     }
 
     public virtual void Run()
     {
-        View.Load += InternalLoad;
-        View.Render += OnRender;
-        View.Update += OnUpdate;
-        View.Closing += OnClose;
-        View.Resize += OnResize;
-        View.Run();
+        Window.Load += InternalLoad;
+        Window.Render += OnRender;
+        Window.Update += OnUpdate;
+        Window.Closing += OnClose;
+        Window.Resize += OnResize;
+        Window.Run();
     }
 
     private void OnResize(Vector2D<int> size)
@@ -80,15 +84,15 @@ public class GameWindow
 
     public IInputContext Input { get; set; }
 
-    public Vector2D<uint> Size => (Vector2D<uint>)View.Size;
-    public float AspectRatio => (float) View.Size.X / View.Size.Y;
-    public IWindow View { get; }
+    public Vector2D<uint> Size => (Vector2D<uint>)Window.Size;
+    public float AspectRatio => (float) Window.Size.X / Window.Size.Y;
+    public IWindow Window { get; }
     public EngineState State { get; set; }
     public Vector2D<float> MousePosition
     {
-        get => new(Math.Clamp(Mouse.Position.X, 0, View.Size.X),
-            View.Size.Y - Math.Clamp(Mouse.Position.Y, 0, View.Size.Y));
-        set => Mouse.Position = new Vector2(value.X, View.Size.Y - value.Y);
+        get => new(Math.Clamp(Mouse.Position.X, 0, Window.Size.X),
+            Window.Size.Y - Math.Clamp(Mouse.Position.Y, 0, Window.Size.Y));
+        set => Mouse.Position = new Vector2(value.X, Window.Size.Y - value.Y);
     }
     
     public Vector2D<float> LastMousePosition { get; private set; }
@@ -102,7 +106,7 @@ public class GameWindow
     protected virtual void OnUpdate(double t)
     {
         var time = (float)t;
-        if (Keyboard.IsKeyPressed(Key.Escape)) View.Close();
+        if (Keyboard.IsKeyPressed(Key.Escape)) Window.Close();
         BehaviorSystem.InitializeQueue();
         BehaviorSystem.Update(time);
         PhysicsSystem.ResetCollisions();
@@ -130,12 +134,14 @@ public class GameWindow
 
     private void InternalLoad()
     {
-        GL = GL.GetApi(View);
+
+        var includes = new[] { "Engine/Internal/include.glsl" };
+        GL = GL.GetApi(Window);
         Console.WriteLine($"API: {GL.GetStringS(StringName.Version)}");
         ARB = new ARB(GL);
         
         if (_debug) Debug.Init(this);
-        Input = View.CreateInput();
+        Input = Window.CreateInput();
         Input.Mice[0].MouseMove += OnMouseMove;
         AudioSystem = new AudioSystem(out _);
 
@@ -146,15 +152,15 @@ public class GameWindow
         BRDFTexture tex = new BRDFTexture(this, 512);
         BRDFTexture.ShaderDispose();
         */
-        _skyboxShader = new ShaderProgram(this, "Engine/Internal/skybox.vert", "Engine/Internal/skybox.frag");
+        _skyboxShader = new ShaderProgram(this, "Engine/Internal/skybox.vert", "Engine/Internal/skybox.frag", includes);
         _skyboxVao = new SkyboxVAO(this);
         //Skybox = new EnvironmentTexture(this, "../../../res/sky.pvr");
         
         Root = new Entity(this, name: "Root");
         Root.AddComponent(new Transform(Root));
         
-        DefaultVertex = new Shader(this, "Engine/Internal/default.vert", ShaderType.VertexShader);
-        FramebufferShader = new Shader(this, "Engine/Internal/framebuffer.vert", ShaderType.VertexShader);
+        DefaultVertex = new Shader(this, "Engine/Internal/default.vert", ShaderType.VertexShader, includes);
+        FramebufferShader = new Shader(this, "Engine/Internal/framebuffer.vert", ShaderType.VertexShader, includes);
         
         GL.Enable(EnableCap.DepthTest);
         GL.Enable(EnableCap.CullFace);
@@ -163,18 +169,22 @@ public class GameWindow
         
         ShadowBuffer = new FrameBuffer(this, 2048, 2048, new []{DrawBufferMode.None});
 
-        _screenFramebuffer = new FrameBuffer(this, Size.X, Size.Y);
+        ScreenFramebuffer = new FrameBuffer(this, Size.X, Size.Y);
         
         _screenDepth = new RenderBuffer(this);
-        _screenDepth.BindToFrameBuffer(_screenFramebuffer, InternalFormat.DepthComponent32f, FramebufferAttachment.DepthAttachment);
+        _screenDepth.BindToFrameBuffer(ScreenFramebuffer, InternalFormat.DepthComponent32f, FramebufferAttachment.DepthAttachment);
         
-        _screenTexture = new EmptyTexture(this, Size.X, Size.Y, InternalFormat.Rgba32f, TextureWrapMode.ClampToBorder);
-        _screenTexture.BindToFrameBuffer(_screenFramebuffer, FramebufferAttachment.ColorAttachment0);
-        _prevScreenTexture = new EmptyTexture(this, Size.X, Size.Y, InternalFormat.Rgba32f,
+        _screenTexture = new Texture2D(this, Size.X, Size.Y, InternalFormat.Rgba32f, TextureWrapMode.ClampToBorder);
+        _screenTexture.BindToFrameBuffer(ScreenFramebuffer, FramebufferAttachment.ColorAttachment0);
+        _prevScreenTexture = new Texture2D(this, Size.X, Size.Y, InternalFormat.Rgba32f,
             TextureWrapMode.ClampToBorder);
 
         _fbCopyProgram = new ShaderProgram(this, "Engine/Internal/fbcopy.frag", FramebufferShader);
         _screenPlane = new PlaneVAO(this);
+        
+        Entity cubemap = new Entity(this);
+        cubemap.AddComponent(new Transform(cubemap));
+        cubemap.AddComponent(new CubemapCapture(cubemap, 1024));
         
         OnLoad();
         
@@ -185,21 +195,22 @@ public class GameWindow
         State = EngineState.Shadow;
         
         TransformSystem.Update(Root);
-        CameraSystem.Render(0f);
+        CameraSystem.Update(0f);
         ProgramManager.InitFrame(this);
-        MeshRendererSystem.VerifyUsers();
         MeshRendererSystem.Update(0f);
         
         GL.Clear(ClearBufferMask.DepthBufferBit);
 
-        _depthShader = new ShaderProgram(this, "Engine/Internal/depth.vert", "Engine/Internal/depth.frag");
+        _depthShader = new ShaderProgram(this, "Engine/Internal/depth.vert", "Engine/Internal/depth.frag", includes);
         _depthShader.Use();
-
-        MeshRendererSystem.Render(0f);
+        
         MeshRendererSystem.Render();
 
         PrimitiveVao.Init(this);
         _frustumTest = new PrimitiveVao(this, 12, PrimitiveType.Lines);
+        
+        
+        BuildCubemaps();
     }
 
     protected virtual void OnLoad()
@@ -210,21 +221,21 @@ public class GameWindow
     protected void OnRender(double t)
     {
         float time = (float)t;
-        View.Title = $"gE2 - FPS: {1f / time}";
+        Window.Title = $"gE2 - FPS: {(int)(1f / time)}";
+        
         if (_isClosed) return;
         // Main Render Pass
         
         State = EngineState.PreZ;
         
-        MeshRendererSystem.VerifyUsers();
         BehaviorSystem.Render(time);
         TransformSystem.Update(Root);
-        CameraSystem.Render(time);
+        CameraSystem.Update(time);
         SkinManager.Render(time);
         ProgramManager.InitFrame(this);
         MeshRendererSystem.Update(0f);
 
-        _screenFramebuffer.Bind(null);
+        ScreenFramebuffer.Bind(null);
         
         GL.DrawBuffer(DrawBufferMode.None);
         GL.DepthMask(true);
@@ -232,29 +243,20 @@ public class GameWindow
         GL.Clear(ClearBufferMask.DepthBufferBit);
 
         _depthShader.Use();
-
-        MeshRendererSystem.Render(0f);
+        
         MeshRendererSystem.Render();
 
         State = EngineState.Render;
         
-        GL.DrawBuffers((uint) _screenFramebuffer.DrawBuffers.Length, _screenFramebuffer.DrawBuffers);
+        GL.DrawBuffers((uint) ScreenFramebuffer.DrawBuffers.Length, ScreenFramebuffer.DrawBuffers);
         GL.DepthMask(false);
         GL.ColorMask(true, true, true, true);
         GL.DepthFunc(DepthFunction.Equal);
-        GL.Clear(ClearBufferMask.ColorBufferBit);
-        
-        MeshRendererSystem.Render(0f);
+
         MeshRendererSystem.Render();
         
-        if (_skyboxVao != null && Skybox != null && _skyboxShader != null)
-        {
-            GL.DepthFunc(DepthFunction.Lequal);
-            _skyboxShader.Use();
-            _skyboxShader.SetUniform(0, Skybox.Use(TexSlotManager.Unit));
-            _skyboxVao.Render();
-        }
-
+        RenderSkybox();
+        
         if (_debug)
         {
             for (int i = 0; i < MeshRendererSystem.Components.Count; i++)
@@ -277,22 +279,59 @@ public class GameWindow
                     };
 
                     fixed (void* ptr = points) _frustumTest.UpdateData(ptr);
-                    _frustumTest.Render();
+                    _frustumTest.Render(1);
                 }
             }
         }
         
         State = EngineState.PostProcess;
 
+        bool postBuffer = false;
+        
+        for (int i = 0; i < PostEffects.Count; i++)
+        {
+            PostEffects[i].Use(0);
+            postBuffer = !postBuffer;
+        }
+
         GL.DepthFunc(DepthFunction.Always);
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         _fbCopyProgram.SetUniform(0, _screenTexture.Use(0));
         _fbCopyProgram.Use();
-        _screenPlane.Render();
+        _screenPlane.Render(1);
 
         GL.CopyImageSubData(_screenTexture.ID, CopyImageSubDataTarget.Texture2D, 0, 0, 0, 0, _prevScreenTexture.ID,
             GLEnum.Texture2D, 0, 0, 0, 0, _screenTexture.Size.X, _screenTexture.Size.Y, 1);
 
         //View.SwapBuffers();
+    }
+
+    public void RenderSkybox()
+    {
+        if (_skyboxVao != null && Skybox != null && _skyboxShader != null)
+        {
+            GL.DepthFunc(DepthFunction.Lequal);
+            _skyboxShader.Use();
+            _skyboxShader.SetUniform(0, Skybox.Use(TexSlotManager.Unit));
+            _skyboxVao.Render(1);
+            TexSlotManager.ResetUnit();
+        }
+        else
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+    }
+    
+
+    private void BuildCubemaps()
+    {
+        var prevCam = CameraSystem.CurrentCamera;
+
+        ScreenFramebuffer.Bind(null);
+        
+        State = EngineState.Cubemap;
+        CubemapCaptureManager.Render(0f);
+        
+        prevCam.Set();
+        ScreenFramebuffer.Bind(null);
+        _screenTexture.BindToFrameBuffer(ScreenFramebuffer, FramebufferAttachment.ColorAttachment0);
     }
 }

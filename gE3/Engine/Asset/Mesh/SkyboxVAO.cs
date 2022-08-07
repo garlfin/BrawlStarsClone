@@ -35,6 +35,8 @@ public unsafe class SkyboxVAO : VAO
         7, 5, 4
     };
 
+    private uint _ebo;
+
     public SkyboxVAO(GameWindow window) : base(window)
     {
         _vao = GL.GenVertexArray();
@@ -48,17 +50,29 @@ public unsafe class SkyboxVAO : VAO
         }
         GL.EnableVertexAttribArray(0);
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 12, (nuint*) 0);
-        var ebo = GL.GenBuffer();
-        GL.BindBuffer(GLEnum.ElementArrayBuffer, ebo);
+        _ebo = GL.GenBuffer();
+        GL.BindBuffer(GLEnum.ElementArrayBuffer, _ebo);
         fixed (void* ptr = SkyboxIndices)
         {
             GL.BufferData(GLEnum.ElementArrayBuffer, (nuint)(SkyboxIndices.Length * sizeof(ushort)), ptr, GLEnum.StaticDraw);
         }
     }
 
-    public override void Render()
+    protected override void Render()
     {
         GL.BindVertexArray(_vao);
         GL.DrawElements(PrimitiveType.Triangles, 36, DrawElementsType.UnsignedShort,(void*) 0);
+    }
+
+    protected override void RenderInstanced(uint count)
+    {
+        GL.BindVertexArray(_vao);
+        GL.DrawElementsInstanced(PrimitiveType.Triangles, 36, DrawElementsType.UnsignedShort,(void*) 0, count);
+    }
+
+    public override void Delete()
+    {
+        base.Delete();
+        GL.DeleteBuffer(_ebo);
     }
 }

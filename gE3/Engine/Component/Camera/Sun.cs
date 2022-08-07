@@ -5,7 +5,7 @@ using gEMath.Math;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
-namespace gE3.Engine.Component;
+namespace gE3.Engine.Component.Camera;
 
 public class Sun : BaseCamera
 {
@@ -13,7 +13,7 @@ public class Sun : BaseCamera
     private readonly Transform _entityTransform;
     public Vector3D<float> Offset = Vector3D<float>.Zero;
 
-    public EmptyTexture ShadowMap { get; }
+    public Texture2D ShadowMap { get; }
 
     public Sun(Entity? owner, int size, float clipNear = 0.1f, float clipFar = 300f, uint shadowMapSize = 2048) : base(owner, clipNear, clipFar)
     {
@@ -22,7 +22,7 @@ public class Sun : BaseCamera
         _entityTransform = owner.GetComponent<Transform>() ??
                            throw new InvalidOperationException($"No transform on sun object {Owner.Name}!");
 
-        ShadowMap = new EmptyTexture(Window, shadowMapSize, shadowMapSize, InternalFormat.DepthComponent32f, TextureWrapMode.ClampToBorder, false, true);
+        ShadowMap = new Texture2D(Window, shadowMapSize, shadowMapSize, InternalFormat.DepthComponent32f, TextureWrapMode.ClampToBorder, false, true);
     }
 
     public override void Set()
@@ -30,11 +30,18 @@ public class Sun : BaseCamera
         CameraSystem.Sun = this;
     }
 
+    public override void OnUpdate(float deltaTime)
+    {
+       ShadowMap.BindToFrameBuffer(Window.ShadowBuffer, FramebufferAttachment.DepthAttachment);
+               Position = _entityTransform.Model.Transformation() + Offset;
+               _view = Matrix4X4.CreateLookAt(Position, Offset, Vector3D<float>.UnitY);
+               var viewProj = _view * _projection;
+               ViewFrustum = new Frustum(ref viewProj);
+    }
+
     public override void OnRender(float deltaTime)
     {
-        ShadowMap.BindToFrameBuffer(Window.ShadowBuffer, FramebufferAttachment.DepthAttachment);
-        Position = _entityTransform.Model.Transformation() + Offset;
-        _view = Matrix4X4.CreateLookAt(Position, Offset, Vector3D<float>.UnitY);
+        
     }
 
     public override void Dispose()
@@ -60,11 +67,6 @@ public class Sun : BaseCamera
     public override RayInfo ScreenToRay(ref Vector2D<float> vector2D)
     {
         throw new NotImplementedException();
-    }
-
-    public override bool IsAABBVisible(ref AABB aabb)
-    {
-        return true;
     }
 }
 

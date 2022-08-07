@@ -9,7 +9,7 @@ public abstract class Component
 {
     public Entity? Owner;
     public GameWindow Window => Owner.Window;
-    public IWindow View => Owner.Window.View;
+    public IWindow View => Owner.Window.Window;
     public IInputContext Input => Owner.Window.Input;
     public IKeyboard Keyboard => Owner.Window.Input.Keyboards[0];
     public IMouse Mouse => Owner.Window.Input.Mice[0];

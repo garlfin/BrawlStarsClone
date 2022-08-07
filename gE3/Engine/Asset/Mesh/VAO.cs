@@ -1,6 +1,5 @@
 ﻿using gE3.Engine.Windowing;
 using gEModel.Struct;
-using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
 
@@ -8,26 +7,23 @@ public abstract class VAO : Asset
 {
     protected uint _vao;
     protected uint _vbo;
-    public SubMesh Mesh { get; }
     public uint VBO => _vbo;
-    public abstract void Render();
-
-    protected VAO(GameWindow window, SubMesh mesh) : base(window)
-    { 
-        Mesh = mesh;
-    }
     
     protected VAO(GameWindow window) : base(window)
     {
     }
 
-    public virtual unsafe void RenderInstanced(uint count)
+    public virtual unsafe void Render(uint count)
     {
         GL.BindVertexArray(_vao);
-        GL.DrawElementsInstanced(PrimitiveType.Triangles, Mesh.IndexCount * 3, DrawElementsType.UnsignedInt,
-            (void*) 0, count);
+        
+        if (Window.State is EngineState.Cubemap) count *= 6;
+        if(count == 1) Render();
+        else RenderInstanced(count);
     }
-
+    protected abstract void Render();
+    protected abstract void RenderInstanced(uint count);
+    
     public override void Delete()
     {
         GL.DeleteVertexArray(_vao);

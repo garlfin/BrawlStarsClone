@@ -6,16 +6,22 @@ namespace gE3.Engine.Asset.Material;
 
 public class Shader : Asset
 {
-    public Shader(GameWindow window, string path, ShaderType type) : base(window)
+    private static string RequiredExts = "#extension GL_ARB_bindless_texture : require \n #define ARB_BINDLESS 1 \n";
+    public Shader(GameWindow window, string path, ShaderType type, string[]? shaderIncludes) : base(window)
     {
         _id = GL.CreateShader(type);
 
-        APIVersion apiVersion = window.View.API.Version;
-        
-        var source = $"#version {apiVersion.MajorVersion}{apiVersion.MinorVersion}0 core \n";
-        if (ARB.BT != null) source += "#extension GL_ARB_bindless_texture : require \n #define ARB_BINDLESS 1 \n";
+        APIVersion apiVersion = window.Window.API.Version;
 
-        GL.ShaderSource(ID, source + File.ReadAllText(path));
+        var version = $"#version {apiVersion.MajorVersion}{apiVersion.MinorVersion}0 core \n";
+        
+        var requiredExts = ARB.BT != null ? RequiredExts : "";
+        if (shaderIncludes != null)
+            for (int i = 0; i < shaderIncludes.Length; i++)
+                requiredExts += File.ReadAllText(shaderIncludes[i]) + "\n";
+
+        string[] sources = File.ReadAllText(path).Split("#define ENDEXT");
+        GL.ShaderSource(ID, version + (sources.Length > 1 ? sources[0] + requiredExts : requiredExts) + sources[^1]);
         GL.CompileShader(ID);
 
         var log = GL.GetShaderInfoLog(ID);

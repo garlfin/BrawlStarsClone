@@ -11,7 +11,17 @@ public abstract class Texture : Asset
     protected InternalFormat _format;
     
     public Vector2D<uint> Size => new Vector2D<uint>(_width, _height);
-    public ulong Handle { get; protected set; }
+
+    private ulong _handle;
+    public ulong Handle
+    {
+        get
+        {
+            if (_handle == 0) GetHandle();
+            return _handle;
+        }
+        private set => _handle = value;
+    }
 
     public Texture(GameWindow window, uint width, uint height, InternalFormat format) : base(window)
     {
@@ -28,8 +38,8 @@ public abstract class Texture : Asset
     {
         if (ARB.BT == null) return;
 
-        Handle = ARB.BT.GetTextureHandle(ID);
-        ARB.BT.MakeTextureHandleResident(Handle);
+        _handle = ARB.BT.GetTextureHandle(ID);
+        ARB.BT.MakeTextureHandleResident(_handle);
     }
 
     public override int Use(int slot)
@@ -65,6 +75,11 @@ public abstract class Texture : Asset
     {
         ARB.BT.MakeTextureHandleNonResident(Handle);
         GL.DeleteTexture(ID);
+    }
+
+    public void GenMips()
+    {
+        GL.GenerateTextureMipmap(_id);
     }
 }
 

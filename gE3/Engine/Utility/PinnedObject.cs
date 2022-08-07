@@ -4,30 +4,28 @@ namespace gE3.Engine.Utility;
 
 public unsafe class PinnedObject<T> : IDisposable where T : unmanaged
 {
-    public T* Pointer =>       _pointer;
+    public T* Pointer { get; private set; }
         //if (_disposed)
         //    throw new System.Exception("How am I expected to get a pointer to a disposed object funny guy? 💀");
-        
-    private T* _pointer;
-    private readonly GCHandle _handle;
-    private bool _disposed;
 
-    public PinnedObject(T value)
+        public PinnedObject(T value)
     {
-        _handle = GCHandle.Alloc(value, GCHandleType.Pinned);
-        _pointer = (T*)_handle.AddrOfPinnedObject();
+        Pointer = (T*)NativeMemory.Alloc((nuint) sizeof(T));
+        *Pointer = value;
     }
 
     public PinnedObject(ref T value)
     {
-        _handle = GCHandle.Alloc(value, GCHandleType.Pinned);
-        _pointer = (T*)_handle.AddrOfPinnedObject();
+        Pointer = (T*)NativeMemory.Alloc((nuint) sizeof(T));
+        *Pointer = value;
     }
 
     private void ReleaseUnmanagedResources()
     {
-        _handle.Free();
-        _disposed = true;
+        if (Pointer == null) return;
+        
+        NativeMemory.Free(Pointer);
+        Pointer = null;
     }
 
     public void Dispose()

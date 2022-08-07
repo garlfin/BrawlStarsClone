@@ -6,8 +6,10 @@ namespace gE3.Engine.Asset.Mesh;
 
 public sealed class MeshVao : VAO
 {
-    public unsafe MeshVao(GameWindow window, SubMesh mesh) : base(window, mesh)
+    public SubMesh Mesh { get; }
+    public unsafe MeshVao(GameWindow window, SubMesh mesh) : base(window)
     {
+        Mesh = mesh;
         var finalData = new Vertex[mesh.Vertices.Length];
 
         for (var i = 0; i < mesh.Vertices.Length; i++)
@@ -51,10 +53,17 @@ public sealed class MeshVao : VAO
 
     public int EBO { get; } = -1;
 
-    public override unsafe void Render()
+    protected override unsafe void Render()
     {
         GL.BindVertexArray(_vao);
-        GL.DrawElements(PrimitiveType.Triangles, Mesh.IndexCount * 3, DrawElementsType.UnsignedInt, (void*) 0);
+        GL.DrawElements(PrimitiveType.Triangles, Mesh.IndexCount * 3, DrawElementsType.UnsignedInt, (void*)0);
+    }
+
+    protected override unsafe void RenderInstanced(uint count)
+    {
+        GL.BindVertexArray(_vao);
+        GL.DrawElementsInstanced(PrimitiveType.Triangles, Mesh.IndexCount * 3, DrawElementsType.UnsignedInt, (void*)0,
+            count);
     }
 
     public override void Delete()

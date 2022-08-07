@@ -24,10 +24,11 @@ public class PrimitiveVao : VAO
     
     private readonly uint _length;
     private PrimitiveType _primitiveType;
+    private uint _ebo;
 
     public static void Init(GameWindow window)
     {
-        DebugShader = new ShaderProgram(window, "../../../debug.vert", "../../../debug.frag");
+        DebugShader = new ShaderProgram(window, "../../../debug.vert", "../../../debug.frag", null);
     }
 
     public unsafe PrimitiveVao(GameWindow window, uint length, PrimitiveType primitiveType) : base(window)
@@ -43,7 +44,7 @@ public class PrimitiveVao : VAO
 
         if (_primitiveType == PrimitiveType.Lines)
         {
-            var _ebo = GL.GenBuffer();
+            _ebo = GL.GenBuffer();
             GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
             
             fixed (void* ptr = CubeIndices) 
@@ -60,7 +61,7 @@ public class PrimitiveVao : VAO
         GL.BufferSubData(BufferTargetARB.ArrayBuffer, 0, _length * sizeof(float) * 3, ptr);
     }
 
-    public override unsafe void Render()
+    protected override unsafe void Render()
     {
         DebugShader.Use();
         GL.DepthFunc(DepthFunction.Always);
@@ -70,13 +71,18 @@ public class PrimitiveVao : VAO
         else if (_primitiveType == PrimitiveType.Points) GL.DrawArrays(_primitiveType, 0, _length);
     }
 
-    public override void RenderInstanced(uint count)
+    protected override unsafe void RenderInstanced(uint count)
     {
+        DebugShader.Use();
+        GL.DepthFunc(DepthFunction.Always);
+        GL.BindVertexArray(_vao);
+        if (_primitiveType == PrimitiveType.Lines) GL.DrawElementsInstanced(_primitiveType, 24, DrawElementsType.UnsignedShort, (void*) 0, count);
+        else if (_primitiveType == PrimitiveType.Points) GL.DrawArraysInstanced(_primitiveType, 0, _length, count);
     }
-
     public override void Delete()
     {
-        GL.DeleteVertexArray(_vao);
-        GL.DeleteBuffer(_vbo);
+        base.Delete();
+        if (_ebo != 0)
+            GL.DeleteBuffer(_ebo);
     }
 }

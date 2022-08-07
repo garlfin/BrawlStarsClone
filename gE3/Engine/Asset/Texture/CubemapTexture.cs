@@ -4,9 +4,9 @@ using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Texture;
 
-public class EnvironmentTexture : Texture
+public class CubemapTexture : Texture
 {
-    public unsafe EnvironmentTexture(GameWindow window, string path, bool genMips = true) : base (window)
+    public unsafe CubemapTexture(GameWindow window, string path, bool genMips = true) : base (window)
     {
         if (!File.Exists(path)) throw new FileNotFoundException(path);
         FileStream file = File.Open(path, FileMode.Open);
@@ -69,6 +69,19 @@ public class EnvironmentTexture : Texture
         GetHandle();
         reader.Close();
         file.Close();
+    }
+
+    public CubemapTexture(GameWindow window, uint size, InternalFormat format, bool genMips = true) :
+        base(window, size, size, format)
+    {
+        GL.CreateTextures(TextureTarget.TextureCubeMap, 1, out _id);
+        GL.TextureStorage2D(ID, genMips ? GetMipsCount() : 1, (GLEnum)format, size, size);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Repeat);
+        GL.TextureParameter(ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        GL.TextureParameter(ID, TextureParameterName.TextureMinFilter, (int)(genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
+        if (genMips) GL.GenerateTextureMipmap(_id);
     }
 
     public override int Use(int slot)

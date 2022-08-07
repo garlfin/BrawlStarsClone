@@ -70,6 +70,9 @@
         <None Update="Engine\Internal\depth.vert">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="Engine\Internal\include.glsl">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
@@ -80,11 +83,6 @@
         <PackageReference Include="Silk.NET.OpenGL.Extensions.ARB" Version="2.15.0" />
         <PackageReference Include="Silk.NET.Windowing" Version="2.15.0" />
         <PackageReference Include="Silk.NET.Windowing.Desktop" Version="1.9.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Engine\Asset\Bounds" />
-      <Folder Include="Engine\Map" />
     </ItemGroup>
 
     <ItemGroup>

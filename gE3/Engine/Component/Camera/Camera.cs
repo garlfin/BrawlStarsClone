@@ -6,7 +6,7 @@ using gEMath.Bounds;
 using gEMath.Math;
 using Silk.NET.Maths;
 
-namespace gE3.Engine.Component;
+namespace gE3.Engine.Component.Camera;
 
 public class Camera : BaseCamera
 {
@@ -34,7 +34,7 @@ public class Camera : BaseCamera
         }
     }
 
-    public override unsafe void OnRender(float deltaTime)
+    public override unsafe void OnUpdate(float deltaTime)
     {
         // Yaw Y, Roll Z, Pitch X
         _front.X = MathF.Cos(_entityTransform.Rotation.X.DegToRad()) *
@@ -45,8 +45,7 @@ public class Camera : BaseCamera
         _front.Z = MathF.Cos(_entityTransform.Rotation.X.DegToRad()) *
                    MathF.Sin(_entityTransform.Rotation.Y.DegToRad());
 
-        _front /= _front.Length;
-
+        _front = Vector3D.Normalize(_front);
         _right = Vector3D.Normalize(Vector3D.Cross(_front, Vector3D<float>.UnitY));
         _up = Vector3D.Normalize(Vector3D.Cross(_right, _front));
         
@@ -61,10 +60,13 @@ public class Camera : BaseCamera
         System.Studio->SetListenerAttributes(0, *_attributes.Pointer);
 
         var viewProj = _view * _projection;
-        ViewFrustum = GetViewFrustum(ref viewProj);
+        ViewFrustum = new Frustum(ref viewProj);
+    }
+
+    public override void OnRender(float deltaTime)
+    {
     }
     
-
     public override void Dispose()
     {
         CameraSystem.Remove(this);
@@ -106,13 +108,7 @@ public class Camera : BaseCamera
         Matrix4X4.Invert(_view, out inverse);
         var result = rayEye * inverse;
 
-        return new RayInfo(_entityTransform.Location,
+        return new RayInfo(_entityTransform.Location, 
             Vector3D.Normalize(new Vector3D<float>(result.X, result.Y, result.Z)));
     }
-    public override bool IsAABBVisible(ref AABB aabb)
-    {
-        return ViewFrustum.AABBVsFrustum(ref aabb);
-    }
-    
-    
 }

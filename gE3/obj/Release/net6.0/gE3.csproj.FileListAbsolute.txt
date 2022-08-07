@@ -31,3 +31,4 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\gEModel.pdb
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\obj\Release\net6.0\gE3.csproj.CopyComplete
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\gEMath.dll
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\gEMath.pdb
+C:\Users\scion\RiderProjects\BrawlStarsClone\gE3\bin\Release\net6.0\Engine\Internal\include.glsl

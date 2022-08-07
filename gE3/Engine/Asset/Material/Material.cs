@@ -20,12 +20,13 @@ public abstract class Material
 
     public void Use()
     {
-        if (_cull) Window.GL.Enable(EnableCap.CullFace); else Window.GL.Disable(EnableCap.CullFace);
-        if (Window.State is EngineState.Shadow or EngineState.PreZ) Window.GL.DepthFunc(_function);
+        if (_cull) Window.GL.Enable(EnableCap.CullFace); 
+        else Window.GL.Disable(EnableCap.CullFace);
+        
+        if (Window.State is EngineState.Shadow or EngineState.PreZ or EngineState.Cubemap) Window.GL.DepthFunc(_function);
         RequiredSet();
 
-        if (Window.State != EngineState.Render) return;
-        
+        if (Window.State != EngineState.Render && Window.State != EngineState.Cubemap) return;
         Program.Use();
         Set();
         Window.GL.Disable(EnableCap.CullFace);

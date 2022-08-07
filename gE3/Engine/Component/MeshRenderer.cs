@@ -1,9 +1,7 @@
-﻿using gE3.Engine.Asset.Material;
-using gE3.Engine.Asset.Mesh;
-using gE3.Engine.Asset.Texture;
+﻿using gE3.Engine.Asset.Mesh;
+using gE3.Engine.Component.Camera;
 using gE3.Engine.Windowing;
 using gEMath.Bounds;
-using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;
 
@@ -21,13 +19,15 @@ public sealed class MeshRenderer : Component
     public MeshRenderer(Entity? owner, Mesh mesh, bool overrideInstance = false) : base(owner)
     {
         MeshRendererSystem.Register(this);
+        
         Mesh = mesh;
         _overrideInstance = overrideInstance;
-        if (!overrideInstance) mesh.Register(Owner);
+        
+        mesh.Register(Owner);
         _transform = owner?.GetComponent<Transform>();
     }
 
-    public override unsafe void OnRender(float deltaTime)
+    /*public override unsafe void OnRender(float deltaTime)
     {
         if (!InFrustum) return;
         if (Mesh.Instanced && !_overrideInstance) return; 
@@ -41,7 +41,7 @@ public sealed class MeshRenderer : Component
             //Owner.GetComponent<Animator>()?.RenderDebug();
             TexSlotManager.ResetUnit();
         }
-    }
+    }*/
 
     public override void Dispose()
     {
@@ -54,6 +54,10 @@ public sealed class MeshRenderer : Component
         var matrix = _transform.Model;
         AABB _bounds;
         Bounds = _bounds = Mesh.Bounds.Transform(ref matrix);
+        InFrustum = true;
+        
+        if (Window.State is EngineState.Cubemap) return;
+        
         InFrustum = (Window.State == EngineState.Shadow ?  CameraSystem.Sun! : CameraSystem.CurrentCamera!).IsAABBVisible(ref _bounds);
     }
 }
@@ -61,7 +65,7 @@ public sealed class MeshRenderer : Component
 public class MeshRendererSystem : ComponentSystem<MeshRenderer>
 {
     public static List<Mesh> Meshes { get; } = new List<Mesh>();
-    private static readonly List<Mesh> ManagedMeshes = new List<Mesh>();
+    //private static readonly List<Mesh> ManagedMeshes = new List<Mesh>();
 
     public static void Register(Mesh mesh)
     {
@@ -70,25 +74,6 @@ public class MeshRendererSystem : ComponentSystem<MeshRenderer>
 
     public static void Render()
     {
-        for (var i = 0; i < ManagedMeshes.Count; i++) ManagedMeshes[i].ManagedRender();
-    }
-
-    public static void VerifyUsers()
-    {
-        for (var i = 0; i < Meshes.Count; i++)
-        {
-            var mesh = Meshes[i];
-
-            if (mesh.Users.Count < 2 && mesh.Instanced)
-            {
-                ManagedMeshes.Remove(mesh);
-                mesh.Instanced = false;
-            }
-            else if (mesh.Users.Count > 1 && !mesh.Instanced)
-            {
-                ManagedMeshes.Add(mesh);
-                mesh.Instanced = true;
-            }
-        }
+        for (var i = 0; i < Meshes.Count; i++) Meshes[i].ManagedRender();
     }
 }

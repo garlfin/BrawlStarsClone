@@ -6,11 +6,11 @@ namespace gE3.Engine.Asset.Mesh;
 
 public class SkinnedVAO : VAO
 {
-    private int _ebo;
-    
-    public unsafe SkinnedVAO(GameWindow window, int length, SubMesh mesh, int ebo = -1) : base(window, mesh) 
+    public SubMesh Mesh { get; }
+
+    public unsafe SkinnedVAO(GameWindow window, int length, SubMesh mesh, int ebo = -1) : base(window) 
     {
-        _ebo = ebo;
+        Mesh = mesh;
         _vao = GL.GenVertexArray();
         GL.BindVertexArray(_vao);
 
@@ -30,9 +30,16 @@ public class SkinnedVAO : VAO
         GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (uint) sizeof(Vertex), (nuint*) 32);
     }
 
-    public override unsafe void Render()
+    protected override unsafe void Render()
     {
         GL.BindVertexArray(_vao);
         GL.DrawElements(PrimitiveType.Triangles, Mesh.IndexCount * 3, DrawElementsType.UnsignedInt, (void*) 0);
+    }
+
+    protected override unsafe void RenderInstanced(uint count)
+    {
+        GL.BindVertexArray(_vao);
+        GL.DrawElementsInstanced(PrimitiveType.Triangles, Mesh.IndexCount * 3, DrawElementsType.UnsignedInt, (void*)0,
+            count);
     }
 }

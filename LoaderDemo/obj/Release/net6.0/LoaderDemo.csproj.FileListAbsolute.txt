@@ -64,3 +64,4 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\obj\Release\net6.0\refin
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\obj\Release\net6.0\LoaderDemo.pdb
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\obj\Release\net6.0\LoaderDemo.genruntimeconfig.cache
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\obj\Release\net6.0\ref\LoaderDemo.dll
+C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Release\net6.0\Engine\Internal\include.glsl

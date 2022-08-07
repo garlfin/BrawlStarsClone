@@ -1,9 +1,8 @@
 ﻿using gE3.Engine.Component.Physics;
 using gEMath.Bounds;
-using gEMath.Math;
 using Silk.NET.Maths;
 
-namespace gE3.Engine.Component;
+namespace gE3.Engine.Component.Camera;
 
 public abstract class BaseCamera : Component
 {
@@ -42,26 +41,10 @@ public abstract class BaseCamera : Component
     public abstract Vector3D<float> ScreenToWorld2D(ref Vector3D<float> point);
     public abstract RayInfo ScreenToRay(ref Vector2D<float> point);
 
-    protected Frustum GetViewFrustum(ref Matrix4X4<float> viewProjection)
+    public bool IsAABBVisible(ref AABB aabb)
     {
-        Frustum frustum = new Frustum();
-
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 2; j++)
-            {
-                var index = i * 2 + j;
-                frustum.Planes[index].X = viewProjection[0, 3] + (j == 0 ? viewProjection[0, i] : -viewProjection[0, i]);
-                frustum.Planes[index].Y = viewProjection[1, 3] + (j == 0 ? viewProjection[1, i] : -viewProjection[1, i]);
-                frustum.Planes[index].Z = viewProjection[2, 3] + (j == 0 ? viewProjection[2, i] : -viewProjection[2, i]);
-                frustum.Planes[index].W = viewProjection[3, 3] + (j == 0 ? viewProjection[3, i] : -viewProjection[3, i]);
-                frustum.Planes[index] *= frustum.Planes[index].Vec3().Length;
-            }
-        }
-        
-        return frustum;
+        return ViewFrustum.AABBVsFrustum(ref aabb);
     }
-    public abstract bool IsAABBVisible(ref AABB aabb);
 
     public virtual void Set()
     {

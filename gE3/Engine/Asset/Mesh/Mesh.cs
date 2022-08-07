@@ -12,11 +12,9 @@ public class Mesh : BaseMesh
     private readonly Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
     private readonly float[] _alpha = new float[100]; // 100 is the max amount.
     public List<Entity> Users { get; } = new List<Entity>();
-    public List<Entity> ActiveUsers { get; } = new List<Entity>();
-    public bool Instanced { get; set; }
     public MeshVao[] MeshVAO { get; }
     public gEModel.Struct.Mesh RenderMesh { get; set; }
-    public VAO this[int index] => MeshVAO[index];
+    public MeshVao this[int index] => MeshVAO[index];
     // ReSharper disable once InconsistentNaming
 
     public AABB Bounds => RenderMesh.BoundingBox;
@@ -43,31 +41,33 @@ public class Mesh : BaseMesh
 
     public override unsafe void ManagedRender()
     {
+        if (Users.Count == 0) return;
+        
+        var users = Math.Min(Users.Count, 100);
+        
+        uint actualUsers = 0;
+        
+        for (var j = 0; j < users; j++)
+        {
+            var userRenderer = Users[j].GetComponent<MeshRenderer>();
+            if(!userRenderer!.InFrustum) continue;
+            _model[actualUsers] = Users[j].GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
+            _alpha[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.Alpha; 
+            actualUsers++;
+        }
+        
+        if (actualUsers == 0) return;
+        
+        fixed (void* ptr = _model, ptr2 = _alpha)
+        {
+            ProgramManager.PushObjects(ptr, ptr2, actualUsers);
+        }
+        
         for (var i = 0; i < MeshVAO.Length; i++)
         {
             Users[0].GetComponent<MaterialComponent>()[RenderMesh.SubMeshes[i].MaterialID].Use();
-            var users = Math.Min(Users.Count, 100);
 
-            uint actualUsers = 0;
-            
-            for (var j = 0; j < users; j++)
-            {
-                var userRenderer = Users[j].GetComponent<MeshRenderer>();
-                if(!userRenderer!.InFrustum) continue;
-                _model[actualUsers] = Users[j].GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
-                _alpha[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.Alpha; 
-                actualUsers++;
-            }
-
-
-            if (actualUsers != 0)
-            {
-                fixed (void* ptr = _model, ptr2 = _alpha)
-                {
-                    ProgramManager.PushObjects(ptr, ptr2, (int) actualUsers);
-                }
-                this[i].RenderInstanced(actualUsers);
-            }
+            this[i].Render(actualUsers);
 
             TexSlotManager.ResetUnit();
         }

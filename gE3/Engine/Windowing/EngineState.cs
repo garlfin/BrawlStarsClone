@@ -5,5 +5,6 @@ public enum EngineState
     Render = 0,
     Shadow = 1,
     PostProcess = 2,
-    PreZ = 3
+    PreZ = 3,
+    Cubemap = 4
 }
