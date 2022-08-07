@@ -33,7 +33,8 @@ public class GameWindow
     private Texture2D _screenTexture;
     private Texture2D _prevScreenTexture;
     public FrameBuffer ScreenFramebuffer { get; private set; }
-    private RenderBuffer _screenDepth; 
+    public RenderBuffer ScreenDepth { get; private set; }
+
     //public EmptyTexture PrevScreenTexture { get; private set; }
     private PlaneVAO _screenPlane;
     private PrimitiveVao _frustumTest;
@@ -171,8 +172,8 @@ public class GameWindow
 
         ScreenFramebuffer = new FrameBuffer(this, Size.X, Size.Y);
         
-        _screenDepth = new RenderBuffer(this);
-        _screenDepth.BindToFrameBuffer(ScreenFramebuffer, InternalFormat.DepthComponent32f, FramebufferAttachment.DepthAttachment);
+        ScreenDepth = new RenderBuffer(this, Size.X, Size.Y, InternalFormat.DepthComponent32f);
+        ScreenDepth.BindToFrameBuffer(ScreenFramebuffer, FramebufferAttachment.DepthAttachment);
         
         _screenTexture = new Texture2D(this, Size.X, Size.Y, InternalFormat.Rgba32f, TextureWrapMode.ClampToBorder);
         _screenTexture.BindToFrameBuffer(ScreenFramebuffer, FramebufferAttachment.ColorAttachment0);
@@ -183,7 +184,10 @@ public class GameWindow
         _screenPlane = new PlaneVAO(this);
         
         Entity cubemap = new Entity(this);
-        cubemap.AddComponent(new Transform(cubemap));
+        cubemap.AddComponent(new Transform(cubemap)
+        {
+            Location = new Vector3D<float>(5, 6, 5)
+        });
         cubemap.AddComponent(new CubemapCapture(cubemap, 1024));
         
         OnLoad();

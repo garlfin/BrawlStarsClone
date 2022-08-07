@@ -70,7 +70,7 @@ public unsafe class SkyboxVAO : VAO
         GL.DrawElementsInstanced(PrimitiveType.Triangles, 36, DrawElementsType.UnsignedShort,(void*) 0, count);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         base.Delete();
         GL.DeleteBuffer(_ebo);

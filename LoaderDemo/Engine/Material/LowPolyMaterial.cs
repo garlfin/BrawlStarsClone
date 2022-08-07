@@ -40,7 +40,7 @@ public unsafe class LowPolyMaterial : gE3.Engine.Asset.Material.Material
             if (_shadowUniform == -1) 
                 _shadowUniform = Program.GetUniformLocation("ShadowMap");
             ProgramManager.CurrentProgram.SetUniform(_window.State is EngineState.Shadow or EngineState.PreZ ? _albedoDepthUniform : _albedoUniform, Albedo.Use(TexSlotManager.Unit));
-            if (_window.State is EngineState.Render) ProgramManager.CurrentProgram.SetUniform(_shadowUniform, CameraSystem.Sun.ShadowMap.Use(TexSlotManager.Unit));
+            if (_window.State is EngineState.Render or EngineState.Cubemap) ProgramManager.CurrentProgram.SetUniform(_shadowUniform, CameraSystem.Sun.ShadowMap.Use(TexSlotManager.Unit));
         } else
         {
             _data.Albedo = Albedo.Handle;

@@ -58,7 +58,7 @@ public unsafe class SoundEventInstance : Asset
         Instance->Set3DAttributes(attributes);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         _soundEvent.Instances.Remove(this);
         Instance->Release();

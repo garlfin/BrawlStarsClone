@@ -29,7 +29,7 @@ public class Buffer : Asset
         GL.BindBufferBase((BufferTargetARB)(targetOverride ??  _target), slot, ID);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         GL.DeleteBuffer(ID);
     }

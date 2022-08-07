@@ -42,7 +42,7 @@ public unsafe class Sound : Asset
         Instance->SetPitch(pitch);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         Instance->Release();
         _instance.Dispose();

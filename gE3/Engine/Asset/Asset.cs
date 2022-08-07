@@ -31,29 +31,24 @@ public abstract class Asset : IDisposable
         return slot;
     }
 
-    public abstract void Delete();
-
-    private void Dispose(bool disposing)
-    {
-        Delete();
-    }
-
+    protected abstract void Delete();
+    
     public void Dispose()
     {
-        Dispose(true);
+        Delete();
         GC.SuppressFinalize(this);
     }
 
     ~Asset()
     {
-        Dispose(false);
+        Delete();
     }
 }
 
 public static class AssetManager
 {
-    private static readonly List<Tuple<Entity, bool>> RemovalQueue = new();
-    private static readonly List<Asset> Assets = new();
+    private static readonly List<Tuple<Entity, bool>> RemovalQueue = new List<Tuple<Entity, bool>>();
+    private static readonly List<Asset> Assets = new List<Asset>();
 
     public static void Register(Asset asset)
     {

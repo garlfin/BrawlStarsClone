@@ -42,7 +42,7 @@ public class FrameBuffer : Asset
         if (mask != null) GL.Clear((ClearBufferMask)mask);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         GL.DeleteFramebuffer(ID);
     }

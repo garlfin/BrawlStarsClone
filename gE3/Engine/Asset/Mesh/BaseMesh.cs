@@ -12,7 +12,7 @@ public abstract class BaseMesh : Asset
     public abstract void Remove(Entity entity);
     public abstract void ManagedRender();
 
-    public override void Delete()
+    protected override void Delete()
     {
         
     }

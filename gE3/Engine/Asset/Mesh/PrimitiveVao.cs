@@ -79,7 +79,8 @@ public class PrimitiveVao : VAO
         if (_primitiveType == PrimitiveType.Lines) GL.DrawElementsInstanced(_primitiveType, 24, DrawElementsType.UnsignedShort, (void*) 0, count);
         else if (_primitiveType == PrimitiveType.Points) GL.DrawArraysInstanced(_primitiveType, 0, _length, count);
     }
-    public override void Delete()
+
+    protected override void Delete()
     {
         base.Delete();
         if (_ebo != 0)

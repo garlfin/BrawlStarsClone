@@ -15,7 +15,7 @@ public sealed class BRDFTexture : Texture
 
     public static void ShaderDispose()
     {
-        _brdfComputeShader.Delete();
+        _brdfComputeShader.Dispose();
     }
 
     public BRDFTexture(GameWindow window, uint size) : base(window)

@@ -23,8 +23,8 @@ public abstract class VAO : Asset
     }
     protected abstract void Render();
     protected abstract void RenderInstanced(uint count);
-    
-    public override void Delete()
+
+    protected override void Delete()
     {
         GL.DeleteVertexArray(_vao);
         GL.DeleteBuffer(_vbo);

@@ -13,30 +13,37 @@ public class CubemapCapture : BaseCamera
     private Transform _transform;
     public AABB Bounds { get; set; }
     public CubemapTexture Texture { get; }
+    private uint _size;
 
-    public Matrix4X4<float>[] ViewMatrices = new Matrix4X4<float>[6]; 
+    public Matrix4X4<float>[] ViewMatrices = new Matrix4X4<float>[6];
+    private CubemapTexture _depthMap;
 
     public CubemapCapture(Entity? owner, uint size, float clipNear = 0.1f, float clipFar = 100f) : base(owner, clipNear, clipFar)
     {
+        _size = size;
         CubemapCaptureManager.Register(this);
         Texture = new CubemapTexture(Window, size, InternalFormat.Rgb8);
         UpdateProjection();
         _transform = Owner.GetComponent<Transform>();
+        _depthMap = new CubemapTexture(Window, _size, InternalFormat.DepthComponent32f);
     }
 
     public override void OnRender(float deltaTime)
     {
         GL.Viewport((Vector2D<int>)Texture.Size);
-        
+
         Texture.BindToFrameBuffer(Window.ScreenFramebuffer, FramebufferAttachment.ColorAttachment0);
-        
+        _depthMap.BindToFrameBuffer(Window.ScreenFramebuffer, FramebufferAttachment.DepthAttachment);
+
         GL.Clear((ClearBufferMask)16640);
         Set();
-        
+
         ProgramManager.InitFrame(Window);
         MeshRendererSystem.Render();
         Window.RenderSkybox();
         Texture.GenMips();
+
+        Window.ScreenDepth.BindToFrameBuffer(Window.ScreenFramebuffer, FramebufferAttachment.DepthAttachment);
     }
 
     public override void OnUpdate(float deltaTime)

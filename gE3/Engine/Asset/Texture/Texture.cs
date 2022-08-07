@@ -23,14 +23,14 @@ public abstract class Texture : Asset
         private set => _handle = value;
     }
 
-    public Texture(GameWindow window, uint width, uint height, InternalFormat format) : base(window)
+    protected Texture(GameWindow window, uint width, uint height, InternalFormat format) : base(window)
     {
         _width = width;
         _height = height;
         _format = format;
     }
 
-    public Texture(GameWindow window) : base(window)
+    protected Texture(GameWindow window) : base(window)
     {
         
     }  
@@ -71,7 +71,7 @@ public abstract class Texture : Asset
         GL.NamedFramebufferTexture(buffer.ID, attachmentLevel, _id, level);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         ARB.BT.MakeTextureHandleNonResident(Handle);
         GL.DeleteTexture(ID);

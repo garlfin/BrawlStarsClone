@@ -25,7 +25,7 @@ public unsafe class SoundEvent : Asset
         return instance;
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         _audioSystem.Events.Remove(this);
         EventDescription->ReleaseAllInstances();

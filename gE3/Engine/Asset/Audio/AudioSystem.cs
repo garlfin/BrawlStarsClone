@@ -72,7 +72,7 @@ public unsafe class AudioSystem : Asset
         return Studio->Update();
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         Studio->Release();
         Core->Release();

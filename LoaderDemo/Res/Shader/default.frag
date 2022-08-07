@@ -11,7 +11,7 @@ layout(std140, binding = 3) uniform LowPolyMaterial
 
 #ifndef ARB_BINDLESS
 uniform sampler2D albedoTex;
-uniform sampler2D ShadowMap;
+uniform sampler2DShadow  ShadowMap;
 #endif
 
 
@@ -23,16 +23,10 @@ in vec4 FragPosLightSpace;
 
 out vec4 FragColor;
 
-const mat4 thresholdMatrix = mat4(0.0, 8.0, 2.0, 10.0,
-12.0, 4.0, 14.0, 6.0,
-3.0, 11.0, 1.0, 9.0,
-15.0, 7.0, 13.0, 5.0) / 17;
-
-float offset_lookup(sampler2DShadow map, vec4 loc, vec2 offset, vec2 texmapscale) {
-    return texture(map, vec3(loc.xy + offset * texmapscale, loc.z - loc.w));
+float random(vec3 seed3, int x){
+    float dot_product = dot(vec4(seed3, x), vec4(12.9898,78.233,45.164,94.673));
+    return fract(sin(dot_product) * 43758.5453);
 }
-
-float ditherSample = thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
@@ -40,26 +34,32 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     
     if (projCoords.z > 1) return 1;
     
-    float size = 5;
-
+    int size = 5;
+    int sampleCount = size; // Per Axis
+    float invSampleCount = 1.0 / sampleCount;
+    
     projCoords.w = 0.0001 * max(dot(normalize(Normal), normalize(sun.SunPos.xyz)), 0);
     projCoords.w = clamp(projCoords.w, 0f, 0.0001);
     
-    vec2 texSize = size / textureSize(
+    vec2 texSize = float(size * 0.5) / textureSize(
     #ifdef ARB_BINDLESS
     sun.
     #endif
     ShadowMap
     , 0);
-    float shadow = texture(
+    float shadow = 0; 
+    
+    
+    for (int x = 1; x <= sampleCount; x++)
+        for (int y = 1; y <= sampleCount; y++) 
+            shadow += texture(
             #ifdef ARB_BINDLESS
             sun.
             #endif
             ShadowMap
-            , projCoords.xy + (ditherSample * 2 - 1) * texSize).r >= projCoords.z - projCoords.w ? 1 : 0;
-
-    
-    return shadow;
+            , vec3(projCoords.xy + (vec2(x, y) * invSampleCount * 2 - 1) * texSize, projCoords.z - projCoords.w));
+   
+    return shadow / (sampleCount * sampleCount);
 } 
 
 void main()
@@ -73,12 +73,10 @@ void main()
     if (alpha * diffuseColor.a <= ditherSample) discard;
     
     float shadow = ShadowCalculation(FragPosLightSpace);
-    shadow = mix(0.5, 1.0, shadow);
     float ambient = max(dot(normal, lightDir), 0.0) * 0.5 + 0.5;
-    diffuseColor *= clamp(min(shadow, ambient), 0.0, 1.0);
+    diffuseColor *= clamp(min(mix(0.5, 1.0, shadow), ambient), 0.0, 1.0);
     diffuseColor += pow(max(dot(normalize(reflect(-lightDir, normal)), view), 0), 64) * 0.2 * shadow;
     FragColor = vec4(pow(diffuseColor.rgb, vec3(0.4545)), 1.0);
-    
 
     //vec3 reflect = normalize(reflect(normalize(FragPos - viewPos), Normal));
     //FragColor = vec4(rayMarch(FragPos, reflect, 10), 1);

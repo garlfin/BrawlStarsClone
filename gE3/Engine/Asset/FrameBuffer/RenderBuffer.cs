@@ -5,19 +5,23 @@ namespace gE3.Engine.Asset.FrameBuffer;
 
 public class RenderBuffer : Asset
 {
-    public RenderBuffer(GameWindow window) : base(window)
+    private uint _width, _height;
+    private InternalFormat _storageFormat;
+    public RenderBuffer(GameWindow window, uint width, uint height, InternalFormat storageFormat) : base(window)
     {
-        _id = GL.GenRenderbuffer();
+        _width = width;
+        _height = height;
+        _storageFormat = storageFormat;
+        
+        _id = GL.CreateRenderbuffer();
+        GL.NamedRenderbufferStorage(_id, storageFormat, width, height);
     }
-    public void BindToFrameBuffer(FrameBuffer buffer, InternalFormat storage, FramebufferAttachment attachment)
+    public void BindToFrameBuffer(FrameBuffer buffer, FramebufferAttachment attachment)
     {
-        GL.BindFramebuffer(FramebufferTarget.Framebuffer, buffer.ID);
-        GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, ID);
-        GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, storage, buffer.Size.X, buffer.Size.Y);
-        GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, attachment, RenderbufferTarget.Renderbuffer, ID);
+        GL.NamedFramebufferRenderbuffer(buffer.ID, attachment, RenderbufferTarget.Renderbuffer, ID);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         GL.DeleteRenderbuffer(ID);
     }

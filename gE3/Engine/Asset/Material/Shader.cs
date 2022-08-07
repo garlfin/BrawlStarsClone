@@ -16,6 +16,8 @@ public class Shader : Asset
         var version = $"#version {apiVersion.MajorVersion}{apiVersion.MinorVersion}0 core \n";
         
         var requiredExts = ARB.BT != null ? RequiredExts : "";
+        if (type == ShaderType.FragmentShader) requiredExts += "#define FRAGMENT_SHADER 1 \n";
+        
         if (shaderIncludes != null)
             for (int i = 0; i < shaderIncludes.Length; i++)
                 requiredExts += File.ReadAllText(shaderIncludes[i]) + "\n";
@@ -42,7 +44,7 @@ public class Shader : Asset
         GL.AttachShader(program.ID, ID);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         GL.DeleteShader(ID);
     }

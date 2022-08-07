@@ -48,7 +48,7 @@ public unsafe class PlaneVAO : VAO
         GL.DepthFunc(DepthFunction.Less);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         base.Delete();
         GL.DeleteBuffer(_ebo);

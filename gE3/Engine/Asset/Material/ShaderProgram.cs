@@ -22,8 +22,8 @@ public class ShaderProgram : Asset
 
         GL.LinkProgram(ID);
 
-        fragment.Delete();
-        vertex.Delete();
+        fragment.Dispose();
+        vertex.Dispose();
     }
     
     public ShaderProgram(GameWindow window, string vertPath, string fragPath, string[]? shaderIncludes = null) : base(window)
@@ -39,8 +39,8 @@ public class ShaderProgram : Asset
         
         GL.LinkProgram(ID);
         
-        fragment.Delete();
-        vertex.Delete();
+        fragment.Dispose();
+        vertex.Dispose();
     }
     
     public ShaderProgram(GameWindow window, string fragPath, Shader vertex, string[]? shaderIncludes = null) : base(window)
@@ -58,7 +58,7 @@ public class ShaderProgram : Asset
         GL.GetProgramInfoLog(ID, out var infoLog);
         if (!string.IsNullOrEmpty(infoLog)) Console.WriteLine($"Linker error: {infoLog}");
         
-        fragment.Delete();
+        fragment.Dispose();
     }
 
     public ShaderProgram(GameWindow window, string computePath, string[]? shaderIncludes = null) : base(window)
@@ -71,7 +71,7 @@ public class ShaderProgram : Asset
 
         GL.LinkProgram(ID);
 
-        compute.Delete();
+        compute.Dispose();
     }
 
     public void Use()
@@ -127,7 +127,7 @@ public class ShaderProgram : Asset
         return GL.GetUniformLocation(ID, uniform);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         GL.DeleteProgram(ID);
     }

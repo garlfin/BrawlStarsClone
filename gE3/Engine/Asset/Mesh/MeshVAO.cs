@@ -66,7 +66,7 @@ public sealed class MeshVao : VAO
             count);
     }
 
-    public override void Delete()
+    protected override void Delete()
     {
         base.Delete();
         if (EBO != -1)
