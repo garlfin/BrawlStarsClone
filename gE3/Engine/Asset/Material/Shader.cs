@@ -27,16 +27,16 @@ public class Shader : Asset
         GL.CompileShader(ID);
 
         var log = GL.GetShaderInfoLog(ID);
-        if (!string.IsNullOrEmpty(log))
-        {
-            Console.WriteLine($"File {path} compile error:\n {log}");
-            GL.GetShaderSource(_id, ushort.MaxValue, out _, out string src);
-            var split = src.Split('\n');
-            for (int i = 0; i < split.Length; i++)
-            {
-                Console.WriteLine($"{i + 1}: {split[i]}");
-            }
-        }
+
+        if (string.IsNullOrEmpty(log)) return;
+        
+        Console.WriteLine($"File {path} compile error:\n {log}");
+        
+#if DEBUG
+        GL.GetShaderSource(_id, ushort.MaxValue, out _, out string src);
+        var split = src.Split('\n');
+        for (int i = 0; i < split.Length; i++) Console.WriteLine($"{i + 1}: {split[i]}");
+#endif
     }
 
     public void Attach(ShaderProgram program)

@@ -15,7 +15,7 @@ public unsafe class LowPolyMaterial : gE3.Engine.Asset.Material.Material
    
     public gE3.Engine.Asset.Texture.Texture Albedo { get; set; }
     
-    public LowPolyMaterial(GameWindow window, ShaderProgram program, gE3.Engine.Asset.Texture.Texture albedo, DepthFunction function = DepthFunction.Less) : base(window, program, false, function)
+    public LowPolyMaterial(GameWindow window, ShaderProgram program, gE3.Engine.Asset.Texture.Texture albedo, DepthFunction function = DepthFunction.Less) : base(window, program, true, function)
     {
         Albedo = albedo;
     }
@@ -36,10 +36,7 @@ public unsafe class LowPolyMaterial : gE3.Engine.Asset.Material.Material
                 _albedoDepthUniform = ProgramManager.CurrentProgram.GetUniformLocation("albedoTex");
             if (_albedoUniform == -1)
                 _albedoUniform = Program.GetUniformLocation("albedoTex");
-            if (_shadowUniform == -1) 
-                _shadowUniform = Program.GetUniformLocation("ShadowMap");
             ProgramManager.CurrentProgram.SetUniform(_window.State is EngineState.Shadow or EngineState.PreZ ? _albedoDepthUniform : _albedoUniform, Albedo.Use(TexSlotManager.Unit));
-            if (_window.State is EngineState.Render or EngineState.Cubemap) ProgramManager.CurrentProgram.SetUniform(_shadowUniform, CameraSystem.Sun.ShadowMap.Use(TexSlotManager.Unit));
         } else
         {
             _data.Albedo = Albedo.Handle;
@@ -55,15 +52,12 @@ public unsafe class LowPolyMaterial : gE3.Engine.Asset.Material.Material
     {
         _window = window;
         _lowPolyBuffer = new Buffer<LowPolyMatData>(window);
-        _lowPolyBuffer.Bind(3);
+        _lowPolyBuffer.Bind(4);
     }
      
     public static void Push()
     {
-        fixed (void* ptr = &_data)
-        {
-            _lowPolyBuffer.ReplaceData(ptr, (uint) sizeof(LowPolyMatData) - 8);
-        }
+        _lowPolyBuffer.ReplaceData(ref _data);
     }
 }
 

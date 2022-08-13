@@ -186,11 +186,14 @@ public class GameWindow
         Entity cubemap = new Entity(this);
         cubemap.AddComponent(new Transform(cubemap)
         {
-            Location = new Vector3D<float>(5, 6, 5)
+            Location = new Vector3D<float>(5, 6, 5),
+            Scale = Vector3D<float>.One * 20
         });
         cubemap.AddComponent(new CubemapCapture(cubemap, 1024));
         
         OnLoad();
+        
+        CubemapCaptureManager.Init(this);
         
         PhysicsSystem.Load();
 
@@ -209,11 +212,14 @@ public class GameWindow
         _depthShader.Use();
         
         MeshRendererSystem.Render();
+        
+        if (_debug)
+        {
+            PrimitiveVao.Init(this);
+            _frustumTest = new PrimitiveVao(this, 12, PrimitiveType.Lines);
+        }
 
-        //PrimitiveVao.Init(this);
-        //_frustumTest = new PrimitiveVao(this, 12, PrimitiveType.Lines);
-
-        CubemapCaptureManager.Init(this);
+        
         
         BuildCubemaps();
     }
@@ -333,8 +339,10 @@ public class GameWindow
         ScreenFramebuffer.Bind(null);
         
         State = EngineState.Cubemap;
-        CubemapCaptureManager.Render(0f);
         
+        MeshRendererSystem.Update(0f);
+        CubemapCaptureManager.Render(0f);
+
         prevCam.Set();
         ScreenFramebuffer.Bind(null);
         _screenTexture.BindToFrameBuffer(ScreenFramebuffer, FramebufferAttachment.ColorAttachment0);

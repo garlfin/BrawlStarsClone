@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "eW1GcpxEPcLm6pl1L8t3hdUTGZ/64G8lagmvqzrgeslyIFN0LqqOJmL82R85KLFXHqvieofB2VILLJyPKAcg6w==",
+  "dgSpecHash": "dOt9LKskco43mXmR1VM66sgsquI6f90H1Ep/5roiqBbbEmrr5eGDakgMtqsvHC6qZflsIYIqyd0qJQmscEwKCA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\gEModel\\gEModel.csproj",
+  "projectFilePath": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\gEModel\\gEModel.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\scion\\.nuget\\packages\\assimpnet\\4.1.0\\assimpnet.4.1.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",

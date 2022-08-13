@@ -41,9 +41,14 @@ public abstract class BaseCamera : Component
     public abstract Vector3D<float> ScreenToWorld2D(ref Vector3D<float> point);
     public abstract RayInfo ScreenToRay(ref Vector2D<float> point);
 
-    public bool IsAABBVisible(ref AABB aabb)
+    public virtual bool IsAABBVisible(ref AABB aabb)
     {
         return ViewFrustum.AABBVsFrustum(ref aabb);
+    }
+    
+    public virtual bool IsAABBVisible(AABB aabb)
+    {
+        return IsAABBVisible(ref aabb);
     }
 
     public virtual void Set()

@@ -204,17 +204,12 @@ public static class ProgramManager
         _Programs.Add(program);
         return _Programs.Count - 1;
     }
-
-    public static unsafe void PushObject(void* model, float transparency, int index = 0)
-    {
-        _objectData.ReplaceData(model, 64, index * 64);
-        _objectData.ReplaceData(&transparency, 4, index * 4 + 6400);
-    }
-    public static unsafe void PushObjects(void* model, void* transparency, uint count, int index = 0)
+    public static unsafe void PushObjects(void* model, void* transparency, void* samples, uint count)
     {
         _objectData.ReplaceData(&count, 4);
-        _objectData.ReplaceData(model, 64 * count, 16 + index * 64);
-        _objectData.ReplaceData(transparency, 4 * count, 6416 + index * 4);
+        _objectData.ReplaceData(model, 64 * count, 16);
+        _objectData.ReplaceData(transparency, 4 * count, 6416);
+        _objectData.ReplaceData(samples, 16 * count, 6816);
     }
 }
 

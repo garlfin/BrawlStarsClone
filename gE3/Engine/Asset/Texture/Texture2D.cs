@@ -88,6 +88,9 @@ public class Texture2D : Texture
             GL.TextureParameterI(_id, TextureParameterName.TextureCompareMode, (int) TextureCompareMode.CompareRefToTexture);
             GL.TextureParameterI(_id, TextureParameterName.TextureCompareFunc, (int) DepthFunction.Lequal);
         }
+        
+        GL.TextureParameter(_id, TextureParameterName.TextureMaxAnisotropy, 4f);
+        // GL.TextureParameter(_id, GLEnum.TextureLodBias, );
             
 
         GL.TextureParameter(ID, TextureParameterName.TextureMinFilter, (int)(genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));

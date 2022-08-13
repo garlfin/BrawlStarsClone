@@ -4,8 +4,6 @@ using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component.Physics;
 using gE3.Engine.Windowing;
 using gEMath.Bounds;
-using gEMath.Math;
-using Microsoft.VisualBasic.FileIO;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
@@ -27,13 +25,13 @@ public sealed class CubemapCapture : BaseCamera
     public CubemapCapture(Entity? owner, uint size, float clipNear = 0.1f, float clipFar = 100f) : base(owner, clipNear, clipFar)
     {
         _size = size;
+        ID = (uint)CubemapCaptureManager.Components.Count;
         CubemapCaptureManager.Register(this);
-        ID = (uint)CubemapCaptureManager.Components.Count; // Skybox takes #1
         Texture = new CubemapTexture(Window, size, InternalFormat.Rgb8);
         UpdateProjection();
         _transform = Owner.GetComponent<Transform>();
         _depthMap = new CubemapTexture(Window, _size, InternalFormat.DepthComponent32f);
-        Data = new CubemapInfo();
+        Data = new CubemapInfo(Texture.Handle, new AABB(_transform.Location, _transform.Scale * 0.5f));
     }
 
     public override void OnRender(float deltaTime)
@@ -56,8 +54,8 @@ public sealed class CubemapCapture : BaseCamera
 
     public override void OnUpdate(float deltaTime)
     {
-        var location = _transform.Model.Transformation();
-        
+        var location = _transform.LocationBaked;
+
         ViewMatrices[0] = Matrix4X4.CreateLookAt(location, location + Vector3D<float>.UnitX, -Vector3D<float>.UnitY);
         ViewMatrices[1] = Matrix4X4.CreateLookAt(location, location - Vector3D<float>.UnitX, -Vector3D<float>.UnitY);
         ViewMatrices[2] = Matrix4X4.CreateLookAt(location, location + Vector3D<float>.UnitY, Vector3D<float>.UnitZ);
@@ -72,7 +70,7 @@ public sealed class CubemapCapture : BaseCamera
     }
     public override void UpdateProjection()
     {
-        _projection = Matrix4X4.CreatePerspectiveFieldOfView(90 * Mathf.Deg2Rad, 1, ClipNear, ClipFar);
+        _projection = Matrix4X4.CreatePerspectiveFieldOfView(1.57079632679f, 1, ClipNear, ClipFar); // Pi / 2 = 90 degrees
     }
 
     public override Vector3D<float> WorldToScreen(ref Vector3D<float> point)
@@ -88,6 +86,11 @@ public sealed class CubemapCapture : BaseCamera
     public override RayInfo ScreenToRay(ref Vector2D<float> point)
     {
         throw new NotImplementedException();
+    }
+
+    public override bool IsAABBVisible(ref AABB aabb)
+    {
+        return true;
     }
 }
 
@@ -105,7 +108,7 @@ public class CubemapCaptureManager : ComponentSystem<CubemapCapture>
         for (int i = 0; i < Components.Count; i++) allCubemaps[i + 1] = Components[i].Data;
         
         _cubemaps.ReplaceData(allCubemaps);
-        _cubemaps.Bind(4);
+        _cubemaps.Bind(3);
     }
     public static CubemapCapture GetNearestCubemap(ref Vector3D<float> position)
     {
@@ -117,8 +120,14 @@ public class CubemapCaptureManager : ComponentSystem<CubemapCapture>
         float dist = float.MaxValue;
 
         for (int i = 0; i < Components.Count; i++)
-            if (Components[i].Bounds.DistanceToPoint(ref position) < dist)
-                closest = Components[i];
+        {
+            float newDist = Components[i].Bounds.DistanceToPoint(ref position);
+            
+            if (!(newDist < dist)) continue;
+            
+            dist = newDist;
+            closest = Components[i];
+        }
 
         return closest;
     }
@@ -127,7 +136,7 @@ public class CubemapCaptureManager : ComponentSystem<CubemapCapture>
 public struct CubemapInfo
 {
     public ulong Handle;
-    private Vector2D<float> _pad;
+    private ulong _pad;
     public AABB Bounds;
     public CubemapInfo(ulong handle, AABB bounds) : this()
     {

@@ -48,8 +48,8 @@ public class Camera : BaseCamera
         _front = Vector3D.Normalize(_front);
         _right = Vector3D.Normalize(Vector3D.Cross(_front, Vector3D<float>.UnitY));
         _up = Vector3D.Normalize(Vector3D.Cross(_right, _front));
-        
-        Position = _entityTransform.Model.Transformation();
+
+        Position = _entityTransform.LocationBaked;
         
         _view = Matrix4X4.CreateLookAt(Position, Position + _front, _up);
         

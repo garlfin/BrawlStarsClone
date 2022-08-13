@@ -61,9 +61,9 @@ public List<Entity> Users { get; } = new List<Entity>();
         
         if (actualUsers == 0) return;
         
-        fixed (void* ptr = _model, ptr2 = _alpha)
+        fixed (void* ptr = _model, ptr2 = _alpha, ptr3 = _cubemapWeights)
         {
-            ProgramManager.PushObjects(ptr, ptr2, actualUsers);
+            ProgramManager.PushObjects(ptr, ptr2, ptr3, actualUsers);
         }
         
         for (var i = 0; i < MeshVAO.Length; i++)

@@ -24,17 +24,26 @@ layout (std140, binding = 2) uniform ObjectData {
 };
 
 struct CubemapInfo {
-    sampler3D cubemap;
+    #ifdef ARB_BINDLESS
+        samplerCube cubemap;
+    #else
+        double pad;
+    #endif
     vec3 position;
-        vec3 extents;
+    vec3 extents;
 };
 
-layout (std430, binding = 4) buffer SceneCubemaps {
-    CubemapInfo[] Cubemaps;
+layout (std430, binding = 3) restrict readonly buffer SceneCubemaps {
+    CubemapInfo Cubemaps[];
 };
 
 
 #ifdef FRAGMENT_SHADER
+
+#ifndef ARB_BINDLESS
+uniform sampler2DShadow ShadowMap;
+uniform samplerCube CubemapTex[4];
+#endif
 
 const mat4 thresholdMatrix = mat4(0.0, 8.0, 2.0, 10.0,
 12.0, 4.0, 14.0, 6.0, 

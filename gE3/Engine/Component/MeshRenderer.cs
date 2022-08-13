@@ -16,9 +16,16 @@ public sealed class MeshRenderer : Component
     public float Alpha { get; set; } = 1.0f;
     public Vector4D<uint> CubemapSamples => _cubemapSamples; 
     private Transform? _transform;
-    private Vector4D<uint> _cubemapSamples = new(uint.MaxValue);
-    public AABB Bounds { get; private set; }
+    private Vector4D<uint> _cubemapSamples = Vector4D<uint>.Zero;
     
+    private AABB _bounds;
+
+    public AABB Bounds
+    {
+        get => _bounds;
+        private set => _bounds = value;
+    }
+
     public MeshRenderer(Entity? owner, Mesh mesh, bool overrideInstance = false) : base(owner)
     {
         MeshRendererSystem.Register(this);
@@ -38,16 +45,14 @@ public sealed class MeshRenderer : Component
 
     public override void OnUpdate(float deltaTime)
     {
-        var matrix = _transform.Model;
-        AABB _bounds;
-        Bounds = _bounds = Mesh.Bounds.Transform(ref matrix);
+        _bounds = Mesh.Bounds.Transform(_transform.Model);
         InFrustum = true;
         
-        _cubemapSamples.X = 0;
-        if (Window.State is EngineState.Cubemap) return;
+        if((_cubemapSamples.LengthSquared == 0 && Static) || !Static) _cubemapSamples.X = CubemapCaptureManager.GetNearestCubemap(ref _bounds.Center).ID + 2;
+        if (Window.State == EngineState.Cubemap) _cubemapSamples.X = 1;
         
+        // 0 is no cubemap, 1 is skybox, 2 is the beginning of the actual cubemaps
         InFrustum = (Window.State == EngineState.Shadow ?  CameraSystem.Sun! : CameraSystem.CurrentCamera!).IsAABBVisible(ref _bounds);
-        if (_cubemapSamples.X == uint.MaxValue) _cubemapSamples.X = CubemapCaptureManager.GetNearestCubemap(ref _bounds.Center).ID;
     }
 }
 

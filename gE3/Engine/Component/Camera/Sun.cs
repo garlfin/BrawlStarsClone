@@ -33,7 +33,7 @@ public sealed class Sun : BaseCamera
     public override void OnUpdate(float deltaTime)
     {
        ShadowMap.BindToFrameBuffer(Window.ShadowBuffer, FramebufferAttachment.DepthAttachment);
-               Position = _entityTransform.Model.Transformation() + Offset;
+               Position = _entityTransform.LocationBaked + Offset;
                _view = Matrix4X4.CreateLookAt(Position, Offset, Vector3D<float>.UnitY);
                var viewProj = _view * _projection;
                ViewFrustum = new Frustum(ref viewProj);

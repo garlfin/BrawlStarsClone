@@ -63,7 +63,7 @@ public unsafe class AudioSource : Component
     {
         _3DSettings.Pointer->forward = Vector3D<float>.UnitZ;
         _3DSettings.Pointer->up = Vector3D<float>.UnitY;
-        _3DSettings.Pointer->position = _transform.GlobalMatrix.Transformation();
+        _3DSettings.Pointer->position = _transform.LocationBaked;
 
         Sound.Set3DSettings(_3DSettings.Pointer);
     }

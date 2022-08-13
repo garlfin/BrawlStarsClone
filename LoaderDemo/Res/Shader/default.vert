@@ -15,19 +15,15 @@ out vec2 TexCoord;
 out vec4 FragPosLightSpace;
 out vec3 Normal;
 out vec4 FragPos;
-flat out uvec4 CubemapSamples;
-
-flat out float alpha;
+flat out uint InstanceID;
 
 void main()
 {
-    uint instanceCorrected = gl_InstanceID % numObjects;
+    InstanceID = gl_InstanceID % numObjects;
     gl_Layer = int(gl_InstanceID / numObjects);
-    gl_Position = projection * view[gl_InstanceID / numObjects] * model[instanceCorrected] * vec4(aPos, 1.0);
+    gl_Position = projection * view[gl_InstanceID / numObjects] * model[InstanceID] * vec4(aPos, 1.0);
     FragPos = vec4((model[gl_InstanceID % numObjects] * vec4(aPos, 1.0)).xyz, 1);
     FragPosLightSpace = sun.ViewProj * FragPos;
     Normal = mat3(transpose(inverse(model[gl_InstanceID]))) * aNormal;
-    alpha = transparency[instanceCorrected / 4][instanceCorrected % 4];
-    CubemapSamples = cubemapSamples[instanceCorrected];
     TexCoord = aTexCoord;
 }
