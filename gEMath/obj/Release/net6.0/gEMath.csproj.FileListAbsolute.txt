@@ -10,3 +10,15 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.dl
 C:\Users\scion\RiderProjects\BrawlStarsClone\gEMath\obj\Release\net6.0\refint\gEMath.dll
 C:\Users\scion\RiderProjects\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.pdb
 C:\Users\scion\RiderProjects\BrawlStarsClone\gEMath\obj\Release\net6.0\ref\gEMath.dll
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\bin\Release\net6.0\gEMath.deps.json
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\bin\Release\net6.0\gEMath.dll
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\bin\Release\net6.0\gEMath.pdb
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.csproj.AssemblyReference.cache
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.AssemblyInfoInputs.cache
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.AssemblyInfo.cs
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.csproj.CoreCompileInputs.cache
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.dll
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\refint\gEMath.dll
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\gEMath.pdb
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEMath\obj\Release\net6.0\ref\gEMath.dll

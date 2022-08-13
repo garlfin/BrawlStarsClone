@@ -210,9 +210,10 @@ public class GameWindow
         
         MeshRendererSystem.Render();
 
-        PrimitiveVao.Init(this);
-        _frustumTest = new PrimitiveVao(this, 12, PrimitiveType.Lines);
-        
+        //PrimitiveVao.Init(this);
+        //_frustumTest = new PrimitiveVao(this, 12, PrimitiveType.Lines);
+
+        CubemapCaptureManager.Init(this);
         
         BuildCubemaps();
     }

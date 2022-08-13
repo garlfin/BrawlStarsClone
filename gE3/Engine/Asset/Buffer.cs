@@ -3,18 +3,19 @@ using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset;
 
-public class Buffer : Asset
+public class Buffer<T> : Asset where T : unmanaged
 {
     private readonly Target _target;
     public uint Size { get; }
     public uint Location { get; private set; }
-    public unsafe Buffer(GameWindow window, uint size,
+    public unsafe Buffer(GameWindow window,
+        uint count = 1,
         Target target = Target.UniformBuffer) : base(window)
     {
         _target = target;
-        Size = size;
+        Size = (uint)sizeof(T) * count;
         _id = GL.CreateBuffer();
-        GL.NamedBufferStorage(ID, size, (void*)0, BufferStorageMask.DynamicStorageBit);
+        GL.NamedBufferStorage(ID, Size, (void*)0, BufferStorageMask.DynamicStorageBit);
     }
     
     public unsafe void ReplaceData(void* data, uint size = 0, int offset = 0)
@@ -27,6 +28,16 @@ public class Buffer : Asset
     {
         Location = slot;
         GL.BindBufferBase((BufferTargetARB)(targetOverride ??  _target), slot, ID);
+    }
+    
+    public unsafe void ReplaceData(ref T item, int offset = 0) 
+    {
+        fixed(void* ptr = &item) ReplaceData(ptr, (uint)sizeof(T),offset * sizeof(T));
+    }
+
+    public unsafe void ReplaceData(T[] dat, int offset = 0)
+    {
+        fixed (void* ptr = dat) ReplaceData(ptr, (uint)sizeof(T) * (uint)dat.Length, offset);
     }
 
     protected override void Delete()

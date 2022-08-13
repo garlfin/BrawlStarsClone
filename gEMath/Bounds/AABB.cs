@@ -28,4 +28,19 @@ public struct AABB
         return new AABB(center, max);
     }
 
+    public bool CollidePoint(ref Vector3D<float> point)
+    {
+        var min = Min;
+        var max = Max;
+        
+        return min.X <= point.X && min.Y <= point.Y && min.Z <= point.Z && 
+               max.X >= point.X && max.X >= point.Y && max.Z >= point.Z;
+    }
+
+    public float DistanceToPoint(ref Vector3D<float> point)
+    {
+        var closest = Vector3D.Max(Vector3D.Min(Max, point), Min);
+        return Vector3D.Distance(closest, point);
+    }
+
 }

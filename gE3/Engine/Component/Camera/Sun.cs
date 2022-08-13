@@ -7,7 +7,7 @@ using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Component.Camera;
 
-public class Sun : BaseCamera
+public sealed class Sun : BaseCamera
 {
     public int Size { get; }
     private readonly Transform _entityTransform;

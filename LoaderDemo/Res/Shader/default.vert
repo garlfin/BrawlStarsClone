@@ -15,6 +15,7 @@ out vec2 TexCoord;
 out vec4 FragPosLightSpace;
 out vec3 Normal;
 out vec4 FragPos;
+flat out uvec4 CubemapSamples;
 
 flat out float alpha;
 
@@ -27,5 +28,6 @@ void main()
     FragPosLightSpace = sun.ViewProj * FragPos;
     Normal = mat3(transpose(inverse(model[gl_InstanceID]))) * aNormal;
     alpha = transparency[instanceCorrected / 4][instanceCorrected % 4];
+    CubemapSamples = cubemapSamples[instanceCorrected];
     TexCoord = aTexCoord;
 }

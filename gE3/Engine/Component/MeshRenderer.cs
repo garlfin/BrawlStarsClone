@@ -2,6 +2,7 @@
 using gE3.Engine.Component.Camera;
 using gE3.Engine.Windowing;
 using gEMath.Bounds;
+using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;
 
@@ -13,7 +14,9 @@ public sealed class MeshRenderer : Component
     
     public Mesh Mesh { get; }
     public float Alpha { get; set; } = 1.0f;
+    public Vector4D<uint> CubemapSamples => _cubemapSamples; 
     private Transform? _transform;
+    private Vector4D<uint> _cubemapSamples = new(uint.MaxValue);
     public AABB Bounds { get; private set; }
     
     public MeshRenderer(Entity? owner, Mesh mesh, bool overrideInstance = false) : base(owner)
@@ -26,22 +29,6 @@ public sealed class MeshRenderer : Component
         mesh.Register(Owner);
         _transform = owner?.GetComponent<Transform>();
     }
-
-    /*public override unsafe void OnRender(float deltaTime)
-    {
-        if (!InFrustum) return;
-        if (Mesh.Instanced && !_overrideInstance) return; 
-        var matrix = _transform?.Model ?? Matrix4X4<float>.Identity;
-        ProgramManager.PushObject(&matrix, Alpha);
-
-        for (var i = 0; i < Mesh.MeshVAO.Length; i++)
-        {
-            Owner.GetComponent<MaterialComponent>()![Mesh.RenderMesh.SubMeshes[i].MaterialID].Use();
-            Mesh[i].Render();
-            //Owner.GetComponent<Animator>()?.RenderDebug();
-            TexSlotManager.ResetUnit();
-        }
-    }*/
 
     public override void Dispose()
     {
@@ -56,9 +43,11 @@ public sealed class MeshRenderer : Component
         Bounds = _bounds = Mesh.Bounds.Transform(ref matrix);
         InFrustum = true;
         
+        _cubemapSamples.X = 0;
         if (Window.State is EngineState.Cubemap) return;
         
         InFrustum = (Window.State == EngineState.Shadow ?  CameraSystem.Sun! : CameraSystem.CurrentCamera!).IsAABBVisible(ref _bounds);
+        if (_cubemapSamples.X == uint.MaxValue) _cubemapSamples.X = CubemapCaptureManager.GetNearestCubemap(ref _bounds.Center).ID;
     }
 }
 

@@ -1,10 +1,9 @@
-﻿using gE3.Engine.Asset.Material;
+﻿using gE3.Engine.Asset;
+using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Texture;
-using gE3.Engine.Component;
 using gE3.Engine.Component.Camera;
 using gE3.Engine.Windowing;
 using Silk.NET.OpenGL;
-using Buffer = gE3.Engine.Asset.Buffer;
 
 namespace LoaderDemo.Engine.Material;
 
@@ -49,13 +48,13 @@ public unsafe class LowPolyMaterial : gE3.Engine.Asset.Material.Material
     }
     
     private static LowPolyMatData _data;
-    private static Buffer _lowPolyBuffer;
+    private static Buffer<LowPolyMatData> _lowPolyBuffer;
     private static GameWindow _window;
      
     public static void Init(GameWindow window)
     {
         _window = window;
-        _lowPolyBuffer = new Buffer(window, (uint) sizeof(LowPolyMatData));
+        _lowPolyBuffer = new Buffer<LowPolyMatData>(window);
         _lowPolyBuffer.Bind(3);
     }
      

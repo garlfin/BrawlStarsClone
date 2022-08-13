@@ -53,3 +53,11 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Int
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\framebuffer.vert
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Engine\Internal\depth.vert
 C:\Users\scion\RiderProjects\BrawlStarsClone\gE3BS\bin\Release\net6.0\Silk.NET.OpenGL.Extensions.ARB.dll
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gE3BS\obj\Release\net6.0\gE3BS.csproj.AssemblyReference.cache
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gE3BS\obj\Release\net6.0\gE3BS.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gE3BS\obj\Release\net6.0\gE3BS.AssemblyInfoInputs.cache
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gE3BS\obj\Release\net6.0\gE3BS.AssemblyInfo.cs
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gE3BS\obj\Release\net6.0\gE3BS.csproj.CoreCompileInputs.cache
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gE3BS\obj\Release\net6.0\gE3BS.dll
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gE3BS\obj\Release\net6.0\refint\gE3BS.dll
+C:\Users\scion\Documents\GitHub\BrawlStarsClone\gE3BS\obj\Release\net6.0\gE3BS.pdb

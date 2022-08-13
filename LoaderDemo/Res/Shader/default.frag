@@ -20,6 +20,7 @@ in vec3 Normal;
 in vec4 FragPos;
 in vec2 TexCoord;
 in vec4 FragPosLightSpace;
+flat in uvec4 CubemapSamples;
 
 out vec4 FragColor;
 
@@ -39,7 +40,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     float invSampleCount = 1.0 / sampleCount;
     
     projCoords.w = 0.0001 * max(dot(normalize(Normal), normalize(sun.SunPos.xyz)), 0);
-    projCoords.w = clamp(projCoords.w, 0f, 0.0001);
+    projCoords.w = clamp(projCoords.w, 0.0, 0.0001);
     
     vec2 texSize = float(size * 0.5) / textureSize(
     #ifdef ARB_BINDLESS
@@ -68,6 +69,8 @@ void main()
     vec3 view = normalize(viewPos - FragPos.xyz);
     vec3 lightDir = normalize(sun.SunPos);
     
+    vec3 cubemapColor = texture(Cubemaps[CubemapSamples.x].cubemap, reflect(-view, normal)).rgb;
+    
     vec4 diffuseColor = texture(albedoTex, TexCoord.xy);
 
     if (alpha * diffuseColor.a <= ditherSample) discard;
@@ -76,6 +79,7 @@ void main()
     float ambient = max(dot(normal, lightDir), 0.0) * 0.5 + 0.5;
     diffuseColor *= clamp(min(mix(0.5, 1.0, shadow), ambient), 0.0, 1.0);
     diffuseColor += pow(max(dot(normalize(reflect(-lightDir, normal)), view), 0), 64) * 0.2 * shadow;
+    diffuseColor = vec4(cubemapColor, 1);
     FragColor = vec4(pow(diffuseColor.rgb, vec3(0.4545)), 1.0);
 
     //vec3 reflect = normalize(reflect(normalize(FragPos - viewPos), Normal));

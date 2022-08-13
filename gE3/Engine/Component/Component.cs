@@ -49,6 +49,8 @@ public abstract class Component
 
 public abstract class ComponentSystem<T> where T : Component
 {
+    private static GameWindow _window;
+
     public static readonly List<T> Components = new();
 
     public static void Register(T component)

@@ -1,4 +1,5 @@
-﻿using gEMath.Math;
+﻿using gE3.Engine.Windowing;
+using gEMath.Math;
 using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;

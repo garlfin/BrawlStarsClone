@@ -1,4 +1,6 @@
-﻿namespace gE3.Engine.Component;
+﻿using gE3.Engine.Windowing;
+
+namespace gE3.Engine.Component;
 
 public abstract class Behavior : Component
 {

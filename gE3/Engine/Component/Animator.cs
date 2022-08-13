@@ -3,7 +3,6 @@ using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Windowing;
 using Silk.NET.Maths;
-using Buffer = gE3.Engine.Asset.Buffer;
 
 namespace gE3.Engine.Component;
 [Obsolete("Animator under maintenance, will be reworked.", false)]
@@ -124,13 +123,13 @@ public class Animator : Component
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class SkinManager : ComponentSystem<Animator>
 {
-    public static Buffer MatBuffer { get; private set; }
+    public static Buffer<Matrix4X4<float>> MatBuffer { get; private set; }
     public static ShaderProgram SkinningShader { get; private set; }
 
-    public static unsafe void Init(GameWindow window)
+    public static void Init(GameWindow window)
     {
-        MatBuffer = new Buffer(window, (uint) sizeof(Matrix4X4<float>) * 255, Target.ShaderStorageBuffer);
+        MatBuffer = new Buffer<Matrix4X4<float>>(window, 255, Target.ShaderStorageBuffer);
         MatBuffer.Bind(4);
         SkinningShader = new ShaderProgram(window, "Engine/Internal/skinning.comp");
     }
-} 
+}

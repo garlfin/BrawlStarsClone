@@ -11,7 +11,9 @@ public class Mesh : BaseMesh
 {
     private readonly Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
     private readonly float[] _alpha = new float[100]; // 100 is the max amount.
-    public List<Entity> Users { get; } = new List<Entity>();
+    private readonly Vector4D<uint>[] _cubemapWeights = new Vector4D<uint>[100];
+
+public List<Entity> Users { get; } = new List<Entity>();
     public MeshVao[] MeshVAO { get; }
     public gEModel.Struct.Mesh RenderMesh { get; set; }
     public MeshVao this[int index] => MeshVAO[index];
@@ -52,7 +54,8 @@ public class Mesh : BaseMesh
             var userRenderer = Users[j].GetComponent<MeshRenderer>();
             if(!userRenderer!.InFrustum) continue;
             _model[actualUsers] = Users[j].GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
-            _alpha[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.Alpha; 
+            _alpha[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.Alpha;
+            _cubemapWeights[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.CubemapSamples;
             actualUsers++;
         }
         

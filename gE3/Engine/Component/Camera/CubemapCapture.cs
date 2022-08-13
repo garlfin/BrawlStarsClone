@@ -1,19 +1,25 @@
-﻿using gE3.Engine.Asset.Material;
+﻿using gE3.Engine.Asset;
+using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component.Physics;
+using gE3.Engine.Windowing;
 using gEMath.Bounds;
 using gEMath.Math;
+using Microsoft.VisualBasic.FileIO;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Component.Camera;
 
-public class CubemapCapture : BaseCamera
+public sealed class CubemapCapture : BaseCamera
 {
+    public uint ID { get; }
     private Transform _transform;
-    public AABB Bounds { get; set; }
+    public AABB Bounds => Data.Bounds;
+    public CubemapInfo Data;
     public CubemapTexture Texture { get; }
     private uint _size;
+    
 
     public Matrix4X4<float>[] ViewMatrices = new Matrix4X4<float>[6];
     private CubemapTexture _depthMap;
@@ -22,10 +28,12 @@ public class CubemapCapture : BaseCamera
     {
         _size = size;
         CubemapCaptureManager.Register(this);
+        ID = (uint)CubemapCaptureManager.Components.Count; // Skybox takes #1
         Texture = new CubemapTexture(Window, size, InternalFormat.Rgb8);
         UpdateProjection();
         _transform = Owner.GetComponent<Transform>();
         _depthMap = new CubemapTexture(Window, _size, InternalFormat.DepthComponent32f);
+        Data = new CubemapInfo();
     }
 
     public override void OnRender(float deltaTime)
@@ -85,5 +93,45 @@ public class CubemapCapture : BaseCamera
 
 public class CubemapCaptureManager : ComponentSystem<CubemapCapture>
 {
-    
+    private static GameWindow _window;
+    private static Buffer<CubemapInfo> _cubemaps;
+    public static void Init(GameWindow window)
+    {
+        _window = window;
+        _cubemaps = new Buffer<CubemapInfo>(window, (uint) Components.Count + 1, Target.ShaderStorageBuffer);
+        
+        CubemapInfo[] allCubemaps = new CubemapInfo[Components.Count + 1];
+        allCubemaps[0] = new CubemapInfo(window.Skybox.Handle, new AABB(Vector3D<float>.Zero, Vector3D<float>.Zero));
+        for (int i = 0; i < Components.Count; i++) allCubemaps[i + 1] = Components[i].Data;
+        
+        _cubemaps.ReplaceData(allCubemaps);
+        _cubemaps.Bind(4);
+    }
+    public static CubemapCapture GetNearestCubemap(ref Vector3D<float> position)
+    {
+        for (int i = 0; i < Components.Count; i++)
+            if (Components[i].Bounds.CollidePoint(ref position))
+                return Components[i];
+
+        CubemapCapture closest = null!;
+        float dist = float.MaxValue;
+
+        for (int i = 0; i < Components.Count; i++)
+            if (Components[i].Bounds.DistanceToPoint(ref position) < dist)
+                closest = Components[i];
+
+        return closest;
+    }
+}
+
+public struct CubemapInfo
+{
+    public ulong Handle;
+    private Vector2D<float> _pad;
+    public AABB Bounds;
+    public CubemapInfo(ulong handle, AABB bounds) : this()
+    {
+        Handle = handle;
+        Bounds = bounds;
+    }
 }

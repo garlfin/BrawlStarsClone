@@ -132,7 +132,7 @@ public class ShaderProgram : Asset
         GL.DeleteProgram(ID);
     }
 
-    public void BindToUBO(Buffer buffer, string uniformName)
+    /*public void BindToUBO(Buffer buffer, string uniformName)
     {
         var uniform = GL.GetUniformBlockIndex(ID, uniformName);
         GL.UniformBlockBinding(ID, uniform, buffer.Location);
@@ -142,7 +142,7 @@ public class ShaderProgram : Asset
     {
         var uniform = GL.GetUniformBlockIndex(ID, uniformName);
         GL.UniformBlockBinding(ID, uniform, location);
-    }
+    }*/
 }
 
 public static class ProgramManager
@@ -151,17 +151,17 @@ public static class ProgramManager
 
     public static ShaderProgram CurrentProgram;
     
-    private static Buffer _objectData;
-    private static Buffer _sceneData;
+    private static Buffer<ObjectData> _objectData;
+    private static Buffer<SceneData> _sceneData;
 
     private static SceneData _scene;
 
     public static unsafe void Init(GameWindow window)
     {
-        _sceneData = new Buffer(window, (uint) sizeof(SceneData));
+        _sceneData = new Buffer<SceneData>(window);
         _sceneData.Bind(1);
         
-        _objectData = new Buffer(window, (uint) sizeof(ObjectData));
+        _objectData = new Buffer<ObjectData>(window);
         _objectData.Bind(2);
 
         _scene.Sun = new SunInfo();
@@ -240,4 +240,5 @@ public unsafe struct ObjectData
     private fixed float _pad[3];
     public fixed float Model[1600]; // 16 x 100
     public fixed float Transparency[100];
+    public fixed uint CubemapSample[400]; // 4 x 100
 }
