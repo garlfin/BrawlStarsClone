@@ -114,12 +114,12 @@ vec3 SampleCubemaps(vec3 dir, float roughness)
 
 void main()
 {
-    float roughness = 0.8;
+    float roughness = 0;
     vec3 normal = normalize(gl_FrontFacing ? Normal : -Normal);
     vec3 view = normalize(viewPos.xyz - FragPos.xyz);
     vec3 lightDir = normalize(sun.SunPos);
     
-    vec3 cubemapColor = SampleCubemaps(reflect(-view, normal), 0.1);
+    vec3 cubemapColor = SampleCubemaps(reflect(-view, normal),roughness);
     
     vec4 diffuseColor = texture(albedoTex, TexCoord.xy);
 
@@ -129,7 +129,7 @@ void main()
     float ambient = max(dot(normal, lightDir), 0.0) * 0.5 + 0.5;
     diffuseColor *= clamp(min(mix(0.5, 1.0, shadow), ambient), 0.0, 1.0);
     diffuseColor += pow(clamp(dot(normalize(reflect(-lightDir, normal)), view), 0, 1), pow( 1 + (1-roughness), 8)) * (1 - roughness) * shadow;
-    diffuseColor += vec4(cubemapColor * (1 - roughness), 1);
+    diffuseColor += vec4(diffuseColor.rgb * cubemapColor * (1-roughness), 1.0);
     FragColor = vec4(pow(diffuseColor.rgb, vec3(0.4545)), 1.0);
 
     //vec3 reflect = normalize(reflect(normalize(FragPos - viewPos), Normal));

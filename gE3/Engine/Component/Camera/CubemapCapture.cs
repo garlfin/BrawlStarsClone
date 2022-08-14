@@ -31,7 +31,7 @@ public sealed class CubemapCapture : BaseCamera
         UpdateProjection();
         _transform = Owner.GetComponent<Transform>();
         _depthMap = new CubemapTexture(Window, _size, InternalFormat.DepthComponent32f);
-        Data = new CubemapInfo(Texture.Handle, new AABB(_transform.Location, _transform.Scale * 0.5f));
+        Data = new CubemapInfo(Texture.Handle, new AABB(_transform.Location, _transform.Scale));
     }
 
     public override void OnRender(float deltaTime)

@@ -43,7 +43,7 @@ public struct AABB
         var max = Max;
         
         return min.X <= point.X && min.Y <= point.Y && min.Z <= point.Z && 
-               max.X >= point.X && max.X >= point.Y && max.Z >= point.Z;
+               max.X >= point.X && max.Y >= point.Y && max.Z >= point.Z;
     }
 
     public float DistanceToPoint(ref Vector3D<float> point)
