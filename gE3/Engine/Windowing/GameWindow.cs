@@ -194,7 +194,7 @@ public class GameWindow
         cubemap = new Entity(this);
         cubemap.AddComponent(new Transform(cubemap)
         {
-            Location = new Vector3D<float>(0, 10, 0),
+            Location = new Vector3D<float>(5, 10, 5),
             Scale = new Vector3D<float>(21, 10, 21)
         });
         cubemap.AddComponent(new CubemapCapture(cubemap, 1024));

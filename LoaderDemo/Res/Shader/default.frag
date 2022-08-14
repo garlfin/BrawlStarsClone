@@ -95,17 +95,15 @@ vec3 SampleCubemaps(vec3 dir, float roughness)
                 sampleDir = intersectPos - Cubemaps[sampleID - 1].position; 
             }
         }
-        
-        samplerCube sampler = 
+            
         #ifdef ARB_BINDLESS
-        Cubemaps[sampleID - 1].cubemap;
+        samplerCube sampler = Cubemaps[sampleID - 1].cubemap;
+        sampleColor += textureLod(sampler, sampleDir, roughness * (textureQueryLevels(sampler) - 1)).rgb;
         #else
-        CubemapTex[sampleID - 1];
+        sampleColor += textureLod(CubemapTex[sampleID - 1], sampleDir, roughness * (textureQueryLevels(CubemapTex[sampleID - 1]) - 1)).rgb;
         #endif
     
-        sampleColor += textureLod(
-        sampler,
-        sampleDir, roughness * textureQueryLevels(sampler)).rgb;
+        
         
     }
     
@@ -114,23 +112,26 @@ vec3 SampleCubemaps(vec3 dir, float roughness)
 
 void main()
 {
-    float roughness = 0;
+    float roughness = 0.7;
+    float metallic = 0;
+    
+    vec4 diffuseColor = texture(albedoTex, TexCoord.xy);
+
+    if (transparency[InstanceID / 4][InstanceID % 4] * diffuseColor.a <= ditherSample) discard;
+    
     vec3 normal = normalize(gl_FrontFacing ? Normal : -Normal);
     vec3 view = normalize(viewPos.xyz - FragPos.xyz);
     vec3 lightDir = normalize(sun.SunPos);
     
     vec3 cubemapColor = SampleCubemaps(reflect(-view, normal),roughness);
     
-    vec4 diffuseColor = texture(albedoTex, TexCoord.xy);
-
-    if (transparency[InstanceID / 4][InstanceID % 4] * diffuseColor.a <= ditherSample) discard;
-    
     float shadow = ShadowCalculation(FragPosLightSpace);
     float ambient = max(dot(normal, lightDir), 0.0) * 0.5 + 0.5;
-    diffuseColor *= clamp(min(mix(0.5, 1.0, shadow), ambient), 0.0, 1.0);
-    diffuseColor += pow(clamp(dot(normalize(reflect(-lightDir, normal)), view), 0, 1), pow( 1 + (1-roughness), 8)) * (1 - roughness) * shadow;
-    diffuseColor += vec4(diffuseColor.rgb * cubemapColor * (1-roughness), 1.0);
+    diffuseColor *= mix(clamp(min(mix(0.5, 1.0, shadow), ambient), 0.0, 1.0), 1.0, metallic);
+    diffuseColor += clamp(pow(clamp(dot(normalize(reflect(-lightDir, normal)), view), 0, 1), pow( 1 + (1-roughness), 8)), 0, 1) * (1.0 - roughness) * shadow;
+    diffuseColor.rgb = mix(diffuseColor.rgb + diffuseColor.rgb * cubemapColor * (1-roughness), diffuseColor.rgb * cubemapColor, metallic);
     FragColor = vec4(pow(diffuseColor.rgb, vec3(0.4545)), 1.0);
+    
 
     //vec3 reflect = normalize(reflect(normalize(FragPos - viewPos), Normal));
     //FragColor = vec4(rayMarch(FragPos, reflect, 10), 1);

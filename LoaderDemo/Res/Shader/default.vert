@@ -24,6 +24,6 @@ void main()
     gl_Position = projection * view[gl_InstanceID / numObjects] * model[InstanceID] * vec4(aPos, 1.0);
     FragPos = vec4((model[gl_InstanceID % numObjects] * vec4(aPos, 1.0)).xyz, 1);
     FragPosLightSpace = sun.ViewProj * FragPos;
-    Normal = mat3(transpose(inverse(model[gl_InstanceID]))) * aNormal;
+    Normal = mat3(transpose(inverse(model[InstanceID]))) * aNormal;
     TexCoord = aTexCoord;
 }
