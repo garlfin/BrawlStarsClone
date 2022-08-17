@@ -69,7 +69,7 @@ public class Camera : BaseCamera
     
     public override void Dispose()
     {
-        CameraSystem.Remove(this);
+        Window.CameraSystem.Remove(this);
     }
 
     public override void UpdateProjection()
@@ -79,8 +79,8 @@ public class Camera : BaseCamera
 
     public override Vector3D<float> WorldToScreen(ref Vector3D<float> point)
     {
-        var objPos = new Vector4D<float>(point, 1f) * CameraSystem.CurrentCamera.View *
-                     CameraSystem.CurrentCamera.Projection; // World to screen pos -1 to 1
+        var objPos = new Vector4D<float>(point, 1f) * Window.CameraSystem.CurrentCamera.View *
+                     Window.CameraSystem.CurrentCamera.Projection; // World to screen pos -1 to 1
         if (objPos.W == 0) return Vector3D<float>.Zero;
         objPos /= objPos.W; // Clip Space
         return new Vector3D<float>(objPos.X, objPos.Y, objPos.Z);

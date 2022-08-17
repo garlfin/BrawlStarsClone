@@ -77,6 +77,6 @@ public class Entity
 
     public void Delete(bool freeChildren)
     {
-        AssetManager.QueueRemoval(this, freeChildren);
+        Window.AssetManager.QueueRemoval(this, freeChildren);
     }
 }

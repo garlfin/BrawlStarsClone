@@ -1,4 +1,5 @@
-﻿using gEMath.Math;
+﻿using gE3.Engine.Windowing;
+using gEMath.Math;
 using Silk.NET.Maths;
 
 namespace gE3.Engine.Component;
@@ -13,10 +14,10 @@ public sealed class Transform : Component
     public Vector3D<float> RotationBaked = Vector3D<float>.Zero;
     public Vector3D<float> ScaleBaked = Vector3D<float>.One;
     public Matrix4X4<float> Model { get; private set; }
-    public Transform(Entity? owner) : base(owner)
+    public Transform(Entity owner) : base(owner)
     {
+        Window.TransformSystem.Register(this);
         OnUpdate(0f);
-        TransformSystem.Register(this);
     }
 
     public override void OnUpdate(float deltaTime)
@@ -36,16 +37,20 @@ public sealed class Transform : Component
 
     public override void Dispose()
     {
-        TransformSystem.Remove(this);
+        Window.TransformSystem.Remove(this);
     }
 }
 
 public class TransformSystem : ComponentSystem<Transform>
 {
-    public static void Update(Entity? root)
+    public void Update(Entity? root)
     {
         root.GetComponent<Transform>()?.OnUpdate(0f);
         for (var i = 0; i < root.Children.Count; i++) Update(root.Children[i]);
+    }
+
+    public TransformSystem(GameWindow window) : base(window)
+    {
     }
 }
 

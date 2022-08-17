@@ -28,7 +28,7 @@ public sealed class MeshRenderer : Component
 
     public MeshRenderer(Entity? owner, Mesh mesh, bool overrideInstance = false) : base(owner)
     {
-        MeshRendererSystem.Register(this);
+        Window.MeshRendererSystem.Register(this);
         
         Mesh = mesh;
         _overrideInstance = overrideInstance;
@@ -39,7 +39,7 @@ public sealed class MeshRenderer : Component
 
     public override void Dispose()
     {
-        MeshRendererSystem.Remove(this);
+        Window.MeshRendererSystem.Remove(this);
         if (!_overrideInstance) Mesh.Remove(Owner);
     }
 
@@ -48,26 +48,31 @@ public sealed class MeshRenderer : Component
         _bounds = Mesh.Bounds.Transform(_transform.Model);
         InFrustum = true;
         
-        if((_cubemapSamples.LengthSquared == 0 && Static) || !Static) _cubemapSamples.X = CubemapCaptureManager.GetNearestCubemap(ref _bounds.Center).ID + 2;
+        if((_cubemapSamples.LengthSquared == 0 && Static) || !Static) _cubemapSamples.X = Window.CubemapCaptureManager.GetNearestCubemap(ref _bounds.Center).ID + 2;
         if (Window.State == EngineState.Cubemap) _cubemapSamples.X = 1;
         
         // 0 is no cubemap, 1 is skybox, 2 is the beginning of the actual cubemaps
-        InFrustum = (Window.State == EngineState.Shadow ?  CameraSystem.Sun! : CameraSystem.CurrentCamera!).IsAABBVisible(ref _bounds);
+        
+        InFrustum = (Window.State == EngineState.Shadow ?  Window.CameraSystem.Sun! : Window.CameraSystem.CurrentCamera!).IsAABBVisible(ref _bounds) || Window.State == EngineState.Cubemap;
     }
 }
 
 public class MeshRendererSystem : ComponentSystem<MeshRenderer>
 {
-    public static List<Mesh> Meshes { get; } = new List<Mesh>();
+    public List<Mesh> Meshes { get; } = new List<Mesh>();
     //private static readonly List<Mesh> ManagedMeshes = new List<Mesh>();
 
-    public static void Register(Mesh mesh)
+    public void Register(Mesh mesh)
     {
         Meshes.Add(mesh);
     }
 
-    public static void Render()
+    public void Render()
     {
         for (var i = 0; i < Meshes.Count; i++) Meshes[i].ManagedRender();
+    }
+
+    public MeshRendererSystem(GameWindow window) : base(window)
+    {
     }
 }

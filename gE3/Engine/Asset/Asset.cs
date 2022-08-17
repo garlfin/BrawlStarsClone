@@ -18,12 +18,7 @@ public abstract class Asset : IDisposable
     protected Asset(GameWindow window)
     {
         Window = window;
-        AssetManager.Register(this);
-    }
-
-    protected Asset()
-    {
-        AssetManager.Register(this);
+        Window.AssetManager.Register(this);
     }
 
     public virtual int Use(int slot)
@@ -45,27 +40,27 @@ public abstract class Asset : IDisposable
     }
 }
 
-public static class AssetManager
+public class AssetManager
 {
-    private static readonly List<Tuple<Entity, bool>> RemovalQueue = new List<Tuple<Entity, bool>>();
-    private static readonly List<Asset> Assets = new List<Asset>();
+    private readonly List<Tuple<Entity, bool>> RemovalQueue = new List<Tuple<Entity, bool>>();
+    private readonly List<Asset> Assets = new List<Asset>();
 
-    public static void Register(Asset asset)
+    public void Register(Asset asset)
     {
         Assets.Add(asset);
     }
 
-    public static void Remove(Asset asset)
+    public void Remove(Asset asset)
     {
         Assets.Remove(asset);
     }
 
-    public static void QueueRemoval(Entity entity, bool disposeChildren)
+    public void QueueRemoval(Entity entity, bool disposeChildren)
     {
         RemovalQueue.Add(new Tuple<Entity, bool>(entity, disposeChildren));
     }
 
-    public static void StartRemoval()
+    public void StartRemoval()
     {
         for (var i = 0; i < RemovalQueue.Count; i++)
         {

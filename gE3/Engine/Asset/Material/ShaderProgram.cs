@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using gE3.Engine.Component;
 using gE3.Engine.Component.Camera;
 using gE3.Engine.Windowing;
 using Silk.NET.Maths;
@@ -11,7 +12,7 @@ public class ShaderProgram : Asset
     
     public ShaderProgram(GameWindow window, string fragPath, string vertPath, bool managed = true, string[]? shaderIncludes = null) : base(window) 
     {
-        if (managed) ProgramManager.Register(this);
+        if (managed) Window.ProgramManager.Register(this);
         _id = GL.CreateProgram();
 
         Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader, shaderIncludes);
@@ -28,7 +29,7 @@ public class ShaderProgram : Asset
     
     public ShaderProgram(GameWindow window, string vertPath, string fragPath, string[]? shaderIncludes = null) : base(window)
     {
-        ProgramManager.Register(this);
+        Window.ProgramManager.Register(this);
         _id = GL.CreateProgram();
 
         Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader, shaderIncludes);
@@ -45,7 +46,7 @@ public class ShaderProgram : Asset
     
     public ShaderProgram(GameWindow window, string fragPath, Shader vertex, string[]? shaderIncludes = null) : base(window)
     {
-        ProgramManager.Register(this);
+        Window.ProgramManager.Register(this);
         _id = GL.CreateProgram();
         
         Shader fragment = new Shader(Window, fragPath, ShaderType.FragmentShader, shaderIncludes);
@@ -76,8 +77,8 @@ public class ShaderProgram : Asset
 
     public void Use()
     {
-        if (ProgramManager.CurrentProgram == this) return;
-        ProgramManager.CurrentProgram = this;
+        if ( Window.ProgramManager.CurrentProgram == this) return;
+        Window.ProgramManager.CurrentProgram = this;
         GL.UseProgram(ID);
     }
 
@@ -145,52 +146,56 @@ public class ShaderProgram : Asset
     }*/
 }
 
-public static class ProgramManager
+public class ProgramManager
 {
-    private static readonly List<ShaderProgram> _Programs = new();
+    private readonly List<ShaderProgram> _Programs = new();
+    private GameWindow _window;
 
-    public static ShaderProgram CurrentProgram;
+    public ShaderProgram CurrentProgram;
     
-    private static Buffer<ObjectData> _objectData;
-    private static Buffer<SceneData> _sceneData;
+    private Buffer<ObjectData> _objectData;
+    private Buffer<SceneData> _sceneData;
 
-    private static SceneData _scene;
+    private SceneData _scene;
 
-    public static unsafe void Init(GameWindow window)
+    public ProgramManager(GameWindow window)
     {
-        _sceneData = new Buffer<SceneData>(window);
-        _sceneData.Bind(1);
-        
-        _objectData = new Buffer<ObjectData>(window);
-        _objectData.Bind(2);
-
-        _scene.Sun = new SunInfo();
+        _window = window;
     }
 
-    public static unsafe void InitFrame(GameWindow window)
+    public void Init()
     {
-        if (window.State is EngineState.Shadow)
+        _sceneData = new Buffer<SceneData>(_window);
+        _sceneData.Bind(1);
+        
+        _objectData = new Buffer<ObjectData>(_window);
+        _objectData.Bind(2);
+    }
+
+    public unsafe void InitFrame()
+    {
+        _scene.Sun.ViewProjection = _window.CameraSystem.Sun.View * _window.CameraSystem.Sun.Projection;
+        _scene.Sun.Position = _window.CameraSystem.Sun.Position;
+        _scene.Sun.ShadowMap = _window.CameraSystem.Sun.ShadowMap.Handle;
+        
+        if (_window.State is EngineState.Shadow)
         {
-            _scene.Projection = CameraSystem.Sun.Projection;
-            _scene.View = CameraSystem.Sun.View;
-            
-             _scene.Sun.ViewProjection = CameraSystem.Sun.View * CameraSystem.Sun.Projection;
-             _scene.Sun.Position = CameraSystem.Sun.Position;
-             _scene.Sun.ShadowMap = CameraSystem.Sun.ShadowMap.Handle;
+            _scene.Projection = _window.CameraSystem.Sun.Projection;
+            _scene.View = _window.CameraSystem.Sun.View;
         }
         else
         {
-            _scene.Projection = CameraSystem.CurrentCamera.Projection;
-            _scene.View = CameraSystem.CurrentCamera.View;
-            _scene.ViewPos = CameraSystem.CurrentCamera.Position;
-            if (window.State is EngineState.Cubemap)
+            _scene.Projection = _window.CameraSystem.CurrentCamera.Projection;
+            _scene.View = _window.CameraSystem.CurrentCamera.View;
+            _scene.ViewPos = _window.CameraSystem.CurrentCamera.Position;
+            if (_window.State is EngineState.Cubemap)
             {
-                _scene.View = ((CubemapCapture)CameraSystem.CurrentCamera).ViewMatrices[0];
-                _scene.ViewXN = ((CubemapCapture)CameraSystem.CurrentCamera).ViewMatrices[1];
-                _scene.ViewY = ((CubemapCapture)CameraSystem.CurrentCamera).ViewMatrices[2];
-                _scene.ViewYN = ((CubemapCapture)CameraSystem.CurrentCamera).ViewMatrices[3];
-                _scene.ViewZ = ((CubemapCapture)CameraSystem.CurrentCamera).ViewMatrices[4];
-                _scene.ViewZN = ((CubemapCapture)CameraSystem.CurrentCamera).ViewMatrices[5];
+                _scene.View = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[0];
+                _scene.ViewXN = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[1];
+                _scene.ViewY = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[2];
+                _scene.ViewYN = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[3];
+                _scene.ViewZ = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[4];
+                _scene.ViewZN = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[5];
             }
         }
         fixed (void* ptr = &_scene)
@@ -199,12 +204,12 @@ public static class ProgramManager
         }
     }
 
-    public static int Register(ShaderProgram program)
+    public int Register(ShaderProgram program)
     {
         _Programs.Add(program);
         return _Programs.Count - 1;
     }
-    public static unsafe void PushObjects(void* model, void* transparency, void* samples, uint count)
+    public unsafe void PushObjects(void* model, void* transparency, void* samples, uint count)
     {
         _objectData.ReplaceData(&count, 4);
         _objectData.ReplaceData(model, 64 * count, 16);

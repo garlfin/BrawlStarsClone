@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using gE3.Engine.Windowing;
+using Silk.NET.Maths;
 
 namespace gE3.Engine.Component.Physics;
 
@@ -36,18 +37,26 @@ public readonly struct RayInfo
     }
 }
 
-public static class Raycast
+public class Raycast
 {
     private static readonly ColliderCompare Comparer = new();
 
-    public static RayResult Cast(Vector3D<float> position, Vector3D<float> direction,
+    private GameWindow _window;
+
+    public Raycast(GameWindow window)
+    {
+        _window = window;
+    }
+    
+
+    public RayResult Cast(Vector3D<float> position, Vector3D<float> direction,
         PhysicsLayer layer = PhysicsLayer.Zero, Entity[]? ignoreList = null, float length = float.PositiveInfinity)
     {
         var _result = new RayResult(new RayInfo(position, direction, length));
 
-        for (var i = 0; i < PhysicsSystem.Components.Count; i++)
+        for (var i = 0; i < _window.PhysicsSystem.Components.Count; i++)
         {
-            var collider = PhysicsSystem.Components[i];
+            var collider = _window.PhysicsSystem.Components[i];
 
             if (collider.Layer != layer) continue;
             if (ignoreList is not null && ignoreList.Contains(collider.Owner)) continue;

@@ -21,7 +21,7 @@ public abstract class Collider : Component
 
     protected Collider(Entity owner, bool isStatic = true, List<Entity>? ignoreList = null,
         Vector2D<float>? scale = null,
-        PhysicsLayer layer = PhysicsLayer.Zero, bool usePhysics = false)
+        PhysicsLayer layer = PhysicsLayer.Zero, bool usePhysics = false) : base(owner)
     {
         Owner = owner;
         Static = isStatic;
@@ -31,7 +31,7 @@ public abstract class Collider : Component
         Transform = owner.GetComponent<Transform>();
 
         HalfLength = 0.5f * (scale ?? Vector2D<float>.One);
-        PhysicsSystem.Register(this);
+        Window.PhysicsSystem.Register(this);
         Scale = scale ?? Vector2D<float>.One; // Cant set scale to one by default 💀
     }
 
@@ -43,9 +43,9 @@ public abstract class Collider : Component
     public sealed override void OnUpdate(float deltaTime)
     {
         if (Static) return;
-        for (var i = 0; i < PhysicsSystem.Components.Count; i++)
+        for (var i = 0; i < Window.PhysicsSystem.Components.Count; i++)
         {
-            var collider = PhysicsSystem.Components[i];
+            var collider = Window.PhysicsSystem.Components[i];
             if (collider == this || collider.Layer != Layer) continue;
             if (IgnoreList.Contains(collider.Owner) || collider.IgnoreList.Contains(Owner)) continue;
 
@@ -70,7 +70,7 @@ public abstract class Collider : Component
 
     public override void Dispose()
     {
-        PhysicsSystem.Remove(this);
+        Window.PhysicsSystem.Remove(this);
     }
 
     public abstract Collision? Intersect(SquareCollider other);
@@ -81,10 +81,14 @@ public abstract class Collider : Component
     protected abstract void ResolveY(Collision collision);
 }
 
-internal class PhysicsSystem : ComponentSystem<Collider>
+public class PhysicsSystem : ComponentSystem<Collider>
 {
-    public static void ResetCollisions()
+    public void ResetCollisions()
     {
         for (var i = 0; i < Components.Count; i++) Components[i].ResetCollisions();
+    }
+
+    public PhysicsSystem(GameWindow window) : base(window)
+    {
     }
 }

@@ -23,8 +23,7 @@ public List<Entity> Users { get; } = new List<Entity>();
 
     public Mesh(GameWindow window, ref gEModel.Struct.Mesh mesh) : base(window)
     {
-        Window = window;
-        MeshRendererSystem.Register(this);
+        Window.MeshRendererSystem.Register(this);
         RenderMesh = mesh;
 
         MeshVAO = new MeshVao[mesh.SubmeshCount];
@@ -52,7 +51,7 @@ public List<Entity> Users { get; } = new List<Entity>();
         for (var j = 0; j < users; j++)
         {
             var userRenderer = Users[j].GetComponent<MeshRenderer>();
-            if(!userRenderer!.InFrustum) continue;
+            if(!userRenderer!.InFrustum && Window.State != EngineState.Cubemap) continue;
             _model[actualUsers] = Users[j].GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
             _alpha[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.Alpha;
             _cubemapWeights[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.CubemapSamples;
@@ -63,7 +62,7 @@ public List<Entity> Users { get; } = new List<Entity>();
         
         fixed (void* ptr = _model, ptr2 = _alpha, ptr3 = _cubemapWeights)
         {
-            ProgramManager.PushObjects(ptr, ptr2, ptr3, actualUsers);
+            Window.ProgramManager.PushObjects(ptr, ptr2, ptr3, actualUsers);
         }
         
         for (var i = 0; i < MeshVAO.Length; i++)

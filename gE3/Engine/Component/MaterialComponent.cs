@@ -7,12 +7,12 @@ public class MaterialComponent : Component
 {
     private readonly Material?[] _materials;
 
-    public MaterialComponent(gETF mesh)
+    public MaterialComponent(Entity owner, ref gETF mesh) : base(owner)
     {
         _materials = new Material?[mesh.Body.MaterialCount];
     }
 
-    public MaterialComponent(Material[] materials)
+    public MaterialComponent(Entity owner, Material[] materials) : base(owner)
     {
         _materials = materials;
     }

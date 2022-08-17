@@ -45,7 +45,7 @@ public static class MeshLoader
             if (!node.OwnsMesh) continue;
             
             instance.AddComponent(new MeshRenderer(instance, meshes[(uint) node.MeshID]));
-            instance.AddComponent(new MaterialComponent(materials));
+            instance.AddComponent(new MaterialComponent(instance, materials));
         }
     }
 }

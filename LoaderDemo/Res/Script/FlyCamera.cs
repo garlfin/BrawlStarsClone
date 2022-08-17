@@ -1,4 +1,5 @@
-﻿using gE3.Engine.Component;
+﻿using gE3.Engine;
+using gE3.Engine.Component;
 using gE3.Engine.Component.Camera;
 using gE3.Engine.Windowing;
 using gEMath.Math;
@@ -44,5 +45,9 @@ public class FlyCamera : Behavior
         _transform.Rotation.Y += args.Delta.X * Sensitivity * 0.1f;
         _transform.Rotation.X = Math.Clamp(_transform.Rotation.X + args.Delta.Y * Sensitivity * 0.1f, -89, 89);
         Window.MousePosition = (Vector2D<float>) (Window.Size / 2);
+    }
+
+    public FlyCamera(Entity? owner) : base(owner)
+    {
     }
 }

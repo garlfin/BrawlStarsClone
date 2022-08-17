@@ -25,8 +25,8 @@ public sealed class CubemapCapture : BaseCamera
     public CubemapCapture(Entity? owner, uint size, float clipNear = 0.1f, float clipFar = 100f) : base(owner, clipNear, clipFar)
     {
         _size = size;
-        ID = (uint)CubemapCaptureManager.Components.Count;
-        CubemapCaptureManager.Register(this);
+        ID = (uint)Window.CubemapCaptureManager.Components.Count;
+        Window.CubemapCaptureManager.Register(this);
         Texture = new CubemapTexture(Window, size, InternalFormat.Rgb8);
         UpdateProjection();
         _transform = Owner.GetComponent<Transform>();
@@ -44,8 +44,8 @@ public sealed class CubemapCapture : BaseCamera
         GL.Clear((ClearBufferMask)16640);
         Set();
 
-        ProgramManager.InitFrame(Window);
-        MeshRendererSystem.Render();
+        Window.ProgramManager.InitFrame();
+        Window.MeshRendererSystem.Render();
         Window.RenderSkybox();
         Texture.GenMips();
 
@@ -66,7 +66,7 @@ public sealed class CubemapCapture : BaseCamera
 
     public override void Dispose()
     {
-        CameraSystem.Remove(this);
+        Window.CameraSystem.Remove(this);
     }
     public override void UpdateProjection()
     {
@@ -96,21 +96,19 @@ public sealed class CubemapCapture : BaseCamera
 
 public class CubemapCaptureManager : ComponentSystem<CubemapCapture>
 {
-    private static GameWindow _window;
-    private static Buffer<CubemapInfo> _cubemaps;
-    public static void Init(GameWindow window)
+    private Buffer<CubemapInfo> _cubemaps;
+    public override void Init()
     {
-        _window = window;
-        _cubemaps = new Buffer<CubemapInfo>(window, (uint) Components.Count + 1, Target.ShaderStorageBuffer);
+        _cubemaps = new Buffer<CubemapInfo>(Window, (uint) Components.Count + 1, Target.ShaderStorageBuffer);
         
         CubemapInfo[] allCubemaps = new CubemapInfo[Components.Count + 1];
-        allCubemaps[0] = new CubemapInfo(window.Skybox.Handle, new AABB(Vector3D<float>.Zero, Vector3D<float>.Zero));
+        allCubemaps[0] = new CubemapInfo(Window.Skybox.Handle, new AABB(Vector3D<float>.Zero, Vector3D<float>.Zero));
         for (int i = 0; i < Components.Count; i++) allCubemaps[i + 1] = Components[i].Data;
         
         _cubemaps.ReplaceData(allCubemaps);
         _cubemaps.Bind(3);
     }
-    public static CubemapCapture GetNearestCubemap(ref Vector3D<float> position)
+    public CubemapCapture GetNearestCubemap(ref Vector3D<float> position)
     {
         for (int i = 0; i < Components.Count; i++)
             if (Components[i].Bounds.CollidePoint(ref position))
@@ -130,6 +128,10 @@ public class CubemapCaptureManager : ComponentSystem<CubemapCapture>
         }
 
         return closest;
+    }
+
+    public CubemapCaptureManager(GameWindow window) : base(window)
+    {
     }
 }
 

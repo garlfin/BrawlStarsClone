@@ -51,8 +51,15 @@ public class GameWindow
     
     protected List<PostEffect> PostEffects { get; } = new List<PostEffect>();
 
+    public CameraSystem CameraSystem { get; }
+    public BehaviorSystem BehaviorSystem { get; }
+    public AssetManager AssetManager { get; }
+    public PhysicsSystem PhysicsSystem { get; }
+    public CubemapCaptureManager CubemapCaptureManager { get; }
+    public TransformSystem TransformSystem { get; }
+    public ProgramManager ProgramManager { get; }
 
-    public GameWindow(int width, int height, string name, bool debug = false)
+    protected GameWindow(int width, int height, string name, bool debug = false)
     {
         _debug = debug;
         WindowOptions windowOptions = WindowOptions.Default;
@@ -60,9 +67,19 @@ public class GameWindow
         windowOptions.Size = new Vector2D<int>(width, height);
         windowOptions.Title = name;
         windowOptions.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, _debug ? ContextFlags.Debug : ContextFlags.Default, new APIVersion(4, 6));
-        windowOptions.FramesPerSecond = 0;
+        windowOptions.FramesPerSecond = 144;
         windowOptions.VSync = false;
         Window = Silk.NET.Windowing.Window.Create(windowOptions);
+        
+        CameraSystem = new CameraSystem(this);
+        MeshRendererSystem = new MeshRendererSystem(this);
+        BehaviorSystem = new BehaviorSystem(this);
+        AssetManager = new AssetManager();
+        PhysicsSystem = new PhysicsSystem(this);
+        CubemapCaptureManager = new CubemapCaptureManager(this);
+        TransformSystem = new TransformSystem(this);
+        ProgramManager = new ProgramManager(this);
+
     }
 
     public virtual void Run()
@@ -91,8 +108,9 @@ public class GameWindow
     public EngineState State { get; set; }
     public Vector2D<float> MousePosition
     {
-        get => new(Math.Clamp(Mouse.Position.X, 0, Window.Size.X),
-            Window.Size.Y - Math.Clamp(Mouse.Position.Y, 0, Window.Size.Y));
+        get =>
+            new Vector2D<float>(Math.Clamp(Mouse.Position.X, 0, Window.Size.X),
+                Window.Size.Y - Math.Clamp(Mouse.Position.Y, 0, Window.Size.Y));
         set => Mouse.Position = new Vector2(value.X, Window.Size.Y - value.Y);
     }
     
@@ -103,6 +121,8 @@ public class GameWindow
         get => MousePosition / (Vector2D<float>)Size * 2 - Vector2D<float>.One;
         set => MousePosition = (value * 0.5f + new Vector2D<float>(0.5f)) * (Vector2D<float>)Size;
     }
+
+    public MeshRendererSystem MeshRendererSystem { get; set; }
 
     protected virtual void OnUpdate(double t)
     {
@@ -144,10 +164,10 @@ public class GameWindow
         if (_debug) Debug.Init(this);
         Input = Window.CreateInput();
         Input.Mice[0].MouseMove += OnMouseMove;
-        AudioSystem = new AudioSystem(out _);
-
-        ProgramManager.Init(this);
-        SkinManager.Init(this);
+        AudioSystem = new AudioSystem(this, out _);
+        
+        ProgramManager.Init();
+        //SkinManager.Init();
         
         /*BRDFTexture.Init(this);
         BRDFTexture tex = new BRDFTexture(this, 512);
@@ -201,7 +221,7 @@ public class GameWindow
         
         OnLoad();
         
-        CubemapCaptureManager.Init(this);
+        CubemapCaptureManager.Init();
         
         PhysicsSystem.Load();
 
@@ -211,7 +231,7 @@ public class GameWindow
         
         TransformSystem.Update(Root);
         CameraSystem.Update(0f);
-        ProgramManager.InitFrame(this);
+        ProgramManager.InitFrame();
         MeshRendererSystem.Update(0f);
         
         GL.Clear(ClearBufferMask.DepthBufferBit);
@@ -250,8 +270,8 @@ public class GameWindow
         BehaviorSystem.Render(time);
         TransformSystem.Update(Root);
         CameraSystem.Update(time);
-        SkinManager.Render(time);
-        ProgramManager.InitFrame(this);
+        //SkinManager.Render(time);
+        ProgramManager.InitFrame();
         MeshRendererSystem.Update(0f);
 
         ScreenFramebuffer.Bind(null);
@@ -352,7 +372,6 @@ public class GameWindow
         CubemapCaptureManager.Render(0f);
 
         prevCam.Set();
-        ScreenFramebuffer.Bind(null);
         _screenTexture.BindToFrameBuffer(ScreenFramebuffer, FramebufferAttachment.ColorAttachment0);
     }
 }

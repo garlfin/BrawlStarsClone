@@ -20,7 +20,7 @@ public class Animator : Component
 
     public Animator(Entity? owner, Animation? animation = null) : base(owner)
     {
-        SkinManager.Register(this);
+        //SkinManager.Register(this);
 
         _renderer = owner.GetComponent<MeshRenderer>();
 
@@ -89,7 +89,7 @@ public class Animator : Component
 
     public override void Dispose()
     {
-        SkinManager.Remove(this);
+        //SkinManager.Remove(this);
     }
 
     private void IterateMatrix(BoneHierarchy bone, ref Matrix4X4<float> parentTransform)
@@ -123,13 +123,17 @@ public class Animator : Component
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class SkinManager : ComponentSystem<Animator>
 {
-    public static Buffer<Matrix4X4<float>> MatBuffer { get; private set; }
-    public static ShaderProgram SkinningShader { get; private set; }
+    public Buffer<Matrix4X4<float>> MatBuffer { get; private set; }
+    public ShaderProgram SkinningShader { get; private set; }
 
-    public static void Init(GameWindow window)
+    public override void Init()
     {
-        MatBuffer = new Buffer<Matrix4X4<float>>(window, 255, Target.ShaderStorageBuffer);
+        MatBuffer = new Buffer<Matrix4X4<float>>(Window, 255, Target.ShaderStorageBuffer);
         MatBuffer.Bind(4);
-        SkinningShader = new ShaderProgram(window, "Engine/Internal/skinning.comp");
+        SkinningShader = new ShaderProgram(Window, "Engine/Internal/skinning.comp");
+    }
+
+    public SkinManager(GameWindow window) : base(window)
+    {
     }
 }

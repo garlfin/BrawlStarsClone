@@ -5,6 +5,10 @@ namespace gE3.Engine.Asset.Material;
 
 public abstract class PostEffect : Asset
 {
-    public static PlaneVAO PlaneVAO { get; set; }
-    public PostEffect(GameWindow window) : base(window) { }
+    private static PlaneVAO _planeVAO;
+
+    public PostEffect(GameWindow window) : base(window)
+    {
+        _planeVAO = new PlaneVAO(window);
+    }
 }

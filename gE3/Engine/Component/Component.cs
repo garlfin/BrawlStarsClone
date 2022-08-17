@@ -24,10 +24,6 @@ public abstract class Component
         Owner = owner;
     }
 
-    protected Component()
-    {
-    }
-
     public virtual void OnUpdate(float deltaTime)
     {
     }
@@ -49,37 +45,42 @@ public abstract class Component
 
 public abstract class ComponentSystem<T> where T : Component
 {
-    private static GameWindow _window;
+    protected GameWindow Window { get; }
 
-    public static readonly List<T> Components = new();
+    public readonly List<T> Components = new List<T>();
 
-    public static void Register(T component)
+    protected ComponentSystem(GameWindow window)
+    {
+        Window = window;
+    }
+    public void Register(T component)
     {
         Components.Add(component);
     }
 
-    public static void Remove(T component)
+    public void Remove(T component)
     {
         Components.Remove(component);
     }
 
-    public static void Update(float deltaTime)
+    public void Update(float deltaTime)
     {
         for (var i = 0; i < Components.Count; i++) Components[i].OnUpdate(deltaTime);
     }
 
-    public static void Load()
+    public void Load()
     {
         for (var i = 0; i < Components.Count; i++) Components[i].OnLoad();
     }
 
-    public static void Render(float deltaTime)
+    public void Render(float deltaTime)
     {
         for (var i = 0; i < Components.Count; i++) Components[i].OnRender(deltaTime);
     }
 
-    public static void MouseMove(MouseMoveEventArgs args)
+    public void MouseMove(MouseMoveEventArgs args)
     {
         for (var i = 0; i < Components.Count; i++) Components[i].OnMouseMove(args);
     }
+    public virtual void Init() { } 
 }

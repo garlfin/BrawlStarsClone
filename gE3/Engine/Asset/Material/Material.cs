@@ -38,7 +38,7 @@ public abstract class Material
         {
             if (_shadowUniform == -1)
                 _shadowUniform = Program.GetUniformLocation("ShadowMap");
-            Program.SetUniform(_shadowUniform, CameraSystem.Sun.ShadowMap.Use(TexSlotManager.Unit));
+            Program.SetUniform(_shadowUniform, Window.CameraSystem.Sun.ShadowMap.Use(TexSlotManager.Unit));
             
             var cubeUnit = Window.Skybox.Use(TexSlotManager.Unit);
             for (int i = 0; i < 4; i++) Program.SetUniform($"CubemapTex[{i}]", cubeUnit);

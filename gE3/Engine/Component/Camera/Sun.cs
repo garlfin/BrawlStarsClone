@@ -27,7 +27,7 @@ public sealed class Sun : BaseCamera
 
     public override void Set()
     {
-        CameraSystem.Sun = this;
+        Window.CameraSystem.Sun = this;
     }
 
     public override void OnUpdate(float deltaTime)
@@ -46,7 +46,7 @@ public sealed class Sun : BaseCamera
 
     public override void Dispose()
     {
-        CameraSystem.Remove(this);
+        Window.CameraSystem.Remove(this);
     }
 
     public sealed override void UpdateProjection()

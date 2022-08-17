@@ -112,7 +112,8 @@ vec3 SampleCubemaps(vec3 dir, float roughness)
 
 void main()
 {
-    float roughness = 0.7;
+    // Its not pbr, but its something..
+    float roughness = 0.4;
     float metallic = 0;
     
     vec4 diffuseColor = texture(albedoTex, TexCoord.xy);
@@ -123,7 +124,7 @@ void main()
     vec3 view = normalize(viewPos.xyz - FragPos.xyz);
     vec3 lightDir = normalize(sun.SunPos);
     
-    vec3 cubemapColor = SampleCubemaps(reflect(-view, normal),roughness);
+    vec3 cubemapColor = SampleCubemaps(reflect(-view, normal), roughness);
     
     float shadow = ShadowCalculation(FragPosLightSpace);
     float ambient = max(dot(normal, lightDir), 0.0) * 0.5 + 0.5;

@@ -1,4 +1,5 @@
 ﻿using gE3.Engine.Component.Physics;
+using gE3.Engine.Windowing;
 using gEMath.Bounds;
 using Silk.NET.Maths;
 
@@ -17,7 +18,7 @@ public abstract class BaseCamera : Component
     {
         ClipNear = clipNear;
         ClipFar = clipFar;
-        CameraSystem.Register(this);
+        Window.CameraSystem.Register(this);
     }
     
     public float ClipNear { get; set; }
@@ -53,12 +54,16 @@ public abstract class BaseCamera : Component
 
     public virtual void Set()
     {
-        CameraSystem.CurrentCamera = this;
+        Window.CameraSystem.CurrentCamera = this;
     }
 }
 
-public abstract class CameraSystem : ComponentSystem<BaseCamera>
+public class CameraSystem : ComponentSystem<BaseCamera>
 {
-    public static BaseCamera? CurrentCamera;
-    public static Sun? Sun;
+    public BaseCamera? CurrentCamera;
+    public Sun? Sun;
+
+    public CameraSystem(GameWindow window) : base(window)
+    {
+    }
 }

@@ -4,32 +4,27 @@ namespace gE3.Engine.Component;
 
 public abstract class Behavior : Component
 {
-    protected Behavior()
+    protected Behavior(Entity? owner) : base(owner)
     {
-        BehaviorSystem.RegisterForInit(this);
-    }
-
-    private Behavior(Entity? owner) : base(owner)
-    {
-        BehaviorSystem.RegisterForInit(this);
+        Window.BehaviorSystem.RegisterForInit(this);
     }
 
     public override void Dispose()
     {
-        BehaviorSystem.Remove(this);
+        Window.BehaviorSystem.Remove(this);
     }
 }
 
-internal class BehaviorSystem : ComponentSystem<Behavior>
+public class BehaviorSystem : ComponentSystem<Behavior>
 {
-    private static List<Behavior> InitializationQueue = new();
+    private List<Behavior> InitializationQueue = new List<Behavior>();
 
-    public static void RegisterForInit(Behavior behavior)
+    public void RegisterForInit(Behavior behavior)
     {
         InitializationQueue.Add(behavior);
     }
 
-    public static void InitializeQueue()
+    public void InitializeQueue()
     {
         for (var i = 0; i < InitializationQueue.Count; i++)
         {
@@ -38,5 +33,9 @@ internal class BehaviorSystem : ComponentSystem<Behavior>
         }
 
         InitializationQueue.Clear();
+    }
+
+    public BehaviorSystem(GameWindow window) : base(window)
+    {
     }
 }

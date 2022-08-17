@@ -4,6 +4,7 @@
 using FMOD;
 using FMOD.Studio;
 using gE3.Engine.Utility;
+using gE3.Engine.Windowing;
 using Initflags = FMOD.Studio.Initflags;
 
 namespace gE3.Engine.Asset.Audio;
@@ -16,10 +17,10 @@ public unsafe class AudioSystem : Asset
     public global::FMOD.Studio.System* Studio => _studio.Pointer; // Alias for Studio
     public global::FMOD.System* Core => _core.Pointer; // Alias for Core
     public BankHolder Banks { get; } = new();
-    
+
     public List<SoundEvent> Events { get; } = new();
 
-    public AudioSystem(out Result result, int maxChannels = 64)
+    public AudioSystem(GameWindow window, out Result result, int maxChannels = 64) : base(window)
     {
         global::FMOD.Studio.System.Create(out var studio);
         _studio = new PinnedObject<FMOD.Studio.System>(ref studio);
@@ -53,7 +54,7 @@ public unsafe class AudioSystem : Asset
 
     public SoundEvent GetEvent(string eventName)
     {
-        return new SoundEvent(this, eventName);
+        return new SoundEvent(Window, this, eventName);
     }
 
     public Result LoadBankData(Bank* bank)
@@ -78,16 +79,5 @@ public unsafe class AudioSystem : Asset
         Core->Release();
         _studio.Dispose();
         _core.Dispose();
-    }
-}
-
-public static class ArrayExtensions
-{
-    public static void Push<T>(ref T[] source, T value)
-    {
-        var temp = new T[source.Length + 1];
-        Array.Copy(source, temp, source.Length);
-        temp[^1] = value;
-        source = temp;
     }
 }

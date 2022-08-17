@@ -1,5 +1,6 @@
 ﻿using FMOD.Studio;
 using gE3.Engine.Utility;
+using gE3.Engine.Windowing;
 
 namespace gE3.Engine.Asset.Audio;
 
@@ -9,13 +10,13 @@ public unsafe class Sound : Asset
 
     public EventInstance* Instance => _instance.Pointer;
 
-    public Sound(EventDescription* eventDescription)
+    public Sound(GameWindow window, EventDescription* eventDescription) : base(window)
     {
         eventDescription->CreateInstance(out var instance);
         _instance = new PinnedObject<EventInstance>(ref instance);
     }
 
-    public Sound(AudioSystem system, string path)
+    public Sound(GameWindow window, AudioSystem system, string path) : base(window)
     {
         system.Studio->GetEvent(path, out var eventDescription);
         eventDescription.CreateInstance(out var instance);

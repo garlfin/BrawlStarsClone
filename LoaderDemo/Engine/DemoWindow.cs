@@ -1,4 +1,5 @@
 ﻿using gE3.Engine;
+using gE3.Engine.Asset;
 using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component;
@@ -14,19 +15,24 @@ namespace LoaderDemo.Engine;
 
 public class DemoWindow : GameWindow
 {
+    
+    public Buffer<LowPolyMatData> LowPolyBuffer { get; private set; }
+
+
     public DemoWindow(int width, int height, string name, bool debug = false) : base(width, height, name, debug)
     {
     }
 
     protected override void OnLoad()
     {
-        LowPolyMaterial.Init(this);
-        
+        LowPolyBuffer = new Buffer<LowPolyMatData>(this);
+        LowPolyBuffer.Bind(4);
+
         Entity camera = new Entity(this);
         camera.AddComponent(new Transform(camera));
         camera.AddComponent(new Camera(camera, 60, 0.1f, 300f, AudioSystem));
         camera.GetComponent<Camera>().Set();
-        camera.AddComponent(new FlyCamera());
+        camera.AddComponent(new FlyCamera(camera));
             
         Entity sun = new Entity(this);
         sun.AddComponent(new Transform(sun)
