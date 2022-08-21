@@ -12,7 +12,7 @@ public abstract class BaseCamera : Component
     protected Vector3D<float> _right;
     protected Vector3D<float> _up;
     protected Matrix4X4<float> _view = Matrix4X4<float>.Identity;
-    public Vector3D<float> Position;
+    public Vector3D<float> Position { get; protected set; }
 
     protected BaseCamera(Entity? owner, float clipNear, float clipFar) : base(owner)
     {

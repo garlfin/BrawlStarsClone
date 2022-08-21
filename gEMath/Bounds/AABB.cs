@@ -2,7 +2,7 @@
 
 namespace gEMath.Bounds;
 
-public struct AABB
+public struct AABB : ICollider<AABB>
 {
     // ReSharper disable twice MemberCanBePrivate.Global
     public Vector3D<float> Center;
@@ -20,7 +20,32 @@ public struct AABB
     
     public Vector3D<float> Min => Center - Extents;
     public Vector3D<float> Max => Center + Extents;
-    
+
+    public bool vAABB(ref AABB other)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool vPoint(ref Vector3D<float> other)
+    {
+        var min = Min;
+        var max = Max;
+        
+        return min.X <= other.X && min.Y <= other.Y && min.Z <= other.Z && 
+               max.X >= other.X && max.Y >= other.Y && max.Z >= other.Z;
+    }
+
+    public float toAABB(ref AABB other)
+    {
+        throw new NotImplementedException();
+    }
+
+    public float toPoint(ref Vector3D<float> other)
+    {
+        var closest = Vector3D.Max(Vector3D.Min(Max, other), Min);
+        return Vector3D.Distance(closest, other);
+    }
+
     public AABB Transform(ref Matrix4X4<float> transform)
     {
         var center = Vector3D.Transform(Center, transform);
@@ -31,25 +56,4 @@ public struct AABB
 
         return new AABB(center, max);
     }
-    
-    public AABB Transform(Matrix4X4<float> transform)
-    {
-        return Transform(ref transform);
-    }
-
-    public bool CollidePoint(ref Vector3D<float> point)
-    {
-        var min = Min;
-        var max = Max;
-        
-        return min.X <= point.X && min.Y <= point.Y && min.Z <= point.Z && 
-               max.X >= point.X && max.Y >= point.Y && max.Z >= point.Z;
-    }
-
-    public float DistanceToPoint(ref Vector3D<float> point)
-    {
-        var closest = Vector3D.Max(Vector3D.Min(Max, point), Min);
-        return Vector3D.Distance(closest, point);
-    }
-
 }

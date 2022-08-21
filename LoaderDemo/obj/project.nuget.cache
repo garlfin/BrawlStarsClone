@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "xTWEaTnGdPo1voKbtm8D58Wr0tMlk1Ssqup9PC+CjX0x62eBOiuvSUlZ0fNAnVWgzr+wvh13yqI5kyHYC7Dt2w==",
+  "dgSpecHash": "diLthR1Eh/vUIZwBXKn/np/N8ms6LSmDIEPlzbQHlx/sxg//tvTOCYQgBWxLSHP8uilNX/SMfB7ug3GRN4mwvA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\scion\\RiderProjects\\BrawlStarsClone\\LoaderDemo\\LoaderDemo.csproj",
+  "projectFilePath": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\LoaderDemo\\LoaderDemo.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\scion\\.nuget\\packages\\assimpnet\\4.1.0\\assimpnet.4.1.0.nupkg.sha512",
     "C:\\Users\\scion\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",

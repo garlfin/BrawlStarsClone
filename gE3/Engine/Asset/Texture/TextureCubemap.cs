@@ -4,9 +4,9 @@ using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Texture;
 
-public class CubemapTexture : Texture
+public class TextureCubemap : Texture
 {
-    public unsafe CubemapTexture(GameWindow window, string path, bool genMips = true) : base (window)
+    public unsafe TextureCubemap(GameWindow window, string path, bool genMips = true) : base (window)
     {
         if (!File.Exists(path)) throw new FileNotFoundException(path);
         FileStream file = File.Open(path, FileMode.Open);
@@ -71,7 +71,7 @@ public class CubemapTexture : Texture
         file.Close();
     }
 
-    public CubemapTexture(GameWindow window, uint size, InternalFormat format, bool genMips = true) :
+    public TextureCubemap(GameWindow window, uint size, InternalFormat format, bool genMips = true) :
         base(window, size, size, format)
     {
         GL.CreateTextures(TextureTarget.TextureCubeMap, 1, out _id);
@@ -91,5 +91,15 @@ public class CubemapTexture : Texture
         GL.ActiveTexture(TextureUnit.Texture0 + slot);
         GL.BindTexture(TextureTarget.TextureCubeMap, ID);
         return slot;
+    }
+
+    public TextureCubemap CreateIrradiance(uint size = 32u)
+    {
+        TextureCubemap tex = new TextureCubemap(Window, size, InternalFormat.Rgb16f, false);
+        
+        Use(0, BufferAccessARB.ReadOnly); // Bind this texture for read-only.
+        tex.Use(0, BufferAccessARB.WriteOnly); // Bind the output for write-only.
+        
+        return tex;
     }
 }

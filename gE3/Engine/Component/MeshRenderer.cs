@@ -45,7 +45,8 @@ public sealed class MeshRenderer : Component
 
     public override void OnUpdate(float deltaTime)
     {
-        _bounds = Mesh.Bounds.Transform(_transform.Model);
+        var model = _transform.Model;
+        _bounds = Mesh.Bounds.Transform(ref model);
         InFrustum = true;
         
         if((_cubemapSamples.LengthSquared == 0 && Static) || !Static) _cubemapSamples.X = Window.CubemapCaptureManager.GetNearestCubemap(ref _bounds.Center).ID + 2;

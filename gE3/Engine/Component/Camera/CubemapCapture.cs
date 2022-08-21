@@ -15,22 +15,22 @@ public sealed class CubemapCapture : BaseCamera
     private Transform _transform;
     public AABB Bounds => Data.Bounds;
     public CubemapInfo Data;
-    public CubemapTexture Texture { get; }
+    public TextureCubemap Texture { get; }
     private uint _size;
     
 
     public Matrix4X4<float>[] ViewMatrices = new Matrix4X4<float>[6];
-    private CubemapTexture _depthMap;
+    private TextureCubemap _depthMap;
 
     public CubemapCapture(Entity? owner, uint size, float clipNear = 0.1f, float clipFar = 100f) : base(owner, clipNear, clipFar)
     {
         _size = size;
         ID = (uint)Window.CubemapCaptureManager.Components.Count;
         Window.CubemapCaptureManager.Register(this);
-        Texture = new CubemapTexture(Window, size, InternalFormat.Rgb8);
+        Texture = new TextureCubemap(Window, size, InternalFormat.Rgb8);
         UpdateProjection();
         _transform = Owner.GetComponent<Transform>();
-        _depthMap = new CubemapTexture(Window, _size, InternalFormat.DepthComponent32f);
+        _depthMap = new TextureCubemap(Window, _size, InternalFormat.DepthComponent32f);
         Data = new CubemapInfo(Texture.Handle, new AABB(_transform.Location, _transform.Scale));
     }
 
@@ -111,7 +111,7 @@ public class CubemapCaptureManager : ComponentSystem<CubemapCapture>
     public CubemapCapture GetNearestCubemap(ref Vector3D<float> position)
     {
         for (int i = 0; i < Components.Count; i++)
-            if (Components[i].Bounds.CollidePoint(ref position))
+            if (Components[i].Bounds.vPoint(ref position))
                 return Components[i];
 
         CubemapCapture closest = null!;
@@ -119,7 +119,7 @@ public class CubemapCaptureManager : ComponentSystem<CubemapCapture>
 
         for (int i = 0; i < Components.Count; i++)
         {
-            float newDist = Components[i].Bounds.DistanceToPoint(ref position);
+            float newDist = Components[i].Bounds.toPoint(ref position);
             
             if (!(newDist < dist)) continue;
             

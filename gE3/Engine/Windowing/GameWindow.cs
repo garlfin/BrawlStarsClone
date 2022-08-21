@@ -39,9 +39,10 @@ public class GameWindow
     private PlaneVAO _screenPlane;
     private PrimitiveVao _frustumTest;
     
-    public CubemapTexture? Skybox { get; set; }
+    public TextureCubemap? Skybox { get; set; }
     private SkyboxVAO? _skyboxVao;
     private ShaderProgram? _skyboxShader;
+    private BRDFTexture _brdfLut;
 
     private bool _isClosed;
     
@@ -155,7 +156,6 @@ public class GameWindow
 
     private void InternalLoad()
     {
-
         var includes = new[] { "Engine/Internal/include.glsl" };
         GL = GL.GetApi(Window);
         Console.WriteLine($"API: {GL.GetStringS(StringName.Version)}");
@@ -168,11 +168,8 @@ public class GameWindow
         
         ProgramManager.Init();
         //SkinManager.Init();
-        
-        /*BRDFTexture.Init(this);
-        BRDFTexture tex = new BRDFTexture(this, 512);
-        BRDFTexture.ShaderDispose();
-        */
+
+        _brdfLut = new BRDFTexture(this);
         _skyboxShader = new ShaderProgram(this, "Engine/Internal/skybox.vert", "Engine/Internal/skybox.frag", includes);
         _skyboxVao = new SkyboxVAO(this);
         //Skybox = new EnvironmentTexture(this, "../../../res/sky.pvr");
@@ -240,15 +237,13 @@ public class GameWindow
         _depthShader.Use();
         
         MeshRendererSystem.Render();
-        
+
         if (_debug)
         {
             PrimitiveVao.Init(this);
             _frustumTest = new PrimitiveVao(this, 12, PrimitiveType.Lines);
         }
 
-        
-        
         BuildCubemaps();
     }
 

@@ -15,11 +15,12 @@ public sealed class Sun : BaseCamera
 
     public Texture2D ShadowMap { get; }
 
-    public Sun(Entity? owner, int size, float clipNear = 0.1f, float clipFar = 300f, uint shadowMapSize = 2048) : base(owner, clipNear, clipFar)
+    public Sun(Entity owner, int size, float clipNear = 0.1f, float clipFar = 300f, uint shadowMapSize = 2048) : base(owner, clipNear, clipFar)
     {
         Size = size;
+        ViewFrustum = new Frustum();
         UpdateProjection();
-        _entityTransform = owner.GetComponent<Transform>() ??
+        _entityTransform = Owner.GetComponent<Transform>() ??
                            throw new InvalidOperationException($"No transform on sun object {Owner.Name}!");
 
         ShadowMap = new Texture2D(Window, shadowMapSize, shadowMapSize, InternalFormat.DepthComponent32f, TextureWrapMode.ClampToBorder, false, true);
@@ -32,16 +33,15 @@ public sealed class Sun : BaseCamera
 
     public override void OnUpdate(float deltaTime)
     {
-       ShadowMap.BindToFrameBuffer(Window.ShadowBuffer, FramebufferAttachment.DepthAttachment);
-               Position = _entityTransform.LocationBaked + Offset;
-               _view = Matrix4X4.CreateLookAt(Position, Offset, Vector3D<float>.UnitY);
-               var viewProj = _view * _projection;
-               ViewFrustum = new Frustum(ref viewProj);
+        ShadowMap.BindToFrameBuffer(Window.ShadowBuffer, FramebufferAttachment.DepthAttachment);
+        Position = _entityTransform.LocationBaked + Offset;
+        _view = Matrix4X4.CreateLookAt(Position, Offset, Vector3D<float>.UnitY);
+        var viewProj = _view * _projection;
+        ViewFrustum.UpdateFrustum(ref viewProj);
     }
 
     public override void OnRender(float deltaTime)
     {
-        
     }
 
     public override void Dispose()

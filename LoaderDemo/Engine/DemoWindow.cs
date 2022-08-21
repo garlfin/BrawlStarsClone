@@ -50,7 +50,7 @@ public class DemoWindow : GameWindow
        
         MeshLoader.LoadScene(ref mesh, materials, Root!, this);
 
-        Skybox = new CubemapTexture(this, "../../../Res/Texture/sky.pvr");
+        Skybox = new TextureCubemap(this, "../../../Res/Texture/sky.pvr");
         
     }
 }

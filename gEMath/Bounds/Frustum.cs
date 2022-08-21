@@ -17,18 +17,7 @@ public struct Frustum
     public Frustum(ref Matrix4X4<float> viewProj)
     {
         Planes = new Vector4D<float>[6];
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 2; j++)
-            {
-                var index = i * 2 + j;
-                Planes[index].X = viewProj[0, 3] + (j == 0 ? viewProj[0, i] : -viewProj[0, i]);
-                Planes[index].Y = viewProj[1, 3] + (j == 0 ? viewProj[1, i] : -viewProj[1, i]);
-                Planes[index].Z = viewProj[2, 3] + (j == 0 ? viewProj[2, i] : -viewProj[2, i]);
-                Planes[index].W = viewProj[3, 3] + (j == 0 ? viewProj[3, i] : -viewProj[3, i]);
-                Planes[index] *= Planes[index].Vec3().Length;
-            }
-        }
+        UpdateFrustum(ref viewProj);
     }
 
     // Absolutely yoinked from BoyBayKiller on github
@@ -48,11 +37,31 @@ public struct Frustum
     public Vector3D<float> NegativeVertex(ref AABB aabb, Vector3D<float> normal)
     {
         Vector3D<float> output;
+
+        var max = aabb.Max;
+        var min = aabb.Min;
+        // Its a property, I'd rather not keep subtracting even though it may be fast.
         
-        output.X = normal.X > 0f ? aabb.Max.X : aabb.Min.X;
-        output.Y = normal.Y > 0f ? aabb.Max.Y : aabb.Min.Y;
-        output.Z = normal.Z > 0f ? aabb.Max.Z : aabb.Min.Z;
+        output.X = normal.X > 0f ? max.X : min.X;
+        output.Y = normal.Y > 0f ? max.Y : min.Y;
+        output.Z = normal.Z > 0f ? max.Z : min.Z;
 
         return output;
+    }
+
+    public void UpdateFrustum(ref Matrix4X4<float> viewProj)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                var index = i * 2 + j;
+                Planes[index].X = viewProj[0, 3] + (j == 0 ? viewProj[0, i] : -viewProj[0, i]);
+                Planes[index].Y = viewProj[1, 3] + (j == 0 ? viewProj[1, i] : -viewProj[1, i]);
+                Planes[index].Z = viewProj[2, 3] + (j == 0 ? viewProj[2, i] : -viewProj[2, i]);
+                Planes[index].W = viewProj[3, 3] + (j == 0 ? viewProj[3, i] : -viewProj[3, i]);
+                Planes[index] *= Planes[index].Vec3().Length;
+            }
+        }
     }
 }

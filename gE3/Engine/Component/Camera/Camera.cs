@@ -21,6 +21,7 @@ public class Camera : BaseCamera
         FOV = fov;
         System = system;
         _entityTransform = owner.GetComponent<Transform>();
+        ViewFrustum = new Frustum();
         UpdateProjection();
     }
 
@@ -60,7 +61,7 @@ public class Camera : BaseCamera
         System.Studio->SetListenerAttributes(0, *_attributes.Pointer);
 
         var viewProj = _view * _projection;
-        ViewFrustum = new Frustum(ref viewProj);
+        ViewFrustum.UpdateFrustum(ref viewProj);
     }
 
     public override void OnRender(float deltaTime)
