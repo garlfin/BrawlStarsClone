@@ -1,6 +1,6 @@
 ﻿layout(early_fragment_tests) in;
 
-#define M_PI 3.14159265358979323846;
+#define PI 3.14159265358979323846
 
 #ifdef ARB_BINDLESS
 layout(std140, binding = 4) uniform LowPolyMaterial
@@ -32,14 +32,12 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     
     if (projCoords.z > 1) return 1;
     
-    int size = 5;
-    int sampleCount = size; // Per Axis
-    float invSampleCount = 1.0 / sampleCount;
+    float size = 5;
     
     projCoords.w = 0.0001 * max(dot(normalize(Normal), normalize(sun.SunPos.xyz)), 0);
     projCoords.w = clamp(projCoords.w, 0.0, 0.0001);
     
-    vec2 texSize = float(size * 0.5) / textureSize(
+    vec2 texSize = size / textureSize(
     #ifdef ARB_BINDLESS
     sun.
     #endif
@@ -47,17 +45,23 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     , 0);
     float shadow = 0; 
     
+    float igN = 2 * PI * ditherSample;
+    mat2 rot = mat2(cos(igN), sin(igN), -sin(igN), cos(igN));
     
-    for (int x = 1; x <= sampleCount; x++)
-        for (int y = 1; y <= sampleCount; y++) 
-            shadow += texture(
-            #ifdef ARB_BINDLESS
-            sun.
-            #endif
-            ShadowMap
-            , vec3(projCoords.xy + (vec2(x, y) * invSampleCount * 2 - 1) * texSize, projCoords.z - projCoords.w));
+    
+    for (int i = 0; i < 4; i++)
+    {
+        vec2 vecSample = rot * poissonDisk[i];
+        
+        shadow += texture(
+        #ifdef ARB_BINDLESS
+        sun.
+        #endif
+        ShadowMap
+        , vec3(projCoords.xy + vecSample * texSize, projCoords.z - projCoords.w));
+    }
    
-    return shadow / (sampleCount * sampleCount);
+    return saturate(shadow * 0.25);
 }
 
 
@@ -80,7 +84,7 @@ vec3 SampleCubemaps(vec3 dir, float roughness)
         vec3 sampleDir = dir;
         vec3 extent = Cubemaps[sampleID - 1].extents;
 
-        if (dot(extent, extent) > 0)
+        if (dot(extent, extent) > 0) // Squared Length of Extent; if 0, then cubemap is infinite.
         {
             vec3 boxMin = Cubemaps[sampleID - 1].position - extent;
             vec3 boxMax = Cubemaps[sampleID - 1].position + extent;
@@ -110,6 +114,30 @@ vec3 SampleCubemaps(vec3 dir, float roughness)
     return sampleColor / sampleCount;
 }
 
+/*#define sssSteps 4
+#define sssMax 0.05
+#define sssThickness 0.02
+#define sssStepSize (sssMax / sssSteps)
+
+float sSS(){
+    vec3 rayPos = vec3(view * vec4(FragPos.xyz, 1.0));
+    vec3 rayDir = vec3(view * vec4(normalize(-sun.SunPos), 1.0));
+    vec3 rayStep = rayDir * sssStepSize;
+    
+    vec4 rayUV = vec4(0);
+    
+    for (int i = 0; i < sssSteps; i++) {
+        rayPos += rayStep;
+        
+        rayUV = (projection * vec4(rayPos, 1.0));
+        rayUV = rayUV / rayUV.w;
+        
+        if (rayUV.x < 0 || rayUV.x > 1 || rayUV.y < 0 || rayUV.y > 1) return 1;
+        // ()
+    }
+    return 0;
+}*/
+
 void main()
 {
     // Its not pbr, but its something..
@@ -128,9 +156,10 @@ void main()
     
     float shadow = ShadowCalculation(FragPosLightSpace);
     float ambient = max(dot(normal, lightDir), 0.0) * 0.5 + 0.5;
-    diffuseColor *= mix(clamp(min(mix(0.5, 1.0, shadow), ambient), 0.0, 1.0), 1.0, metallic);
+    diffuseColor *= mix(clamp(min(mix(0.0, 1.0, shadow), ambient), 0.0, 1.0), 1.0, metallic);
     diffuseColor += clamp(pow(clamp(dot(normalize(reflect(-lightDir, normal)), view), 0, 1), pow( 1 + (1-roughness), 8)), 0, 1) * (1.0 - roughness) * shadow;
     diffuseColor.rgb = mix(diffuseColor.rgb + diffuseColor.rgb * cubemapColor * (1-roughness), diffuseColor.rgb * cubemapColor, metallic);
+    
     FragColor = vec4(pow(diffuseColor.rgb, vec3(0.4545)), 1.0);
     
 
