@@ -11,9 +11,18 @@
 
 layout (std140, binding = 1) uniform SceneData {
     mat4 projection;
-    vec3 viewPos;
-    SunInfo sun;
     mat4 view[6];
+    vec3 viewPos;
+    float pad;
+    vec2 clipPlanes;
+    vec2 pad2;
+    #ifdef ARB_BINDLESS
+    sampler2D screenDepth;
+    #else
+    vec2 pad3;
+    #endif
+    vec2 pad4;
+    SunInfo sun;
 };
 
 layout (std140, binding = 2) uniform ObjectData {

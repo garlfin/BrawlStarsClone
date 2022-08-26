@@ -6,7 +6,7 @@ namespace gEModel.Struct;
 public struct Mesh : IWriteable
 {
     private static readonly string Cc = "MESH";
-    
+    public gETF Owner;
     public char[] FourCC;
     public ushort Index;
     public string Name;

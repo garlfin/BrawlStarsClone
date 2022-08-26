@@ -40,7 +40,7 @@
           "dependencies": {
             "Silk.NET.Maths": {
               "target": "Package",
-              "version": "[2.15.0, )"
+              "version": "[2.16.0, )"
             }
           },
           "imports": [
@@ -106,7 +106,11 @@
             },
             "Silk.NET.Maths": {
               "target": "Package",
-              "version": "[2.15.0, )"
+              "version": "[2.16.0, )"
+            },
+            "Silk.NET.OpenGL": {
+              "target": "Package",
+              "version": "[2.16.0, )"
             }
           },
           "imports": [

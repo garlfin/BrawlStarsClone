@@ -28,7 +28,7 @@ public class PrimitiveVao : VAO
 
     public static void Init(GameWindow window)
     {
-        DebugShader = new ShaderProgram(window, "../../../debug.vert", "../../../debug.frag", null);
+        DebugShader = new ShaderProgram(window, "../../../debug.vert", "../../../debug.frag", new []{"Engine/Internal/include.glsl"});
     }
 
     public unsafe PrimitiveVao(GameWindow window, uint length, PrimitiveType primitiveType) : base(window)

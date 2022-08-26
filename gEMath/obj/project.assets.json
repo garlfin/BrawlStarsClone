@@ -2,7 +2,7 @@
   "version": 3,
   "targets": {
     "net6.0": {
-      "Silk.NET.Maths/2.15.0": {
+      "Silk.NET.Maths/2.16.0": {
         "type": "package",
         "compile": {
           "lib/net5.0/Silk.NET.Maths.dll": {}
@@ -14,10 +14,10 @@
     }
   },
   "libraries": {
-    "Silk.NET.Maths/2.15.0": {
-      "sha512": "7aDFUR+wSU8kv/YrJX9PxTNye+ZO4ReYEoGI9YjLiipDHYivGJ/I+iR2xtSP+hkeKbC+xmOgE6TnZVf5INCqNg==",
+    "Silk.NET.Maths/2.16.0": {
+      "sha512": "Xjw9Fw/DQ0zVgJL5FUBH04qMp+vEfoHd71PrnrGwsRmopwEK4KKLuMYLVN/tKLvq5Mfh0Qd0bItOb26MyIJ/7g==",
       "type": "package",
-      "path": "silk.net.maths/2.15.0",
+      "path": "silk.net.maths/2.16.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -30,7 +30,7 @@
         "lib/netstandard2.0/Silk.NET.Maths.xml",
         "lib/netstandard2.1/Silk.NET.Maths.dll",
         "lib/netstandard2.1/Silk.NET.Maths.xml",
-        "silk.net.maths.2.15.0.nupkg.sha512",
+        "silk.net.maths.2.16.0.nupkg.sha512",
         "silk.net.maths.nuspec",
         "silkdotnet_v3.png"
       ]
@@ -38,7 +38,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "Silk.NET.Maths >= 2.15.0"
+      "Silk.NET.Maths >= 2.16.0"
     ]
   },
   "packageFolders": {
@@ -80,7 +80,7 @@
         "dependencies": {
           "Silk.NET.Maths": {
             "target": "Package",
-            "version": "[2.15.0, )"
+            "version": "[2.16.0, )"
           }
         },
         "imports": [

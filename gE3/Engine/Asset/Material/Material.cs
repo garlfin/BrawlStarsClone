@@ -27,17 +27,16 @@ public abstract class Material
         else Window.GL.Disable(EnableCap.CullFace);
         
         if (Window.State is EngineState.Shadow or EngineState.PreZ or EngineState.Cubemap) Window.GL.DepthFunc(_function);
-        
-        
-        
+            
         RequiredSet();
-        
+
         if (Window.State != EngineState.Render && Window.State != EngineState.Cubemap) return;
 
         if (Window.ARB.BT == null)
         {
             if (_shadowUniform == -1)
                 _shadowUniform = Program.GetUniformLocation("ShadowMap");
+            
             Program.SetUniform(_shadowUniform, Window.CameraSystem.Sun.ShadowMap.Use(TexSlotManager.Unit));
             
             var cubeUnit = Window.Skybox.Use(TexSlotManager.Unit);

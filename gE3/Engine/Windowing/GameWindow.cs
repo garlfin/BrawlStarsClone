@@ -33,7 +33,7 @@ public class GameWindow
     private Texture2D _screenTexture;
     private Texture2D _prevScreenTexture;
     public FrameBuffer ScreenFramebuffer { get; private set; }
-    public RenderBuffer ScreenDepth { get; private set; }
+    public Texture2D ScreenDepth { get; private set; }
 
     //public EmptyTexture PrevScreenTexture { get; private set; }
     private PlaneVAO _screenPlane;
@@ -59,6 +59,7 @@ public class GameWindow
     public CubemapCaptureManager CubemapCaptureManager { get; }
     public TransformSystem TransformSystem { get; }
     public ProgramManager ProgramManager { get; }
+    public SkinManager SkinManager { get; }
 
     protected GameWindow(int width, int height, string name, bool debug = false)
     {
@@ -80,6 +81,7 @@ public class GameWindow
         CubemapCaptureManager = new CubemapCaptureManager(this);
         TransformSystem = new TransformSystem(this);
         ProgramManager = new ProgramManager(this);
+        SkinManager = new SkinManager(this);
 
     }
 
@@ -158,16 +160,22 @@ public class GameWindow
     {
         var includes = new[] { "Engine/Internal/include.glsl" };
         GL = GL.GetApi(Window);
-        Console.WriteLine($"API: {GL.GetStringS(StringName.Version)}");
         ARB = new ARB(GL);
+
+        if (_debug)
+        {
+            Debug.Init(this);
+        }
+
+        Console.WriteLine($"API: {GL.GetStringS(StringName.Version)}");
+            Console.WriteLine(GL.GetStringS(StringName.Vendor));
         
-        if (_debug) Debug.Init(this);
         Input = Window.CreateInput();
         Input.Mice[0].MouseMove += OnMouseMove;
         AudioSystem = new AudioSystem(this, out _);
         
         ProgramManager.Init();
-        //SkinManager.Init();
+        SkinManager.Init();
 
         _brdfLut = new BRDFTexture(this);
         _skyboxShader = new ShaderProgram(this, "Engine/Internal/skybox.vert", "Engine/Internal/skybox.frag", includes);
@@ -177,7 +185,6 @@ public class GameWindow
         Root = new Entity(this, name: "Root");
         Root.AddComponent(new Transform(Root));
         
-        DefaultVertex = new Shader(this, "Engine/Internal/default.vert", ShaderType.VertexShader, includes);
         FramebufferShader = new Shader(this, "Engine/Internal/framebuffer.vert", ShaderType.VertexShader, includes);
         
         GL.Enable(EnableCap.DepthTest);
@@ -189,7 +196,7 @@ public class GameWindow
 
         ScreenFramebuffer = new FrameBuffer(this, Size.X, Size.Y);
         
-        ScreenDepth = new RenderBuffer(this, Size.X, Size.Y, InternalFormat.DepthComponent32f);
+        ScreenDepth = new Texture2D(this, Size.X, Size.Y, InternalFormat.DepthComponent32f);
         ScreenDepth.BindToFrameBuffer(ScreenFramebuffer, FramebufferAttachment.DepthAttachment);
         
         _screenTexture = new Texture2D(this, Size.X, Size.Y, InternalFormat.Rgba32f, TextureWrapMode.ClampToBorder);
@@ -212,7 +219,7 @@ public class GameWindow
         cubemap.AddComponent(new Transform(cubemap)
         {
             Location = new Vector3D<float>(5, 10, 5),
-            Scale = new Vector3D<float>(21, 10, 21)
+            Scale = new Vector3D<float>(21, 10.1f, 21)
         });
         cubemap.AddComponent(new CubemapCapture(cubemap, 1024));
         

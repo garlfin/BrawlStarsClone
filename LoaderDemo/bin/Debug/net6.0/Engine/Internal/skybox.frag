@@ -7,5 +7,5 @@ out vec4 Color;
 
 void main()
 {
-    Color = texture(skybox, TexCoord);
+    Color = pow(texture(skybox, TexCoord), vec4(1.0 / 2.2));
 }

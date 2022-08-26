@@ -8,16 +8,13 @@ namespace gE3.Engine.Component;
 
 public sealed class MeshRenderer : Component
 {
-    private readonly bool _overrideInstance;
-
     public bool InFrustum { get; private set; }
-    
     public Mesh Mesh { get; }
     public float Alpha { get; set; } = 1.0f;
     public Vector4D<uint> CubemapSamples => _cubemapSamples; 
     private Transform? _transform;
     private Vector4D<uint> _cubemapSamples = Vector4D<uint>.Zero;
-    
+
     private AABB _bounds;
 
     public AABB Bounds
@@ -31,8 +28,7 @@ public sealed class MeshRenderer : Component
         Window.MeshRendererSystem.Register(this);
         
         Mesh = mesh;
-        _overrideInstance = overrideInstance;
-        
+
         mesh.Register(Owner);
         _transform = owner?.GetComponent<Transform>();
     }
@@ -40,7 +36,6 @@ public sealed class MeshRenderer : Component
     public override void Dispose()
     {
         Window.MeshRendererSystem.Remove(this);
-        if (!_overrideInstance) Mesh.Remove(Owner);
     }
 
     public override void OnUpdate(float deltaTime)

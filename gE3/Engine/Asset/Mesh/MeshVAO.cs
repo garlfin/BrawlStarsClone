@@ -39,7 +39,7 @@ public sealed class MeshVao : VAO
         GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, (uint) EBO);
         fixed (void* ptr = Mesh.IndexBuffer)
         {
-            GL.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint) (sizeof(int) * 3 * Mesh.IndexCount), ptr,
+            GL.BufferData(BufferTargetARB.ElementArrayBuffer, sizeof(int) * 3 * Mesh.IndexCount, ptr,
                 BufferUsageARB.StaticRead);
         }
 
@@ -51,7 +51,28 @@ public sealed class MeshVao : VAO
         GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (uint) sizeof(Vertex), (nuint*) 32);
     }
 
-    public int EBO { get; } = -1;
+
+    public unsafe MeshVao(GameWindow window, MeshVao original) : base(window)
+    {
+
+        _vao = GL.GenVertexArray();
+        GL.BindVertexArray(_vao);
+
+        _vbo = GL.GenBuffer();
+        GL.NamedBufferData(_vbo, (nuint) (sizeof(Vertex) * original.Mesh.VertexCount), (void*) 0, VertexBufferObjectUsage.DynamicDraw);
+
+        EBO = original.EBO;
+        GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, (uint) EBO);
+
+        GL.EnableVertexAttribArray(0);
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint) sizeof(Vertex), (nuint*) 0);
+        GL.EnableVertexAttribArray(1);
+        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (uint) sizeof(Vertex), (nuint*) 16);
+        GL.EnableVertexAttribArray(2);
+        GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (uint) sizeof(Vertex), (nuint*) 32);
+    }
+    
+    public int EBO { get; }
 
     protected override unsafe void Render()
     {
@@ -69,7 +90,6 @@ public sealed class MeshVao : VAO
     protected override void Delete()
     {
         base.Delete();
-        if (EBO != -1)
-            GL.DeleteBuffer((uint) EBO);
+        if (EBO != -1) GL.DeleteBuffer((uint) EBO);
     }
 }

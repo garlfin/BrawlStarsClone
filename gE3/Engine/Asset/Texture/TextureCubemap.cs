@@ -6,6 +6,7 @@ namespace gE3.Engine.Asset.Texture;
 
 public class TextureCubemap : Texture
 {
+    private const int WRAP_TO_EDGE = (int) TextureWrapMode.ClampToEdge;
     public unsafe TextureCubemap(GameWindow window, string path, bool genMips = true) : base (window)
     {
         if (!File.Exists(path)) throw new FileNotFoundException(path);
@@ -38,11 +39,11 @@ public class TextureCubemap : Texture
         CompressionRatio compression = header.CompressionRatio;
         
         GL.CreateTextures(TextureTarget.TextureCubeMap, 1, out _id);
-        
-        GL.TextureStorage2D(ID, calcMip ? GetMipsCount() : header.MipMapCount, (GLEnum)_format, _width, _height);
-        GL.TextureParameter(ID, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-        GL.TextureParameter(ID, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-        GL.TextureParameter(ID, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Repeat);
+
+        GL.TextureStorage2D(ID, calcMip ? GetMipsCount() : header.MipMapCount, (GLEnum) _format, _width, _height);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapS, WRAP_TO_EDGE);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapT, WRAP_TO_EDGE);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapR, WRAP_TO_EDGE);
         GL.TextureParameter(ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
         GL.TextureParameter(ID, TextureParameterName.TextureMinFilter, (int)(calcMip && genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
         
@@ -66,7 +67,6 @@ public class TextureCubemap : Texture
         
         if (file.Position != file.Length) Console.WriteLine("Warning: File not fully read");
         if (calcMip && genMips) GL.GenerateTextureMipmap(ID);
-        GetHandle();
         reader.Close();
         file.Close();
     }
@@ -76,9 +76,9 @@ public class TextureCubemap : Texture
     {
         GL.CreateTextures(TextureTarget.TextureCubeMap, 1, out _id);
         GL.TextureStorage2D(ID, genMips ? GetMipsCount() : 1, (GLEnum)format, size, size);
-        GL.TextureParameter(ID, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-        GL.TextureParameter(ID, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-        GL.TextureParameter(ID, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Repeat);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapS, WRAP_TO_EDGE);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapT, WRAP_TO_EDGE);
+        GL.TextureParameter(ID, TextureParameterName.TextureWrapR, WRAP_TO_EDGE);
         GL.TextureParameter(ID, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
         GL.TextureParameter(ID, TextureParameterName.TextureMinFilter, (int)(genMips ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
         if (genMips) GL.GenerateTextureMipmap(_id);

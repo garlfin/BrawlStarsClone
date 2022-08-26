@@ -11,9 +11,18 @@
 
 layout (std140, binding = 1) uniform SceneData {
     mat4 projection;
-    vec3 viewPos;
-    SunInfo sun;
     mat4 view[6];
+    vec3 viewPos;
+    float pad;
+    vec2 clipPlanes;
+    vec2 pad2;
+    #ifdef ARB_BINDLESS
+    sampler2D screenDepth;
+    #else
+    vec2 pad3;
+    #endif
+    vec2 pad4;
+    SunInfo sun;
 };
 
 layout (std140, binding = 2) uniform ObjectData {
@@ -40,16 +49,27 @@ layout (std430, binding = 3) restrict readonly buffer SceneCubemaps {
 
 #ifdef FRAGMENT_SHADER
 
+float saturate(float x) {
+    return clamp(x, 0.0, 1.0);
+}
+
 #ifndef ARB_BINDLESS
 uniform sampler2DShadow ShadowMap;
 uniform samplerCube CubemapTex[4];
 #endif
 
-const mat4 thresholdMatrix = mat4(0.0, 8.0, 2.0, 10.0,
-12.0, 4.0, 14.0, 6.0, 
-3.0, 11.0, 1.0, 9.0,
-15.0, 7.0, 13.0, 5.0) / 17;
+float InterleavedGradientNoise(vec2 pos) {
+    const vec3 magic = vec3(0.06711056, 0.00583715, 52.9829341);
+    return fract(magic.z * fract(dot(pos, magic.xy)));
+}
 
-float ditherSample = thresholdMatrix[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
+float ditherSample = InterleavedGradientNoise(gl_FragCoord.xy);
+
+vec2 poissonDisk[4] = vec2[](
+vec2( -0.94201624, -0.39906216 ),
+vec2( 0.94558609, -0.76890725 ),
+vec2( -0.094184101, -0.92938870 ),
+vec2( 0.34495938, 0.29387760 )
+);
 
 #endif

@@ -22,7 +22,7 @@ public sealed class CubemapCapture : BaseCamera
     public Matrix4X4<float>[] ViewMatrices = new Matrix4X4<float>[6];
     private TextureCubemap _depthMap;
 
-    public CubemapCapture(Entity? owner, uint size, float clipNear = 0.1f, float clipFar = 100f) : base(owner, clipNear, clipFar)
+    public CubemapCapture(Entity? owner, uint size, float clipNear = 0.1f, float clipFar = 300f) : base(owner, clipNear, clipFar)
     {
         _size = size;
         ID = (uint)Window.CubemapCaptureManager.Components.Count;

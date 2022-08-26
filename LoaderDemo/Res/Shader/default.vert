@@ -14,16 +14,16 @@ layout (location = 2) in vec2 aTexCoord;
 out vec2 TexCoord;
 out vec4 FragPosLightSpace;
 out vec3 Normal;
-out vec4 FragPos;
-flat out uint InstanceID;
+out vec3 FragPos;
+flat out uvec2 InstanceData; 
 
 void main()
 {
-    InstanceID = gl_InstanceID % numObjects;
-    gl_Layer = int(gl_InstanceID / numObjects);
-    gl_Position = projection * view[gl_InstanceID / numObjects] * model[InstanceID] * vec4(aPos, 1.0);
-    FragPos = vec4((model[gl_InstanceID % numObjects] * vec4(aPos, 1.0)).xyz, 1);
-    FragPosLightSpace = sun.ViewProj * FragPos;
-    Normal = mat3(transpose(inverse(model[InstanceID]))) * aNormal;
+    InstanceData = uvec2(gl_InstanceID % numObjects, gl_InstanceID / numObjects);
+    gl_Layer = int(InstanceData.y);
+    FragPos = (model[InstanceData.x] * vec4(aPos, 1.0)).xyz;
+    gl_Position = projection * view[InstanceData.y] * model[InstanceData.x] * vec4(aPos, 1.0);
+    FragPosLightSpace = sun.ViewProj * vec4(FragPos, 1);
+    Normal = mat3(transpose(inverse(model[InstanceData.x]))) * aNormal;
     TexCoord = aTexCoord;
 }

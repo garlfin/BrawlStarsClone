@@ -2,35 +2,46 @@
 using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Mesh;
 using gE3.Engine.Windowing;
+using gEModel.Struct;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Component;
-[Obsolete("Animator under maintenance, will be reworked.", false)]
+
 public class Animator : Component
 {
-    private readonly Matrix4X4<float>[] _matTransform;
+    public MeshVao[] MeshVao;
+    
+    private Matrix4X4<float>[] _matTransform;
     private readonly MeshRenderer _renderer;
 
     private int _currentFrame;
     private float _currentTime;
 
+    private Node[] _rootNode;
+
     // Commented stuff is leftover debug stuff I can keep for later if needed.
     //private PointVAO _debugVao;
     //private Vector3D<float>[] _boneTransform;
 
-    public Animator(Entity? owner, Animation? animation = null) : base(owner)
+    public Animator(Entity? owner, gETF skeleton, Animation? animation) : base(owner)
     {
-        //SkinManager.Register(this);
+        Window.SkinManager.Register(this);
+
+        _rootNode = skeleton.Nodes;
 
         _renderer = owner.GetComponent<MeshRenderer>();
 
-        if (animation is not null) Animation = animation;
+        Animation = animation; 
 
         _currentTime = 0;
         _currentFrame = 0;
 
-        //_matTransform = new Matrix4X4<float>[_renderer.Mesh.FlattenedHierarchy.Length];
-        
+        _matTransform = new Matrix4X4<float>[skeleton.Nodes.Length];
+
+        for (int i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
+            MeshVao[i] = new MeshVao(Window, _renderer.Mesh.MeshVAO[i]);
+
         //_debugVao = new PointVAO(_renderer.Mesh.FlattenedHierarchy.Length);
         //_boneTransform = new Vector3D<float>[_renderer.Mesh.FlattenedHierarchy.Length];
     }
@@ -61,51 +72,59 @@ public class Animator : Component
 
     public override unsafe void OnRender(float deltaTime)
     {
-        /*SkinManager.SkinningShader.Use();
+        Window.SkinManager.SkinningShader.Use();
 
-        if (_currentTime > (Animation?.Time ?? 0)) _currentTime = 0;
-        _currentFrame = (int)MathF.Floor(_currentTime * (Animation?.FPS ?? 1));
+        if (_currentTime > (Animation?.FrameCount * Animation?.FPS ?? 0)) _currentTime = 0;
+        _currentFrame = (int)MathF.Floor(_currentTime * (Animation?.FPS ?? 0));
 
         var ident = Matrix4X4<float>.Identity;
-        IterateMatrix(_renderer.Mesh.NodeHierarchy, ref ident);
+        IterateMatrix(ref _rootNode[0], ref ident);
 
         //fixed (void* ptr = _boneTransform) _debugVao.UpdateData(ptr);
         fixed (void* ptr = _matTransform)
         {
-            SkinManager.MatBuffer.ReplaceData(ptr, _matTransform.Length * sizeof(Matrix4X4<float>));
+            Window.SkinManager.MatBuffer.ReplaceData(_matTransform);
         }
 
         for (var i = 0; i < _renderer.Mesh.MeshVAO.Length; i++)
         {
-            SkinManager.SkinningShader.SetUniform(0, _renderer.Mesh.MeshTransform[i]);
+            Window.SkinManager.SkinningShader.SetUniform(0, 0);
             GL.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, 5, _renderer.Mesh.MeshVAO[i].VBO);
-            GL.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, 6, _renderer.Mesh.SkinnedVAO[i].VBO);
-            GL.DispatchCompute((uint)Math.Ceiling((double)_renderer.Mesh.MeshVAO[i].Mesh.Vertices.Length / 32), 1, 1);
+            GL.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, 6, MeshVao[i].VBO);
+            GL.DispatchCompute((uint)Math.Ceiling((float)_renderer.Mesh.MeshVAO[i].Mesh.Vertices.Length / 32), 1, 1);
             GL.MemoryBarrier(MemoryBarrierMask.AllBarrierBits);
         }
 
-        if (!Paused) _currentTime += deltaTime;*/
+        if (!Paused) _currentTime += deltaTime;
     }
 
     public override void Dispose()
     {
-        //SkinManager.Remove(this);
+        Window.SkinManager.Remove(this);
     }
 
-    private void IterateMatrix(BoneHierarchy bone, ref Matrix4X4<float> parentTransform)
+    private void IterateMatrix(ref Node bone, ref Matrix4X4<float> parentTransform)
     {
-        /*var frame = Animation?[bone.Name]?.Frames[_currentFrame];
+        var frame = Animation[bone.Name, _currentFrame];
+        var nextFrame = Animation[bone.Name, (_currentFrame + 1) % Animation.FrameCount];
 
-        var transform = bone.Transform;
+        var transform = bone.Transform.GetMatrix();
+
+
         if (frame is not null)
-            transform = Matrix4X4.CreateScale(frame.Value.Scale) *
-                        Matrix4X4.CreateFromQuaternion(frame.Value.Rotation) *
-                        Matrix4X4.CreateTranslation(frame.Value.Location);
+        {
+            float lerpVal = _currentTime - _currentFrame * Animation.FPS;
+
+            transform = Matrix4X4.CreateScale(Vector3D.Lerp(frame.Value.Position, nextFrame.Value.Position, lerpVal)) *
+                        Matrix4X4.CreateFromQuaternion(Quaternion<float>.Slerp(frame.Value.Rotation, nextFrame.Value.Rotation, lerpVal)) *
+                        Matrix4X4.CreateTranslation(Vector3D.Lerp(frame.Value.Position, nextFrame.Value.Position, lerpVal));
+        }
+        
         var globalTransform = transform * parentTransform;
         //_boneTransform[bone.Index] = new Vector3D<float>(globalTransform.M41, -globalTransform.M43, globalTransform.M42); // Convert 
-        _matTransform[bone.Index] = bone.Offset * globalTransform * _renderer.Mesh.InverseTransform;
+        _matTransform[bone.ID] = bone.Offset ?? Matrix4X4<float>.Identity * globalTransform;
 
-        for (var i = 0; i < bone.Children.Count; i++) IterateMatrix(bone.Children[i], ref globalTransform);*/
+        for (var i = 0; i < bone.ChildCount; i++) IterateMatrix(ref _rootNode[bone.ChildIDs[i]], ref globalTransform);
     }
 
     public void RenderDebug()
@@ -121,7 +140,7 @@ public class Animator : Component
 }
 
 // ReSharper disable once ClassNeverInstantiated.Global
-internal class SkinManager : ComponentSystem<Animator>
+public class SkinManager : ComponentSystem<Animator>
 {
     public Buffer<Matrix4X4<float>> MatBuffer { get; private set; }
     public ShaderProgram SkinningShader { get; private set; }

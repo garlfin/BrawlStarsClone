@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "U7OZkI/OkLDpFXyoJnnVGz42c0tCpRsOsaP/92FJdD3/YGMogwFkscIVxGJrOMmKAPE4iNGenG8eCXW8hnH/6g==",
+  "dgSpecHash": "RApZtPADmlDDDcf65NiVCa0LXmZn2DhYQqX4eGFSVtHkyw8lifvhaNPdorLfBG5N43TpNwl2FzjXmSmHtsto7w==",
   "success": true,
   "projectFilePath": "C:\\Users\\scion\\Documents\\GitHub\\BrawlStarsClone\\gEMath\\gEMath.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\scion\\.nuget\\packages\\silk.net.maths\\2.15.0\\silk.net.maths.2.15.0.nupkg.sha512"
+    "C:\\Users\\scion\\.nuget\\packages\\silk.net.maths\\2.16.0\\silk.net.maths.2.16.0.nupkg.sha512"
   ],
   "logs": []
 }

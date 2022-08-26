@@ -34,7 +34,7 @@ public abstract class Texture : Asset
     {
         
     }  
-    protected void GetHandle()
+    private void GetHandle()
     {
         _handle = uint.MaxValue;
         if (ARB.BT == null) return;

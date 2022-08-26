@@ -1,9 +1,13 @@
-﻿using gE3.Engine.Asset.Material;
+﻿using Assimp;
+using gE3.Engine.Asset.Material;
 using gE3.Engine.Asset.Texture;
 using gE3.Engine.Component;
 using gE3.Engine.Windowing;
+using gEMath;
 using gEMath.Bounds;
+using gEMath.Math;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
 
@@ -43,35 +47,66 @@ public List<Entity> Users { get; } = new List<Entity>();
     public override unsafe void ManagedRender()
     {
         if (Users.Count == 0) return;
-        
-        var users = Math.Min(Users.Count, 100);
-        
-        uint actualUsers = 0;
-        
-        for (var j = 0; j < users; j++)
-        {
-            var userRenderer = Users[j].GetComponent<MeshRenderer>();
-            if(!userRenderer!.InFrustum && Window.State != EngineState.Cubemap) continue;
-            _model[actualUsers] = Users[j].GetComponent<Transform>()?.Model ?? Matrix4X4<float>.Identity;
-            _alpha[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.Alpha;
-            _cubemapWeights[actualUsers] = Users[j].GetComponent<MeshRenderer>()!.CubemapSamples;
-            actualUsers++;
-        }
-        
-        if (actualUsers == 0) return;
-        
-        fixed (void* ptr = _model, ptr2 = _alpha, ptr3 = _cubemapWeights)
-        {
-            Window.ProgramManager.PushObjects(ptr, ptr2, ptr3, actualUsers);
-        }
-        
-        for (var i = 0; i < MeshVAO.Length; i++)
-        {
-            Users[0].GetComponent<MaterialComponent>()[RenderMesh.SubMeshes[i].MaterialID].Use();
 
-            this[i].Render(actualUsers);
+        for (int m = 0; m < MeshVAO.Length; m++)
+        {
+            List<Material.Material> materials = new List<Material.Material>();
+            List<List<Entity>> meshMats = new List<List<Entity>>();
 
-            TexSlotManager.ResetUnit();
+            for (int i = 0; i < Users.Count; i++)
+            {
+                var matRenderer = Users[i].GetComponent<MaterialComponent>();
+                var index = materials.IndexOf(matRenderer[m]);
+
+                if (!Users[i].GetComponent<MeshRenderer>()!.InFrustum) continue;
+                
+                if (index == -1)
+                {
+                    materials.Add(matRenderer[m]);
+                    meshMats.Add(new List<Entity>() { Users[i] });
+                }
+                else
+                    meshMats[index].Add(Users[i]);
+            }
+
+            for (int i = 0; i < materials.Count; i++)
+            {
+                var meshMat = meshMats[i];
+                
+                Matrix4X4<float>[] model = new Matrix4X4<float>[meshMat.Count];
+                Vector4D<float>[] transparency = new Vector4D<float>[(int) MathF.Ceiling((float) meshMat.Count / 4)];
+                Vector4D<uint>[] cubemapSamples = new Vector4D<uint>[meshMat.Count];
+
+                for (int y = 0; y < meshMat.Count; y++)
+                {
+                    model[y] = meshMat[y].GetComponent<Transform>().Model;
+                    
+                    switch (y % 4)
+                    {
+                        case 0: transparency[y / 4].X = meshMat[y].GetComponent<MeshRenderer>().Alpha;
+                            break;
+                        case 1: transparency[y / 4].Y = meshMat[y].GetComponent<MeshRenderer>().Alpha;
+                            break;
+                        case 2: transparency[y / 4].Z = meshMat[y].GetComponent<MeshRenderer>().Alpha;
+                            break;
+                        case 3: transparency[y / 4].W = meshMat[y].GetComponent<MeshRenderer>().Alpha;
+                            break;
+                    }
+                    
+                    cubemapSamples[y] = meshMat[y].GetComponent<MeshRenderer>().CubemapSamples;
+                }
+                
+                materials[i].Use();
+                
+                for (var completed = 0; completed < meshMat.Count; completed += 100)
+                {
+                    fixed (void* modelPtr = model, transparencyPtr = transparency, cubemapSamplePtr = cubemapSamples)
+                        Window.ProgramManager.PushObjects(modelPtr, transparencyPtr, cubemapSamplePtr,
+                            (uint) meshMat.Count, (uint) completed);
+                    MeshVAO[m].Render((uint) Math.Max(meshMat.Count - completed, 0));
+                }
+                TexSlotManager.ResetUnit();
+            }
         }
     }
 }

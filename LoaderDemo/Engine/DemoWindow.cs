@@ -48,9 +48,8 @@ public class DemoWindow : GameWindow
         
         gETF mesh = MeshLoader.LoadgETF("../../../Res/Model/multimesh_test.bnk");
        
-        MeshLoader.LoadScene(ref mesh, materials, Root!, this);
+        MeshLoader.LoadScene(ref mesh, materials, Root, this);
 
         Skybox = new TextureCubemap(this, "../../../Res/Texture/sky.pvr");
-        
     }
 }

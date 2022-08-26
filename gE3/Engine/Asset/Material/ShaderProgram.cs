@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using gE3.Engine.Component;
+using System.Numerics;
 using gE3.Engine.Component.Camera;
 using gE3.Engine.Windowing;
 using Silk.NET.Maths;
@@ -25,6 +25,17 @@ public class ShaderProgram : Asset
 
         fragment.Dispose();
         vertex.Dispose();
+    }
+
+    unsafe void GetBinaryData(out byte[] arr, out ShaderBinaryFormat format)
+    {
+        GL.GetProgram(_id, ProgramPropertyARB.ProgramBinaryLength, out int len);
+        
+        arr = new byte[len];
+        GLEnum temp;
+        
+        fixed(void* ptr = arr) GL.GetProgramBinary(_id, (uint) (len * 8), out _, out temp, ptr);
+        format = (ShaderBinaryFormat) temp;
     }
     
     public ShaderProgram(GameWindow window, string vertPath, string fragPath, string[]? shaderIncludes = null) : base(window)
@@ -93,6 +104,12 @@ public class ShaderProgram : Asset
     public void SetUniform(int uniform, int data)
     {
         GL.ProgramUniform1(ID, uniform, data);
+    }
+    public unsafe void SetUniform(int uniform, ulong data)
+    {
+        //ReadOnlySpan<float> span = new ReadOnlySpan<float>(&data, 2);
+        //ARB.I64.ProgramUniform1(_id, uniform, data);
+        GL.ProgramUniform2(_id, uniform, new ReadOnlySpan<uint>(&data, 2));
     }
 
     public unsafe void SetUniform(string uniform, Vector3D<float> data)
@@ -174,28 +191,34 @@ public class ProgramManager
 
     public unsafe void InitFrame()
     {
-        _scene.Sun.ViewProjection = _window.CameraSystem.Sun.View * _window.CameraSystem.Sun.Projection;
-        _scene.Sun.Position = _window.CameraSystem.Sun.Position;
-        _scene.Sun.ShadowMap = _window.CameraSystem.Sun.ShadowMap.Handle;
+        var camSys = _window.CameraSystem;
+        _scene.Sun.ViewProjection = camSys.Sun.View * camSys.Sun.Projection;
+        _scene.Sun.Position = camSys.Sun.Position;
+        _scene.Sun.ShadowMap = camSys.Sun.ShadowMap.Handle;
+        _scene.ScreenDepth = _window.ScreenDepth.Handle;
         
+        _scene.ViewPos = camSys.CurrentCamera.Position;
+        //_scene.ClipPlanes.X = camSys.CurrentCamera.ClipNear;
+        //_scene.ClipPlanes.Y = camSys.CurrentCamera.ClipFar;
+
         if (_window.State is EngineState.Shadow)
         {
-            _scene.Projection = _window.CameraSystem.Sun.Projection;
-            _scene.View = _window.CameraSystem.Sun.View;
+            _scene.Projection = camSys.Sun.Projection;
+            _scene.View = camSys.Sun.View;
         }
         else
         {
-            _scene.Projection = _window.CameraSystem.CurrentCamera.Projection;
-            _scene.View = _window.CameraSystem.CurrentCamera.View;
-            _scene.ViewPos = _window.CameraSystem.CurrentCamera.Position;
+            _scene.Projection = camSys.CurrentCamera.Projection;
+            _scene.View = camSys.CurrentCamera.View;
+            
             if (_window.State is EngineState.Cubemap)
             {
-                _scene.View = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[0];
-                _scene.ViewXN = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[1];
-                _scene.ViewY = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[2];
-                _scene.ViewYN = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[3];
-                _scene.ViewZ = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[4];
-                _scene.ViewZN = ((CubemapCapture)_window.CameraSystem.CurrentCamera).ViewMatrices[5];
+                _scene.View = ((CubemapCapture)camSys.CurrentCamera).ViewMatrices[0];
+                _scene.ViewXN = ((CubemapCapture)camSys.CurrentCamera).ViewMatrices[1];
+                _scene.ViewY = ((CubemapCapture)camSys.CurrentCamera).ViewMatrices[2];
+                _scene.ViewYN = ((CubemapCapture)camSys.CurrentCamera).ViewMatrices[3];
+                _scene.ViewZ = ((CubemapCapture)camSys.CurrentCamera).ViewMatrices[4];
+                _scene.ViewZN = ((CubemapCapture)camSys.CurrentCamera).ViewMatrices[5];
             }
         }
         fixed (void* ptr = &_scene)
@@ -209,12 +232,13 @@ public class ProgramManager
         _Programs.Add(program);
         return _Programs.Count - 1;
     }
-    public unsafe void PushObjects(void* model, void* transparency, void* samples, uint count)
+
+    public unsafe void PushObjects(void* model, void* transparency, void* samples, uint count, uint objOffset)
     {
         _objectData.ReplaceData(&count, 4);
-        _objectData.ReplaceData(model, 64 * count, 16);
-        _objectData.ReplaceData(transparency, 4 * count, 6416);
-        _objectData.ReplaceData(samples, 16 * count, 6816);
+        _objectData.ReplaceData((Matrix4X4<float>*) model + objOffset * 64, 64 * count, 16);
+        _objectData.ReplaceData((float*) transparency + objOffset * 4, 4 * count, 6416);
+        _objectData.ReplaceData((Vector4D<uint>*) samples + objOffset * 16, 16 * count, 6816);
     }
 }
 
@@ -222,16 +246,23 @@ public class ProgramManager
 public struct SceneData
 {
     public Matrix4X4<float> Projection; // 64
-    public Vector3D<float> ViewPos; // 16
-    private float _pad; // 4
-    public SunInfo Sun;
-    public Matrix4X4<float> View; // 64 also X+
-    public Matrix4X4<float> ViewXN; // 64 also X-
-    public Matrix4X4<float> ViewY; // 64 also y+
-    public Matrix4X4<float> ViewYN; // 64 also y-
-    public Matrix4X4<float> ViewZ; // 64 also z+
-    public Matrix4X4<float> ViewZN; // 64 also z-
+    public Matrix4X4<float> View; 
+    public Matrix4X4<float> ViewXN;
+    public Matrix4X4<float> ViewY; 
+    public Matrix4X4<float> ViewYN;
+    public Matrix4X4<float> ViewZ; 
+    public Matrix4X4<float> ViewZN;
     
+    public Vector3D<float> ViewPos;
+    private float _pad; 
+    public Vector2D<float> ClipPlanes;
+    private Vector2D<float> _pad2;
+    public ulong ScreenDepth; // Handle
+    private ulong _pad3;
+   
+    public SunInfo Sun;
+    
+    //public ulong ScreenNormal;
 }
 
 public unsafe struct ObjectData
