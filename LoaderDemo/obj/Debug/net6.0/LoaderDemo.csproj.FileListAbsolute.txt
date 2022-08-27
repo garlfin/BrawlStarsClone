@@ -3,7 +3,6 @@ C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Debug\net6.0\gEModel
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Debug\net6.0\gEModel.exe
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Debug\net6.0\LoaderDemo.exe
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Debug\net6.0\Engine\Internal\brdf.comp
-C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Debug\net6.0\Engine\Internal\default.vert
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Debug\net6.0\Engine\Internal\depth.frag
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Debug\net6.0\Engine\Internal\depth.vert
 C:\Users\scion\RiderProjects\BrawlStarsClone\LoaderDemo\bin\Debug\net6.0\Engine\Internal\fbcopy.frag

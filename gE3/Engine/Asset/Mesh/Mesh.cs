@@ -100,10 +100,11 @@ public List<Entity> Users { get; } = new List<Entity>();
                 
                 for (var completed = 0; completed < meshMat.Count; completed += 100)
                 {
+                    var clampedComplete = (uint)Math.Clamp(meshMat.Count - completed, 0, 100);
                     fixed (void* modelPtr = model, transparencyPtr = transparency, cubemapSamplePtr = cubemapSamples)
                         Window.ProgramManager.PushObjects(modelPtr, transparencyPtr, cubemapSamplePtr,
-                            (uint) meshMat.Count, (uint) completed);
-                    MeshVAO[m].Render((uint) Math.Max(meshMat.Count - completed, 0));
+                            clampedComplete, (uint) completed);
+                    MeshVAO[m].Render(clampedComplete);
                 }
                 TexSlotManager.ResetUnit();
             }

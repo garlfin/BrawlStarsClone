@@ -50,3 +50,7 @@ C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEModel\bin\Release\net6.0\Micro
 C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEModel\bin\Release\net6.0\Microsoft.Extensions.DependencyModel.dll
 C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEModel\bin\Release\net6.0\Silk.NET.Core.dll
 C:\Users\scion\Documents\GitHub\BrawlStarsClone\gEModel\bin\Release\net6.0\Silk.NET.OpenGL.dll
+C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\bin\Release\net6.0\Microsoft.DotNet.PlatformAbstractions.dll
+C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\bin\Release\net6.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\bin\Release\net6.0\Silk.NET.Core.dll
+C:\Users\scion\RiderProjects\BrawlStarsClone\gEModel\bin\Release\net6.0\Silk.NET.OpenGL.dll

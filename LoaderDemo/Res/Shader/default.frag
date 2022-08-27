@@ -32,7 +32,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     
     if (projCoords.z > 1) return 1;
     
-    float size = 2;
+    float size = 5;
     
     projCoords.w = 0.0001 * max(dot(normalize(Normal), normalize(sun.SunPos.xyz)), 0);
     projCoords.w = clamp(projCoords.w, 0.0, 0.0001);
