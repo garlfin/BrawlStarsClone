@@ -1,23 +1,14 @@
-﻿using Assimp;
-using gE3.Engine.Asset.Material;
-using gE3.Engine.Asset.Texture;
-using gE3.Engine.Component;
+﻿using gE3.Engine.Component;
 using gE3.Engine.Windowing;
-using gEMath;
 using gEMath.Bounds;
-using gEMath.Math;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 
 namespace gE3.Engine.Asset.Mesh;
 
 public class Mesh : BaseMesh
 {
-    private readonly Matrix4X4<float>[] _model = new Matrix4X4<float>[100]; // 100 is the max amount.
-    private readonly float[] _alpha = new float[100]; // 100 is the max amount.
-    private readonly Vector4D<uint>[] _cubemapWeights = new Vector4D<uint>[100];
-
-public List<Entity> Users { get; } = new List<Entity>();
+    public List<Entity> Users { get; } = new List<Entity>();
+    private List<Material.Material>[] _materials;
     public MeshVao[] MeshVAO { get; }
     public gEModel.Struct.Mesh RenderMesh { get; set; }
     public MeshVao this[int index] => MeshVAO[index];
@@ -31,82 +22,101 @@ public List<Entity> Users { get; } = new List<Entity>();
         RenderMesh = mesh;
 
         MeshVAO = new MeshVao[mesh.SubmeshCount];
+        _materials = new List<Material.Material>[mesh.SubmeshCount];
+        for (int i = 0; i < mesh.SubmeshCount; i++) _materials[i] = new List<Material.Material>();
         for (var i = 0; i < mesh.SubmeshCount; i++) MeshVAO[i] = new MeshVao(window, mesh[i]);
     }
 
     public override void Register(Entity entity)
     {
         Users.Add(entity);
+        //var matRender = entity.GetComponent<MaterialComponent>();
+        //for(int i = 0; i < MeshVAO.Length; i++) if (!_materials[i].Contains(matRender![i]))_materials[i].Add(matRender[i]);
     }
 
     public override void Remove(Entity entity)
     {
         Users.Remove(entity);
+        var matRender = entity.GetComponent<MaterialComponent>();
+        //for(int i = 0; i < MeshVAO.Length; i++) _materials[i].Remove(matRender![i]);
     }
 
     public override unsafe void ManagedRender()
     {
         if (Users.Count == 0) return;
+        
+        // I don't want to do a bunch of reallocating with lists
+        // There can't be more materials than entities
+        // There can be a lot of extra unused memory, but its better than a bunch of small allocations
+        
+        Material.Material[] materials = new Material.Material[Users.Count];
+        
+        Entity[][] entities = new Entity[Users.Count][];
+        int[] entityCount = new int[Users.Count];
 
-        for (int m = 0; m < MeshVAO.Length; m++)
+        for (int v = 0; v < MeshVAO.Length; v++)
         {
-            List<Material.Material> materials = new List<Material.Material>();
-            List<List<Entity>> meshMats = new List<List<Entity>>();
+            var matCount = 0;
+            var remainingUsers = Users.Count;
 
             for (int i = 0; i < Users.Count; i++)
             {
-                var matRenderer = Users[i].GetComponent<MaterialComponent>();
-                var index = materials.IndexOf(matRenderer[m]);
-
-                if (!Users[i].GetComponent<MeshRenderer>()!.InFrustum) continue;
-                
-                if (index == -1)
+                if(!Users[i].GetComponent<MeshRenderer>().InFrustum)
                 {
-                    materials.Add(matRenderer[m]);
-                    meshMats.Add(new List<Entity>() { Users[i] });
+                    remainingUsers--;
+                    continue;
+                }
+                Material.Material material = Users[i].GetComponent<MaterialComponent>()[v];
+                
+                int materialIndex = Array.IndexOf(materials, material);
+
+                if (materialIndex == -1)
+                {
+                    materials[matCount] = material;
+                    entities[matCount] = new Entity[remainingUsers];
+                    entities[matCount][0] = Users[i];
+                    matCount++;
                 }
                 else
-                    meshMats[index].Add(Users[i]);
+                {
+                    entities[materialIndex][entityCount[materialIndex]] = Users[i];
+                    
+                }
+                entityCount[matCount - 1]++;
+                remainingUsers--;
             }
 
-            for (int i = 0; i < materials.Count; i++)
+            for (int i = 0; i < matCount; i++)
             {
-                var meshMat = meshMats[i];
-                
-                Matrix4X4<float>[] model = new Matrix4X4<float>[meshMat.Count];
-                Vector4D<float>[] transparency = new Vector4D<float>[(int) MathF.Ceiling((float) meshMat.Count / 4)];
-                Vector4D<uint>[] cubemapSamples = new Vector4D<uint>[meshMat.Count];
-
-                for (int y = 0; y < meshMat.Count; y++)
-                {
-                    model[y] = meshMat[y].GetComponent<Transform>().Model;
-                    
-                    switch (y % 4)
-                    {
-                        case 0: transparency[y / 4].X = meshMat[y].GetComponent<MeshRenderer>().Alpha;
-                            break;
-                        case 1: transparency[y / 4].Y = meshMat[y].GetComponent<MeshRenderer>().Alpha;
-                            break;
-                        case 2: transparency[y / 4].Z = meshMat[y].GetComponent<MeshRenderer>().Alpha;
-                            break;
-                        case 3: transparency[y / 4].W = meshMat[y].GetComponent<MeshRenderer>().Alpha;
-                            break;
-                    }
-                    
-                    cubemapSamples[y] = meshMat[y].GetComponent<MeshRenderer>().CubemapSamples;
-                }
-                
                 materials[i].Use();
+
+                Matrix4X4<float>[] model = new Matrix4X4<float>[entityCount[i]];
+                Vector4D<uint>[] cubemapSamples = new Vector4D<uint>[entityCount[i]];
                 
-                for (var completed = 0; completed < meshMat.Count; completed += 100)
+                // Ceil number to nearest multiple of 4
+                float[] transparency = new float[(int) Math.Ceiling(entityCount[i] / 4.0) * 4];
+
+                for (int u = 0; u < entityCount[i]; u++)
                 {
-                    var clampedComplete = (uint)Math.Clamp(meshMat.Count - completed, 0, 100);
-                    fixed (void* modelPtr = model, transparencyPtr = transparency, cubemapSamplePtr = cubemapSamples)
-                        Window.ProgramManager.PushObjects(modelPtr, transparencyPtr, cubemapSamplePtr,
-                            clampedComplete, (uint) completed);
-                    MeshVAO[m].Render(clampedComplete);
+                    var mRenderer = entities[i][u].GetComponent<MeshRenderer>();
+
+                    transparency[u] = mRenderer.Alpha;
+                    cubemapSamples[u] = mRenderer.CubemapSamples;
+                    model[u] = entities[i][u].GetComponent<Transform>().Model;
                 }
-                TexSlotManager.ResetUnit();
+
+                for (int u = 0; u < entityCount[i]; u += 100)
+                {
+                    uint clampedObjCount = (uint)Math.Clamp(entityCount[i] - u, 0, 100);
+
+                    fixed (void* modelPtr = model, cubemapSamplesPtr = cubemapSamples, transparencyPtr = transparency)
+                    {
+                        Window.ProgramManager.PushObjects(modelPtr, transparencyPtr, cubemapSamplesPtr, clampedObjCount,
+                            (uint)u);
+                    }
+
+                    MeshVAO[u].Render(clampedObjCount);
+                }
             }
         }
     }

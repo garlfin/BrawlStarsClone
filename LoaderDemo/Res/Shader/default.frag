@@ -129,7 +129,7 @@ float LinearizeDepth(float depth)
     vec3 rayStep = rayDir * sssStepSize;
     
     rayDir += rayStep;
-    
+    5
     
     for (int i = 0; i < sssSteps; i++) 
     {

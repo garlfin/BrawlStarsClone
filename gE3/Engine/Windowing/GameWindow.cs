@@ -69,7 +69,7 @@ public class GameWindow
         windowOptions.Size = new Vector2D<int>(width, height);
         windowOptions.Title = name;
         windowOptions.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, _debug ? ContextFlags.Debug : ContextFlags.Default, new APIVersion(4, 6));
-        windowOptions.FramesPerSecond = 144;
+        windowOptions.FramesPerSecond = 0;
         windowOptions.VSync = false;
         Window = Silk.NET.Windowing.Window.Create(windowOptions);
         
